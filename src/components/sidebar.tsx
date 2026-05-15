@@ -106,9 +106,9 @@ export function Sidebar() {
 
       {/* Newsletter */}
       <section className="border-y border-border py-6">
-        <SectionLabel>The Sunday Letter</SectionLabel>
+        <SectionLabel>Newsletter</SectionLabel>
         <p className="text-sm text-muted-foreground mb-3">
-          One quiet essay, every Sunday morning. Free. No tracking.
+          Occasional letters, one or two a week. Free. No tracking.
         </p>
         <form
           onSubmit={(e) => e.preventDefault()}

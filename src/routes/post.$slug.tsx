@@ -5,7 +5,7 @@ import { InlineNewsletter } from "@/components/inline-newsletter";
 import { RelatedArticles } from "@/components/related-articles";
 import { Byline } from "@/components/byline";
 import { getPostBySlug, getRelated, formatDate } from "@/content/queries";
-import { tagSlug } from "@/content/posts";
+
 
 export const Route = createFileRoute("/post/$slug")({
   head: ({ params }) => {
@@ -57,33 +57,12 @@ function PostPage() {
   return (
     <SiteLayout>
       <article>
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
-          {post.tags.map((t: string) => (
-            <Link
-              key={t}
-              to="/tag/$slug"
-              params={{ slug: tagSlug(t) }}
-              className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-primary"
-              style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
-            >
-              {t}
-            </Link>
-          ))}
-        </div>
         <h1
-          className="mt-3 text-4xl md:text-5xl italic leading-[1.1]"
+          className="text-4xl md:text-5xl italic leading-[1.1]"
           style={{ fontFamily: "var(--font-serif-display)" }}
         >
           {post.title}
         </h1>
-        {post.subtitle && (
-          <p
-            className="mt-4 text-xl italic text-muted-foreground leading-snug"
-            style={{ fontFamily: "var(--font-serif-display)" }}
-          >
-            {post.subtitle}
-          </p>
-        )}
         <p
           className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
           style={{ fontFamily: "var(--font-meta)" }}
