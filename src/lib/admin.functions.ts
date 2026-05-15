@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { dbPostToPost, type DbBlogPost } from "./blog-adapter";
+import { dbPostToPost, type DbBlogPost, type ImagePrompt } from "./blog-adapter";
 
 async function assertAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
@@ -54,7 +54,6 @@ export const getPostById = createServerFn({ method: "GET" })
     return row as DbBlogPost | null;
   });
 
-// Preview (admin only) — fetch by slug regardless of status, returns Post-shape.
 export const getPreviewPostBySlug = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({ slug: z.string().min(1).max(255) }).parse(i))
@@ -72,13 +71,20 @@ export const getPreviewPostBySlug = createServerFn({ method: "GET" })
 const SaveSchema = z.object({
   id: z.string().uuid().optional(),
   title: z.string().min(1).max(300),
-  slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/, "slug must be lowercase letters, numbers, hyphens"),
-  excerpt: z.string().max(1000).optional().nullable(),
-  content: z.string().max(100000).optional().nullable(),
+  slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/),
+  excerpt: z.string().max(2000).optional().nullable(),
+  content: z.string().max(200000).optional().nullable(),
   featured_image: z.string().url().max(2000).optional().nullable().or(z.literal("")),
   category: z.string().max(100).optional().nullable(),
   author: z.string().max(200).optional().nullable(),
   status: z.enum(["draft", "published"]),
+  tags: z.array(z.string().max(80)).max(30).optional(),
+  seo_title: z.string().max(200).optional().nullable(),
+  seo_description: z.string().max(400).optional().nullable(),
+  image_prompts: z
+    .array(z.object({ prompt: z.string().max(2000), alt: z.string().max(300).optional(), url: z.string().max(2000).optional() }))
+    .max(20)
+    .optional(),
 });
 
 export const savePost = createServerFn({ method: "POST" })
@@ -96,11 +102,14 @@ export const savePost = createServerFn({ method: "POST" })
       category: data.category || null,
       author: data.author || null,
       status: data.status,
+      tags: data.tags ?? [],
+      seo_title: data.seo_title || null,
+      seo_description: data.seo_description || null,
+      image_prompts: data.image_prompts ?? [],
       published_at: data.status === "published" ? now : null,
     };
 
     if (data.id) {
-      // Preserve existing published_at if already published & still published
       const { data: existing } = await supabaseAdmin
         .from("blog_posts")
         .select("status, published_at")
@@ -162,77 +171,259 @@ export const deletePost = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// AI draft generation via Lovable AI Gateway
+// ---- AI: legacy quick-draft (kept for back-compat) ----
 export const generateDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({ prompt: z.string().min(3).max(4000) }).parse(i))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
+    return runFullBlogGeneration({
+      sourceText: data.prompt,
+      sourceLabel: "Topic/notes",
+      tone: "reflective",
+      length: "medium",
+    });
+  });
+
+// ---- AI: Full blog wizard ----
+const STYLE_BRIEF = `You write for "sravaṇādi jala" — a contemplative bhakti / wisdom blog by Vaisesika Dasa.
+Voice: warm, literary, unhurried. Short paragraphs. Concrete images. Light, occasional Sanskrit when natural (with English meaning).
+Do NOT preach; invite. Avoid clichés ("in today's world…"), avoid hype, avoid bullet-point listicles unless asked.
+Structure long pieces with a few "## " subheadings, and use "> " for an occasional pulled quote.
+You may suggest where an inline image would help by inserting a line on its own:
+![short alt text](IMAGE:short visual prompt)
+Use this exact "IMAGE:" placeholder; the editor will replace it with a real URL later.`;
+
+const WizardSchema = z.object({
+  sourceType: z.enum(["topic", "url", "file", "notes"]),
+  sourceText: z.string().min(3).max(60000),
+  sourceLabel: z.string().max(500).optional(),
+  tone: z.string().max(100).default("reflective"),
+  length: z.enum(["short", "medium", "long"]).default("medium"),
+});
+
+async function runFullBlogGeneration(args: {
+  sourceText: string;
+  sourceLabel?: string;
+  tone: string;
+  length: "short" | "medium" | "long";
+}) {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
+
+  const lengthGuide =
+    args.length === "short"
+      ? "350–550 words, 3–5 short paragraphs, no subheadings."
+      : args.length === "long"
+        ? "1100–1600 words, 3–5 '## ' subheadings, 1–2 pulled quotes."
+        : "650–900 words, optionally 1–2 '## ' subheadings.";
+
+  const userPrompt = `Source type: ${args.sourceLabel ?? "notes"}
+Tone: ${args.tone}
+Target length: ${lengthGuide}
+
+Source material:
+"""
+${args.sourceText.slice(0, 50000)}
+"""
+
+Write a complete blog post in this site's voice. Then return the structured fields.
+Suggest 2–4 inline image placements using the "IMAGE:" placeholder syntax described.
+Suggest one strong featured image prompt suitable for a literary blog hero.`;
+
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: STYLE_BRIEF },
+        { role: "user", content: userPrompt },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "draft_blog",
+            description: "Return the full drafted blog post with metadata.",
+            parameters: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                excerpt: { type: "string", description: "1–2 sentence summary." },
+                content: {
+                  type: "string",
+                  description:
+                    "Full body. Paragraphs separated by blank lines. '## ' for subheadings, '> ' for quotes, inline images as ![alt](IMAGE:visual prompt).",
+                },
+                category: { type: "string", description: "One short category." },
+                tags: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "3–6 short tags.",
+                },
+                seo_title: { type: "string", description: "≤60 chars, includes primary keyword." },
+                seo_description: { type: "string", description: "≤155 chars compelling meta description." },
+                featured_image_prompt: {
+                  type: "string",
+                  description: "A single rich visual prompt for the hero image — atmospheric, no text in image.",
+                },
+              },
+              required: [
+                "title",
+                "excerpt",
+                "content",
+                "category",
+                "tags",
+                "seo_title",
+                "seo_description",
+                "featured_image_prompt",
+              ],
+              additionalProperties: false,
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "draft_blog" } },
+    }),
+  });
+
+  if (res.status === 429) throw new Error("Rate limit exceeded — try again shortly.");
+  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace → Usage.");
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`AI gateway error: ${res.status} ${t.slice(0, 200)}`);
+  }
+  const json = await res.json();
+  const tc = json.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) throw new Error("AI returned no draft.");
+  const args2 = JSON.parse(tc.function.arguments) as {
+    title: string;
+    excerpt: string;
+    content: string;
+    category: string;
+    tags: string[];
+    seo_title: string;
+    seo_description: string;
+    featured_image_prompt: string;
+  };
+
+  // Extract inline IMAGE: placeholders into image_prompts and rewrite content.
+  const inlinePrompts: ImagePrompt[] = [];
+  const rewritten = args2.content.replace(
+    /!\[([^\]]*)\]\(IMAGE:\s*([^)]+)\)/g,
+    (_m, alt: string, prompt: string) => {
+      const cleanPrompt = prompt.trim();
+      const cleanAlt = alt.trim();
+      inlinePrompts.push({ prompt: cleanPrompt, alt: cleanAlt });
+      // Leave the placeholder visible to the editor, but in a safer form
+      return `![${cleanAlt}](pending:${inlinePrompts.length - 1})`;
+    },
+  );
+
+  return {
+    ...args2,
+    content: rewritten,
+    image_prompts: [
+      { prompt: args2.featured_image_prompt, alt: `Featured image for ${args2.title}` },
+      ...inlinePrompts,
+    ],
+  };
+}
+
+export const generateBlogFromSource = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => WizardSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    return runFullBlogGeneration({
+      sourceText: data.sourceText,
+      sourceLabel: data.sourceLabel ?? data.sourceType,
+      tone: data.tone,
+      length: data.length,
+    });
+  });
+
+// ---- URL extraction ----
+export const extractFromUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ url: z.string().url().max(2000) }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const res = await fetch(data.url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; BlogAssistant/1.0)" },
+    });
+    if (!res.ok) throw new Error(`Failed to fetch URL: ${res.status}`);
+    const html = await res.text();
+    // Naive but effective text extraction
+    const cleaned = html
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, " ")
+      .trim();
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    return {
+      title: titleMatch ? titleMatch[1].trim() : null,
+      text: cleaned.slice(0, 40000),
+      url: data.url,
+    };
+  });
+
+// ---- Single image generation via Lovable AI (Nano Banana) ----
+export const generateBlogImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ prompt: z.string().min(3).max(2000) }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
-
-    const system = `You are a writer drafting a contemplative bhakti / wisdom blog post for the site "sravaṇādi jala".
-Tone: warm, literary, unhurried. Write in plain prose with short paragraphs.
-Return ONLY a JSON object via the provided tool.`;
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-image",
         messages: [
-          { role: "system", content: system },
           {
             role: "user",
-            content: `Draft a blog post from this topic / notes:\n\n${data.prompt}\n\nUse "## " for any subheadings and a leading "> " for quotes. 4–8 paragraphs.`,
+            content: `Generate a 16:9 atmospheric editorial image (no text, no watermarks) for a literary bhakti / wisdom blog. Visual: ${data.prompt}`,
           },
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "draft_post",
-              description: "Return the drafted blog post.",
-              parameters: {
-                type: "object",
-                properties: {
-                  title: { type: "string" },
-                  excerpt: { type: "string", description: "1–2 sentence summary." },
-                  content: { type: "string", description: "Markdown-ish body, paragraphs separated by blank lines." },
-                  category: {
-                    type: "string",
-                    description: "One short category, e.g. 'Bhakti Notes' or 'Wisdom'.",
-                  },
-                },
-                required: ["title", "excerpt", "content", "category"],
-                additionalProperties: false,
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "draft_post" } },
+        modalities: ["image", "text"],
       }),
     });
-
-    if (res.status === 429) throw new Error("Rate limit exceeded — try again shortly.");
-    if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace → Usage.");
+    if (res.status === 429) throw new Error("Rate limit — try again shortly.");
+    if (res.status === 402) throw new Error("AI credits exhausted.");
     if (!res.ok) {
       const t = await res.text();
-      throw new Error(`AI gateway error: ${res.status} ${t.slice(0, 200)}`);
+      throw new Error(`Image gateway error: ${res.status} ${t.slice(0, 200)}`);
     }
     const json = await res.json();
-    const tc = json.choices?.[0]?.message?.tool_calls?.[0];
-    if (!tc) throw new Error("AI returned no draft.");
-    const args = JSON.parse(tc.function.arguments) as {
-      title: string;
-      excerpt: string;
-      content: string;
-      category: string;
-    };
-    return args;
+    const dataUrl: string | undefined = json.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    if (!dataUrl) throw new Error("No image returned.");
+    const m = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+    if (!m) throw new Error("Bad image format.");
+    const contentType = m[1];
+    const ext = contentType.split("/")[1] || "png";
+    const buffer = Buffer.from(m[2], "base64");
+    const path = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabaseAdmin.storage
+      .from("blog-images")
+      .upload(path, buffer, { contentType, upsert: false });
+    if (error) throw new Error(error.message);
+    const { data: pub } = supabaseAdmin.storage.from("blog-images").getPublicUrl(path);
+    return { url: pub.publicUrl };
   });
 
-// One-time bootstrap: if NO admin exists, create the first admin user.
+// ---- Bootstrap & uploads ----
 const BootstrapSchema = z.object({
   email: z.string().email().max(255),
   password: z.string().min(8).max(72),
@@ -271,7 +462,6 @@ export const hasAnyAdmin = createServerFn({ method: "GET" }).handler(async () =>
   return { hasAdmin: (count ?? 0) > 0 };
 });
 
-// Image upload — returns a public URL after storing in blog-images bucket.
 export const uploadImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
@@ -279,7 +469,6 @@ export const uploadImage = createServerFn({ method: "POST" })
       .object({
         filename: z.string().min(1).max(255),
         contentType: z.string().min(1).max(100),
-        // base64 (without data: prefix), capped at ~6MB raw
         base64: z.string().min(1).max(8_500_000),
       })
       .parse(i),

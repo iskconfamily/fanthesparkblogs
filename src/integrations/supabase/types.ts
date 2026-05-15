@@ -23,9 +23,13 @@ export type Database = {
           excerpt: string | null
           featured_image: string | null
           id: string
+          image_prompts: Json
           published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string
           status: Database["public"]["Enums"]["post_status"]
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -37,9 +41,13 @@ export type Database = {
           excerpt?: string | null
           featured_image?: string | null
           id?: string
+          image_prompts?: Json
           published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug: string
           status?: Database["public"]["Enums"]["post_status"]
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -51,9 +59,13 @@ export type Database = {
           excerpt?: string | null
           featured_image?: string | null
           id?: string
+          image_prompts?: Json
           published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["post_status"]
+          tags?: string[]
           title?: string
           updated_at?: string
         }

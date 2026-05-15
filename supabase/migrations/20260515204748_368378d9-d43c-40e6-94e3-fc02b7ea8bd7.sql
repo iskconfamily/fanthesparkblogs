@@ -1,0 +1,5 @@
+ALTER TABLE public.blog_posts
+  ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS seo_title TEXT,
+  ADD COLUMN IF NOT EXISTS seo_description TEXT,
+  ADD COLUMN IF NOT EXISTS image_prompts JSONB NOT NULL DEFAULT '[]'::jsonb;
