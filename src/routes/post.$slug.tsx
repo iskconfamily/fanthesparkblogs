@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/site-layout";
 import { ArticleBody } from "@/components/article-body";
 import { InlineNewsletter } from "@/components/inline-newsletter";
 import { RelatedArticles } from "@/components/related-articles";
+import { Byline } from "@/components/byline";
 import { getPostBySlug, getRelated, formatDate } from "@/content/queries";
 import { tagSlug } from "@/content/posts";
 
@@ -89,6 +90,7 @@ function PostPage() {
         >
           {formatDate(post.date)}
         </p>
+        <Byline author={post.author} />
         <figure className="my-8">
           <img src={post.featuredImage.src} alt={post.featuredImage.alt} className="w-full" />
           {post.featuredImage.caption && (
