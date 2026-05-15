@@ -4,15 +4,14 @@ import { ArticleBody } from "@/components/article-body";
 import { InlineNewsletter } from "@/components/inline-newsletter";
 import { RelatedArticles } from "@/components/related-articles";
 import { Byline } from "@/components/byline";
-import { getPostBySlug, getRelated, formatDate } from "@/content/queries";
-
+import { getPostBySlug, getRelated, formatDate, getAllPosts } from "@/content/queries";
+import { getPublishedDbPostBySlug } from "@/lib/blog.functions";
+import type { Post } from "@/content/posts";
 
 export const Route = createFileRoute("/post/$slug")({
   head: ({ params }) => {
     const post = getPostBySlug(params.slug);
-    if (!post) {
-      return { meta: [{ title: "Not found — The Marginalia" }] };
-    }
+    if (!post) return { meta: [{ title: "Essay — sravaṇādi jala" }] };
     return {
       meta: [
         { title: `${post.title} — sravaṇādi jala` },
@@ -26,10 +25,14 @@ export const Route = createFileRoute("/post/$slug")({
       ],
     };
   },
-  loader: ({ params }) => {
-    const post = getPostBySlug(params.slug);
+  loader: async ({ params }) => {
+    const dbPost = await getPublishedDbPostBySlug({ data: { slug: params.slug } });
+    const post: Post | undefined = dbPost ?? getPostBySlug(params.slug);
     if (!post) throw notFound();
-    return { post, related: getRelated(post) };
+    const related = getRelated(post).length
+      ? getRelated(post)
+      : getAllPosts().filter((p) => p.slug !== post.slug).slice(0, 3);
+    return { post, related };
   },
   component: PostPage,
   notFoundComponent: () => (
