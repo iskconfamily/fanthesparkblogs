@@ -1,4 +1,6 @@
-import { posts, type Post } from "./posts";
+import { posts, tagSlug, tagFromSlug, type Post } from "./posts";
+
+export { tagSlug, tagFromSlug };
 
 export const getAllPosts = (): Post[] =>
   [...posts].sort((a, b) => b.date.localeCompare(a.date));
@@ -6,12 +8,13 @@ export const getAllPosts = (): Post[] =>
 export const getPostBySlug = (slug: string): Post | undefined =>
   posts.find((p) => p.slug === slug);
 
-export const getPostsByTag = (tag: string): Post[] =>
-  getAllPosts().filter(
-    (p) =>
-      p.tags.includes(tag.toLowerCase()) ||
-      p.category.toLowerCase() === tag.toLowerCase()
+export const getPostsByTag = (slug: string): Post[] => {
+  const label = tagFromSlug(slug);
+  if (!label) return [];
+  return getAllPosts().filter(
+    (p) => p.tags.includes(label) || p.category === label,
   );
+};
 
 export const getRelated = (post: Post): Post[] => {
   const explicit = (post.relatedSlugs ?? [])

@@ -8,16 +8,16 @@ export function SiteFooter() {
         style={{ fontFamily: "var(--font-meta)" }}
       >
         <p className="italic">
-          Published quietly, irregularly, and with affection since the present.
+          Sprinkling the water of hearing &amp; chanting, quietly and irregularly.
         </p>
         <p className="mt-3 space-x-4 no-underline">
           <Link to="/about" style={{ borderBottom: "none" }}>About</Link>
           <Link to="/archive" style={{ borderBottom: "none" }}>Archive</Link>
           <Link to="/newsletter" style={{ borderBottom: "none" }}>Newsletter</Link>
-          <Link to="/tag/poetry" style={{ borderBottom: "none" }}>Poetry</Link>
-          <Link to="/tag/books" style={{ borderBottom: "none" }}>Books</Link>
+          <Link to="/tag/$slug" params={{ slug: "bhakti-notes" }} style={{ borderBottom: "none" }}>Bhakti Notes</Link>
+          <Link to="/tag/$slug" params={{ slug: "wisdom" }} style={{ borderBottom: "none" }}>Wisdom</Link>
         </p>
-        <p className="mt-6 text-xs">© {new Date().getFullYear()} The Marginalia. All essays original.</p>
+        <p className="mt-6 text-xs">© {new Date().getFullYear()} sravaṇādi jala. All essays original.</p>
       </div>
     </footer>
   );
