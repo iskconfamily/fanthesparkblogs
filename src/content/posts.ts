@@ -37,6 +37,7 @@ export type Post = {
 
 export const TAGS = [
   "Bhakti Notes",
+  "Books",
   "Career & Business",
   "FAQ",
   "Health & Vitality",
