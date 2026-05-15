@@ -1,18 +1,24 @@
 import { Link } from "@tanstack/react-router";
 import type { Post } from "@/content/posts";
+import { tagSlug } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 
 export function PostPreview({ post }: { post: Post }) {
   return (
     <article className="border-b border-border pb-12 mb-12 last:border-b-0">
-      <Link
-        to="/tag/$slug"
-        params={{ slug: post.category.toLowerCase() }}
-        className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
-        style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
-      >
-        {post.category}
-      </Link>
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
+        {post.tags.map((t) => (
+          <Link
+            key={t}
+            to="/tag/$slug"
+            params={{ slug: tagSlug(t) }}
+            className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-primary"
+            style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
+          >
+            {t}
+          </Link>
+        ))}
+      </div>
       <h2 className="mt-2 mb-2">
         <Link
           to="/post/$slug"
@@ -45,15 +51,12 @@ export function PostPreview({ post }: { post: Post }) {
           src={post.featuredImage.src}
           alt={post.featuredImage.alt}
           className="w-full"
+          loading="lazy"
         />
       </Link>
       <p className="text-foreground/90 leading-[1.8]">{post.excerpt}</p>
       <p className="mt-4">
-        <Link
-          to="/post/$slug"
-          params={{ slug: post.slug }}
-          className="text-sm italic"
-        >
+        <Link to="/post/$slug" params={{ slug: post.slug }} className="text-sm italic">
           Continue reading →
         </Link>
       </p>

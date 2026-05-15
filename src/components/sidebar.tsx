@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { getAllPosts, getAllTags } from "@/content/queries";
+import { tagSlug } from "@/content/posts";
 
 const recommended = [
   {
@@ -33,7 +34,7 @@ export function Sidebar() {
         <SectionLabel>Currently Reading</SectionLabel>
         <Link
           to="/post/$slug"
-          params={{ slug: "what-the-bookshelf-remembers" }}
+          params={{ slug: "the-khatvanga-moment" }}
           className="block no-underline"
           style={{ borderBottom: "none" }}
         >
@@ -116,7 +117,7 @@ export function Sidebar() {
         <ul className="space-y-2 text-sm">
           {tags.map(({ tag, count }) => (
             <li key={tag}>
-              <Link to="/tag/$slug" params={{ slug: tag }} className="capitalize">
+              <Link to="/tag/$slug" params={{ slug: tagSlug(tag) }}>
                 {tag}
               </Link>
               <span className="text-muted-foreground ml-2">({count})</span>

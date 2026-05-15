@@ -4,6 +4,7 @@ import { ArticleBody } from "@/components/article-body";
 import { InlineNewsletter } from "@/components/inline-newsletter";
 import { RelatedArticles } from "@/components/related-articles";
 import { getPostBySlug, getRelated, formatDate } from "@/content/queries";
+import { tagSlug } from "@/content/posts";
 
 export const Route = createFileRoute("/post/$slug")({
   head: ({ params }) => {
@@ -13,7 +14,7 @@ export const Route = createFileRoute("/post/$slug")({
     }
     return {
       meta: [
-        { title: `${post.title} — The Marginalia` },
+        { title: `${post.title} — sravaṇādi jala` },
         { name: "description", content: post.excerpt },
         { property: "og:title", content: post.title },
         { property: "og:description", content: post.excerpt },
@@ -55,14 +56,19 @@ function PostPage() {
   return (
     <SiteLayout>
       <article>
-        <Link
-          to="/tag/$slug"
-          params={{ slug: post.category.toLowerCase() }}
-          className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground"
-          style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
-        >
-          {post.category}
-        </Link>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          {post.tags.map((t: string) => (
+            <Link
+              key={t}
+              to="/tag/$slug"
+              params={{ slug: tagSlug(t) }}
+              className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground hover:text-primary"
+              style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
+            >
+              {t}
+            </Link>
+          ))}
+        </div>
         <h1
           className="mt-3 text-4xl md:text-5xl italic leading-[1.1]"
           style={{ fontFamily: "var(--font-serif-display)" }}

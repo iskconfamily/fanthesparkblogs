@@ -5,9 +5,9 @@ import { getAllPosts, formatDate } from "@/content/queries";
 export const Route = createFileRoute("/archive")({
   head: () => ({
     meta: [
-      { title: "Archive — The Marginalia" },
+      { title: "Archive — sravaṇādi jala" },
       { name: "description", content: "The full chronological archive of essays." },
-      { property: "og:title", content: "Archive — The Marginalia" },
+      { property: "og:title", content: "Archive — sravaṇādi jala" },
       { property: "og:description", content: "Every essay, in order of arrival." },
     ],
   }),
