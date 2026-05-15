@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { getAllPosts, getAllTags } from "@/content/queries";
 import { tagSlug } from "@/content/posts";
@@ -37,17 +38,22 @@ const books = [
 export function Sidebar() {
   const recent = getAllPosts().slice(0, 5);
   const tags = getAllTags();
+  const [orderedTiles, setOrderedTiles] = useState(tiles);
+
+  useEffect(() => {
+    const shuffled = [...tiles].sort(() => Math.random() - 0.5);
+    setOrderedTiles(shuffled);
+  }, []);
 
   return (
     <aside
-      className="space-y-12 text-[15px]"
+      className="space-y-12 text-[17px]"
       style={{ fontFamily: "var(--font-serif-body)" }}
     >
       {/* Article tiles — one per row, image + title */}
       <section>
-        <SectionLabel>Essays to Wander Into</SectionLabel>
         <ul className="space-y-5">
-          {tiles.map((t) => (
+          {orderedTiles.map((t) => (
             <li key={t.slug}>
               <Link
                 to="/post/$slug"
@@ -62,7 +68,7 @@ export function Sidebar() {
                   loading="lazy"
                 />
                 <p
-                  className="mt-2 italic text-foreground leading-snug"
+                  className="mt-2 text-lg italic text-foreground leading-snug"
                   style={{ fontFamily: "var(--font-serif-display)" }}
                 >
                   {t.title}
