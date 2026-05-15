@@ -1,6 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { SiteLayout } from "@/components/site-layout";
 import { getAllPosts, formatDate } from "@/content/queries";
+import { getPublishedDbPosts } from "@/lib/blog.functions";
+import type { Post } from "@/content/posts";
 
 export const Route = createFileRoute("/archive")({
   head: () => ({
@@ -11,11 +15,22 @@ export const Route = createFileRoute("/archive")({
       { property: "og:description", content: "Every essay, in order of arrival." },
     ],
   }),
+  loader: () => getPublishedDbPosts(),
   component: ArchivePage,
 });
 
 function ArchivePage() {
-  const posts = getAllPosts();
+  const initial = Route.useLoaderData();
+  const fetchPosts = useServerFn(getPublishedDbPosts);
+  const { data: dbPosts = initial } = useQuery({
+    queryKey: ["published-posts"],
+    queryFn: () => fetchPosts(),
+    initialData: initial,
+  });
+  const dbSlugs = new Set(dbPosts.map((p: Post) => p.slug));
+  const posts = [...dbPosts, ...getAllPosts().filter((p) => !dbSlugs.has(p.slug))].sort((a, b) =>
+    b.date.localeCompare(a.date),
+  );
   return (
     <SiteLayout>
       <p
