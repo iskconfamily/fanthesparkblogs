@@ -1,114 +1,51 @@
-# Literary Long-Form Blog — Build Plan
+# Admin Blog Management System
 
-A quiet, archival, text-first publication with a warm cream background, dark serif typography, muted burgundy accents, narrow reading column, and a dense curated left sidebar. Three routes, fully responsive, original content + placeholder imagery.
+## Overview
+Add a Supabase-backed blog CMS so an admin can write, AI-draft, preview, publish, and unpublish posts. Public site reads from the database (published only); existing static `src/content/posts.ts` posts remain as a fallback/seed.
 
-## Pages (TanStack Start routes)
+## 1. Enable Lovable Cloud
+Provision Supabase (database + auth + storage for featured images).
 
-```
-src/routes/
-  __root.tsx            existing shell — keep
-  index.tsx             Home: vertical essay feed + sidebar
-  about.tsx             Simple editorial about page
-  archive.tsx           Full chronological archive
-  newsletter.tsx        Newsletter signup page
-  surprise.tsx          Picks a random post and redirects
-  tag.$slug.tsx         Category/tag archive (e.g. /tag/poetry)
-  post.$slug.tsx        Single article page
-```
+## 2. Database (migration)
+- `blog_posts` table with: `id (uuid pk)`, `title`, `slug (unique)`, `excerpt`, `content (text)`, `featured_image (text url)`, `category`, `author`, `status` (enum `draft`/`published`), `created_at`, `updated_at`, `published_at`. Trigger updates `updated_at`.
+- `app_role` enum (`admin`, `user`) + `user_roles` table (separate from profiles per security rules).
+- `has_role(uuid, app_role)` SECURITY DEFINER function.
+- Storage bucket `blog-images` (public read).
 
-Each route sets its own `head()` with unique title + description + og tags.
+## 3. RLS policies
+- `blog_posts`:
+  - SELECT for `anon` + `authenticated`: only `status = 'published'`.
+  - SELECT/INSERT/UPDATE/DELETE for admins (via `has_role`).
+- `user_roles`: only admins can manage; users can read their own.
+- Storage: public read on `blog-images`, admin-only write.
 
-## Layout & components
+## 4. Auth
+- Email/password sign-in at `/admin/login` (auto-confirm email enabled).
+- `/_authenticated` style guard on `/admin/*` — redirect to login if not signed in or not admin.
+- First admin: bootstrap by inserting a row in `user_roles` after the user signs up (documented; user can do via SQL or we provide a one-time seed flow).
 
-```
-src/components/
-  site-header.tsx       Wordmark + tagline + nav (Home, About, Archive,
-                        Poetry, Books, Newsletter, Surprise Me)
-  site-footer.tsx       Minimal serif footer, archive + tag links
-  site-layout.tsx       Two-column wrapper: <main> + <Sidebar/>; stacks on mobile
-  sidebar.tsx           Composes the modules below
-  sidebar/
-    featured-book.tsx   Cover thumbnail + blurb
-    newsletter-block.tsx Email input, no payments wording
-    archive-links.tsx   Year/month list
-    tag-cloud.tsx       Category links
-    favorite-reads.tsx  Small thumbnails + text links
-    social-links.tsx    RSS, email, Mastodon, etc. (text links)
-  post-preview.tsx      Home/tag feed entry: kicker tag, serif title,
-                        featured image, excerpt, "Continue reading"
-  article-body.tsx      Prose container with pull-quote + figure helpers
-  pull-quote.tsx
-  figure.tsx            Image + caption
-  related-articles.tsx
-```
+## 5. Routes & UI
+- `/admin/login` — sign in form.
+- `/admin` — list posts (drafts + published) with status badges, edit/delete/publish/unpublish actions, "New post" button.
+- `/admin/new` and `/admin/edit/$id` — editor with:
+  - Title, slug (auto from title, editable), excerpt, category, author, content (textarea / markdown), featured image upload.
+  - **AI Generate** button: prompt for topic/notes → calls server fn → fills title/excerpt/content via Lovable AI Gateway (`google/gemini-2.5-flash`).
+  - **Preview** button → opens `/preview/$slug?token=...` in new tab (works for drafts too, admin-only via auth check).
+  - **Save Draft**, **Publish**, **Unpublish** buttons.
 
-No donation / support / patronage / payment UI anywhere.
+## 6. Public site integration
+- New server fn `getPublishedPosts()` / `getPublishedPostBySlug()` querying Supabase.
+- Homepage, category (`/tag/$slug`), post detail (`/post/$slug`), archive, RSS, sidebar tiles → merge DB published posts with existing static posts (DB takes precedence by slug).
+- Drafts never appear in any public list.
 
-## Content model
+## 7. Preview mode
+- `/preview/$slug` route — requires admin session; fetches post regardless of status; renders with same template as `/post/$slug` plus a "DRAFT PREVIEW" banner.
 
-`src/content/posts.ts` exports a typed array used by every page (ready to swap for a CMS later).
+## Technical notes
+- Server functions in `src/lib/admin.functions.ts` use `requireSupabaseAuth` + `has_role` check; AI generation uses `LOVABLE_API_KEY`.
+- Wire `attachSupabaseAuth` in `src/start.ts`.
+- Add Bearer-attaching middleware so server fns receive the user token.
+- RSS feed route updated to include DB published posts.
 
-```ts
-export type Post = {
-  slug: string;
-  title: string;
-  subtitle?: string;
-  category: string;        // primary kicker
-  tags: string[];          // e.g. ["poetry", "nature"]
-  date: string;            // ISO
-  excerpt: string;
-  featuredImage: { src: string; alt: string; caption?: string };
-  body: ArticleBlock[];    // paragraphs, pull quotes, figures, headings
-  relatedSlugs?: string[];
-};
-```
-
-Helpers in `src/content/queries.ts`: `getAllPosts`, `getPostBySlug`, `getPostsByTag`, `getRelated`, `getRandomPost`. ~8–10 placeholder essays across tags: poetry, books, philosophy, science, art.
-
-## Design system (`src/styles.css`)
-
-Replace tokens with a warm aged-paper palette (oklch equivalents of):
-
-- `--background`: #f6f0e4 (warm ivory)
-- `--foreground`: #2b2520 (deep charcoal)
-- `--primary` (links/accent): #8f3028 (muted burgundy)
-- `--muted-foreground`: warm brown-gray
-- `--border`: soft tan
-- `--card`: slightly lighter cream
-
-Typography via Google Fonts in `__root.tsx` head:
-- Headings: **Cormorant Garamond** (titles), **Playfair Display** option
-- Body: **Lora** (18–20px, line-height 1.75)
-- Nav/meta: **Libre Caslon Text** or fall back to Georgia
-
-Add font-family CSS variables (`--font-serif-display`, `--font-serif-body`, `--font-meta`) and tailwind utilities. Sharp corners (radius ~2px), no shadows, hairline tan separators between feed entries.
-
-## Page composition
-
-**Home** — `SiteLayout` with feed of `PostPreview` (no hero, no cards). Sidebar shows featured book, newsletter, recent essays w/ thumbnails, tag list, RSS/social.
-
-**Tag archive** (`/tag/$slug`) — Page title (e.g. "Poetry"), short descriptive paragraph, chronological `PostPreview` list, same sidebar.
-
-**Article** (`/post/$slug`) — Kicker (category), large serif title, optional deck, byline + date, featured figure, `ArticleBody` (serif prose, pull quotes, inline figures with captions, accent links), newsletter block, related articles, same sidebar.
-
-**Surprise Me** — loader picks random slug, `throw redirect({ to: "/post/$slug", params })`.
-
-## Imagery
-
-Use neutral placeholder imagery (e.g. `https://images.unsplash.com/...` with `?w=800&auto=format` queries) for book covers and featured images. Captions read like archival plates ("Plate VII from a 1894 botanical study"). No copyrighted/branded assets from the reference.
-
-## Responsive behavior
-
-- ≥1024px: two columns, sidebar ~300px left, content max-width ~720px.
-- 768–1023px: single column; sidebar modules collapse to a compact strip after the first 1–2 entries.
-- <768px: single column; sidebar modules appear after the main intro; nav becomes a simple wrapped row (no hamburger needed for a text nav this short).
-
-## Out of scope (per spec)
-
-- No donations / Patreon / fundraising / payment UI.
-- No card grids, gradient heroes, modern SaaS chrome, or heavy animation.
-- No backend yet; content is a typed local module ready for CMS swap.
-
-## Verification
-
-After build: visit `/`, `/tag/poetry`, a sample `/post/...`, `/surprise`; check mobile viewport stacking; confirm no placeholder boilerplate remains on index.
+## Out of scope
+- Multi-author workflows, scheduled publishing, revisions/history, comments.
