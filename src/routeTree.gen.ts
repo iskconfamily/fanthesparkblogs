@@ -12,10 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SurpriseRouteImport } from './routes/surprise'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
 import { Route as ArchiveRouteImport } from './routes/archive'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as TagSlugRouteImport } from './routes/tag.$slug'
+import { Route as PreviewSlugRouteImport } from './routes/preview.$slug'
 import { Route as PostSlugRouteImport } from './routes/post.$slug'
+import { Route as AdminSetupRouteImport } from './routes/admin.setup'
+import { Route as AdminNewRouteImport } from './routes/admin.new'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminEditIdRouteImport } from './routes/admin.edit.$id'
 
 const SurpriseRoute = SurpriseRouteImport.update({
   id: '/surprise',
@@ -32,6 +39,11 @@ const ArchiveRoute = ArchiveRouteImport.update({
   path: '/archive',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -42,9 +54,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const TagSlugRoute = TagSlugRouteImport.update({
   id: '/tag/$slug',
   path: '/tag/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewSlugRoute = PreviewSlugRouteImport.update({
+  id: '/preview/$slug',
+  path: '/preview/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostSlugRoute = PostSlugRouteImport.update({
@@ -52,15 +74,42 @@ const PostSlugRoute = PostSlugRouteImport.update({
   path: '/post/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSetupRoute = AdminSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNewRoute = AdminNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEditIdRoute = AdminEditIdRouteImport.update({
+  id: '/edit/$id',
+  path: '/edit/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
   '/newsletter': typeof NewsletterRoute
   '/surprise': typeof SurpriseRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/new': typeof AdminNewRoute
+  '/admin/setup': typeof AdminSetupRoute
   '/post/$slug': typeof PostSlugRoute
+  '/preview/$slug': typeof PreviewSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/edit/$id': typeof AdminEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,29 +117,49 @@ export interface FileRoutesByTo {
   '/archive': typeof ArchiveRoute
   '/newsletter': typeof NewsletterRoute
   '/surprise': typeof SurpriseRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/new': typeof AdminNewRoute
+  '/admin/setup': typeof AdminSetupRoute
   '/post/$slug': typeof PostSlugRoute
+  '/preview/$slug': typeof PreviewSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/edit/$id': typeof AdminEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
   '/newsletter': typeof NewsletterRoute
   '/surprise': typeof SurpriseRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/admin/new': typeof AdminNewRoute
+  '/admin/setup': typeof AdminSetupRoute
   '/post/$slug': typeof PostSlugRoute
+  '/preview/$slug': typeof PreviewSlugRoute
   '/tag/$slug': typeof TagSlugRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/edit/$id': typeof AdminEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/archive'
     | '/newsletter'
     | '/surprise'
+    | '/admin/login'
+    | '/admin/new'
+    | '/admin/setup'
     | '/post/$slug'
+    | '/preview/$slug'
     | '/tag/$slug'
+    | '/admin/'
+    | '/admin/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -98,26 +167,41 @@ export interface FileRouteTypes {
     | '/archive'
     | '/newsletter'
     | '/surprise'
+    | '/admin/login'
+    | '/admin/new'
+    | '/admin/setup'
     | '/post/$slug'
+    | '/preview/$slug'
     | '/tag/$slug'
+    | '/admin'
+    | '/admin/edit/$id'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/archive'
     | '/newsletter'
     | '/surprise'
+    | '/admin/login'
+    | '/admin/new'
+    | '/admin/setup'
     | '/post/$slug'
+    | '/preview/$slug'
     | '/tag/$slug'
+    | '/admin/'
+    | '/admin/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ArchiveRoute: typeof ArchiveRoute
   NewsletterRoute: typeof NewsletterRoute
   SurpriseRoute: typeof SurpriseRoute
   PostSlugRoute: typeof PostSlugRoute
+  PreviewSlugRoute: typeof PreviewSlugRoute
   TagSlugRoute: typeof TagSlugRoute
 }
 
@@ -144,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArchiveRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -158,11 +249,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/tag/$slug': {
       id: '/tag/$slug'
       path: '/tag/$slug'
       fullPath: '/tag/$slug'
       preLoaderRoute: typeof TagSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview/$slug': {
+      id: '/preview/$slug'
+      path: '/preview/$slug'
+      fullPath: '/preview/$slug'
+      preLoaderRoute: typeof PreviewSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/post/$slug': {
@@ -172,16 +277,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/setup': {
+      id: '/admin/setup'
+      path: '/setup'
+      fullPath: '/admin/setup'
+      preLoaderRoute: typeof AdminSetupRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/new': {
+      id: '/admin/new'
+      path: '/new'
+      fullPath: '/admin/new'
+      preLoaderRoute: typeof AdminNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/edit/$id': {
+      id: '/admin/edit/$id'
+      path: '/edit/$id'
+      fullPath: '/admin/edit/$id'
+      preLoaderRoute: typeof AdminEditIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminNewRoute: typeof AdminNewRoute
+  AdminSetupRoute: typeof AdminSetupRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AdminEditIdRoute: typeof AdminEditIdRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminLoginRoute: AdminLoginRoute,
+  AdminNewRoute: AdminNewRoute,
+  AdminSetupRoute: AdminSetupRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AdminEditIdRoute: AdminEditIdRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRouteWithChildren,
   ArchiveRoute: ArchiveRoute,
   NewsletterRoute: NewsletterRoute,
   SurpriseRoute: SurpriseRoute,
   PostSlugRoute: PostSlugRoute,
+  PreviewSlugRoute: PreviewSlugRoute,
   TagSlugRoute: TagSlugRoute,
 }
 export const routeTree = rootRouteImport
