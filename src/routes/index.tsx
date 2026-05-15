@@ -1,26 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SiteLayout } from "@/components/site-layout";
+import { PostPreview } from "@/components/post-preview";
+import { getAllPosts } from "@/content/queries";
 
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "The Marginalia — A literary journal of attention" },
+      { name: "description", content: "Long-form essays on poetry, books, and the slow practice of being alive." },
+      { property: "og:title", content: "The Marginalia" },
+      { property: "og:description", content: "A literary journal of attention, books, and quiet wonder." },
+    ],
+  }),
+  component: Home,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+function Home() {
+  const posts = getAllPosts();
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <SiteLayout>
+      {posts.map((p) => (
+        <PostPreview key={p.slug} post={p} />
+      ))}
+    </SiteLayout>
   );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
 }
