@@ -11,6 +11,8 @@ import postWater from "@/assets/post-water.jpg";
 import postRabbits from "@/assets/post-rabbits.jpg";
 import postPreparation from "@/assets/post-preparation.jpg";
 import postServe from "@/assets/post-serve.jpg";
+import postFamilyBusiness from "@/assets/post-family-business.jpg";
+import postFourQuestions from "@/assets/post-four-questions.jpg";
 
 export type ArticleBlock =
   | { type: "p"; text: string }
@@ -37,6 +39,7 @@ export type Post = {
 
 export const TAGS = [
   "Bhakti Notes",
+  "Books",
   "Career & Business",
   "FAQ",
   "Health & Vitality",
@@ -425,5 +428,61 @@ export const posts: Post[] = [
       { type: "p", text: "Adapted from a reference page by Vaisesika Dasa and the FanTheSpark team." },
     ],
     relatedSlugs: ["the-quiet-discipline-of-the-senses", "stress-to-serenity"],
+  },
+  {
+    slug: "our-family-business",
+    title: "Our Family Business",
+    subtitle: "Notes from the book on building a household whose primary trade is devotion.",
+    category: "Books",
+    tags: ["Books", "Bhakti Notes", "Relationships"],
+    date: "2026-04-22",
+    author: VAISESIKA,
+    sourceUrl: "https://www.amazon.com/Our-Family-Business-Vaisesika-Dasa/dp/9171499008",
+    excerpt:
+      "Every family is in some kind of business together — the question is what we are quietly producing. This is a small reading companion to the book.",
+    featuredImage: {
+      src: postFamilyBusiness,
+      alt: "A painted book cover of a family at a hearth, navy and gold.",
+      caption: "Our Family Business — a reading companion.",
+    },
+    imageLayout: "side",
+    body: [
+      { type: "p", text: "Every family is in some kind of business together. The visible part may be a shop, a profession, a farm, or simply the daily running of a household. But underneath that, every family is also producing something less visible — a culture, a memory, a set of values that the children will carry, half-consciously, into the rest of their lives." },
+      { type: "p", text: "Our Family Business is a small book about taking that second, hidden enterprise seriously. It proposes that the central work of a devotional household is not to add bhakti as one more activity on a busy calendar, but to reorganize the household's quiet inner economy around it — what we read aloud, what we eat, how we begin and end the day, what we celebrate, what we forgive." },
+      { type: "h2", text: "What the book is really about" },
+      { type: "p", text: "It is a manual, in the gentlest sense of the word. It walks through the small, repeatable practices that turn a home into a place of refuge: cooking and offering food with care, gathering for a few minutes of chanting, reading a verse together, keeping the festivals, welcoming guests as if they were sent. None of these are dramatic. All of them, kept up over years, change a family." },
+      { type: "h2", text: "A reading companion, not a summary" },
+      { type: "p", text: "These notes are not a substitute for the book itself. Think of them as a slow walk around the building before going inside. If something here moves you, the book is where the actual rooms are — with their furniture, their windows, their light." },
+      { type: "p", text: "Adapted from Our Family Business by Vaisesika Dasa." },
+    ],
+    relatedSlugs: ["cultivate-gratitude", "are-you-wholy"],
+  },
+  {
+    slug: "the-four-questions",
+    title: "The Four Questions",
+    subtitle: "A reading companion to the book that returns again and again to four small, life-shaping inquiries.",
+    category: "Books",
+    tags: ["Books", "Intelligent Inquiries", "Wisdom"],
+    date: "2026-04-08",
+    author: VAISESIKA,
+    sourceUrl: "https://thefourquestionsbook.com/",
+    excerpt:
+      "Four questions, asked honestly, can quietly rearrange a life. This is a short reading companion to the book that returns to them again and again.",
+    featuredImage: {
+      src: postFourQuestions,
+      alt: "A painted open book under three glowing lanterns.",
+      caption: "The Four Questions — a reading companion.",
+    },
+    imageLayout: "side",
+    body: [
+      { type: "p", text: "There are questions that are useful for an afternoon, and there are questions that are useful for a life. The Four Questions belongs to the second kind. It returns, patiently, to a small set of inquiries that the Vedic tradition has handed down for centuries — questions about who I am, where I came from, what I am supposed to be doing here, and where I am going next." },
+      { type: "p", text: "The book's wager is simple: most of our suffering is downstream of never having actually sat with these questions. We answer them implicitly, by the way we spend our days, but we rarely answer them on purpose. When we finally do, the answers begin to gently rearrange the furniture of the mind." },
+      { type: "h2", text: "Why four, and why these four" },
+      { type: "p", text: "These are not riddles. They are diagnostic. Each one shines a light on a layer of identity that is easy to forget — the body, the mind, the soul, and the relationship between the soul and its source. Together they form a small examination that any thoughtful person can carry around in a pocket, returning to whenever life feels noisier than it should." },
+      { type: "h2", text: "How to use this companion" },
+      { type: "p", text: "These notes are an invitation, not a summary. The book itself is unhurried and conversational; it deserves to be read slowly, perhaps a chapter at a time, with a notebook nearby. If anything here makes you curious, follow the link to the book and let it do the deeper work." },
+      { type: "p", text: "Adapted from The Four Questions, with gratitude to its authors." },
+    ],
+    relatedSlugs: ["you-are-an-atma", "the-khatvanga-moment"],
   },
 ];

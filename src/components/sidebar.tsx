@@ -7,19 +7,8 @@ import postGratitude from "@/assets/post-gratitude.jpg";
 import postRabbits from "@/assets/post-rabbits.jpg";
 import postSunshine from "@/assets/post-sunshine.jpg";
 import postWholy from "@/assets/post-wholy.jpg";
-
-const favoriteBooks = [
-  {
-    title: "Our Family Business",
-    author: "Vaisesika Dasa",
-    href: "https://www.amazon.com/Our-Family-Business-Vaisesika-Dasa/dp/9171499008",
-  },
-  {
-    title: "The Four Questions",
-    author: "A book of essential inquiry",
-    href: "https://thefourquestionsbook.com/",
-  },
-];
+import postFamilyBusiness from "@/assets/post-family-business.jpg";
+import postFourQuestions from "@/assets/post-four-questions.jpg";
 
 const tiles = [
   { src: postKhatvanga, slug: "the-khatvanga-moment", title: "The Khatvanga Moment" },
@@ -28,6 +17,21 @@ const tiles = [
   { src: postRabbits, slug: "two-rabbits", title: "Two Rabbits" },
   { src: postSunshine, slug: "sunshine-energy-in-unlimited-flavors", title: "Sunshine Energy" },
   { src: postWholy, slug: "are-you-wholy", title: "Are You Wholy?" },
+];
+
+const books = [
+  {
+    src: postFamilyBusiness,
+    slug: "our-family-business",
+    title: "Our Family Business",
+    author: "Vaisesika Dasa",
+  },
+  {
+    src: postFourQuestions,
+    slug: "the-four-questions",
+    title: "The Four Questions",
+    author: "A book of essential inquiry",
+  },
 ];
 
 export function Sidebar() {
@@ -39,66 +43,65 @@ export function Sidebar() {
       className="space-y-12 text-[15px]"
       style={{ fontFamily: "var(--font-serif-body)" }}
     >
-      {/* Featured book */}
+      {/* Article tiles — one per row, image + title */}
       <section>
-        <SectionLabel>Currently Reading</SectionLabel>
-        <Link
-          to="/post/$slug"
-          params={{ slug: "the-khatvanga-moment" }}
-          className="block no-underline"
-          style={{ borderBottom: "none" }}
-        >
-          <img
-            src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&auto=format&fit=crop&q=80"
-            alt="A worn book on a wooden table."
-            className="w-full"
-          />
-          <p className="mt-3 italic text-foreground" style={{ fontFamily: "var(--font-serif-display)" }}>
-            A Field Guide to the Inner Weather
-          </p>
-          <p className="text-sm text-muted-foreground">A slow anthology of essays for the long evening.</p>
-        </Link>
-      </section>
-
-      {/* Favorite Reads */}
-      <section>
-        <SectionLabel>Favorite Reads</SectionLabel>
-        <ul className="space-y-4 mb-6">
-          {favoriteBooks.map((b) => (
-            <li key={b.title}>
-              <a
-                href={b.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="italic"
-                style={{ fontFamily: "var(--font-serif-display)" }}
+        <SectionLabel>Essays to Wander Into</SectionLabel>
+        <ul className="space-y-5">
+          {tiles.map((t) => (
+            <li key={t.slug}>
+              <Link
+                to="/post/$slug"
+                params={{ slug: t.slug }}
+                className="block no-underline group"
+                style={{ borderBottom: "none" }}
               >
-                {b.title}
-              </a>
-              <p className="text-sm text-muted-foreground">{b.author}</p>
+                <img
+                  src={t.src}
+                  alt={t.title}
+                  className="w-full aspect-[4/3] object-cover transition-opacity group-hover:opacity-85"
+                  loading="lazy"
+                />
+                <p
+                  className="mt-2 italic text-foreground leading-snug"
+                  style={{ fontFamily: "var(--font-serif-display)" }}
+                >
+                  {t.title}
+                </p>
+              </Link>
             </li>
           ))}
         </ul>
+      </section>
 
-        {/* Article tiles */}
-        <div className="grid grid-cols-2 gap-3">
-          {tiles.map((t) => (
-            <Link
-              key={t.slug}
-              to="/post/$slug"
-              params={{ slug: t.slug }}
-              className="block no-underline group"
-              style={{ borderBottom: "none" }}
-              title={t.title}
-            >
-              <img
-                src={t.src}
-                alt={t.title}
-                className="w-full aspect-square object-cover transition-opacity group-hover:opacity-80"
-              />
-            </Link>
+      {/* Books */}
+      <section>
+        <SectionLabel>Books</SectionLabel>
+        <ul className="space-y-6">
+          {books.map((b) => (
+            <li key={b.slug}>
+              <Link
+                to="/post/$slug"
+                params={{ slug: b.slug }}
+                className="block no-underline group"
+                style={{ borderBottom: "none" }}
+              >
+                <img
+                  src={b.src}
+                  alt={b.title}
+                  className="w-full aspect-[3/4] object-cover transition-opacity group-hover:opacity-85"
+                  loading="lazy"
+                />
+                <p
+                  className="mt-2 italic text-foreground leading-snug"
+                  style={{ fontFamily: "var(--font-serif-display)" }}
+                >
+                  {b.title}
+                </p>
+                <p className="text-sm text-muted-foreground">{b.author}</p>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       {/* Newsletter */}
