@@ -57,7 +57,7 @@ function PostPage() {
     <SiteLayout>
       <article>
         <div className="flex flex-wrap gap-x-4 gap-y-1">
-          {post.tags.map((t) => (
+          {post.tags.map((t: string) => (
             <Link
               key={t}
               to="/tag/$slug"

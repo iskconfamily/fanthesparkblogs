@@ -66,7 +66,7 @@ function TagPage() {
           <Link to="/archive">Browse the archive</Link>.
         </p>
       ) : (
-        posts.map((p) => <PostPreview key={p.slug} post={p} />)
+        posts.map((p: import("@/content/posts").Post) => <PostPreview key={p.slug} post={p} />)
       )}
     </SiteLayout>
   );
