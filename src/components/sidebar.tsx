@@ -114,7 +114,7 @@ export function Sidebar() {
       <section className="border-y border-border py-6">
         <SectionLabel>Newsletter</SectionLabel>
         <p className="text-sm text-muted-foreground mb-3">
-          Get the blogs delivered to your email — one or two a week.
+          Get the blogs delivered to your email.
         </p>
         <form
           onSubmit={(e) => e.preventDefault()}
@@ -136,25 +136,56 @@ export function Sidebar() {
         </form>
 
         {/* Social — beneath the newsletter form */}
-        <div className="mt-6">
+        <div className="mt-8">
           <SectionLabel>Connect</SectionLabel>
-          <ul className="space-y-2 text-sm">
+          <ul className="grid grid-cols-2 gap-y-3 gap-x-4 text-[15px]">
             <li>
-              <a href="https://www.facebook.com/FanTheSpark/" target="_blank" rel="noopener noreferrer">
-                Facebook
+              <a
+                href="https://www.facebook.com/FanTheSpark/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 no-underline"
+                style={{ borderBottom: "none" }}
+              >
+                <Facebook className="h-4 w-4" strokeWidth={1.5} />
+                <span style={{ fontFamily: "var(--font-serif-display)" }}>Facebook</span>
               </a>
             </li>
             <li>
-              <a href="https://www.youtube.com/FanTheSpark" target="_blank" rel="noopener noreferrer">
-                YouTube
+              <a
+                href="https://www.youtube.com/FanTheSpark"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 no-underline"
+                style={{ borderBottom: "none" }}
+              >
+                <Youtube className="h-4 w-4" strokeWidth={1.5} />
+                <span style={{ fontFamily: "var(--font-serif-display)" }}>YouTube</span>
               </a>
             </li>
             <li>
-              <a href="https://www.instagram.com/fanthesparkcom/" target="_blank" rel="noopener noreferrer">
-                Instagram
+              <a
+                href="https://www.instagram.com/fanthesparkcom/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 no-underline"
+                style={{ borderBottom: "none" }}
+              >
+                <Instagram className="h-4 w-4" strokeWidth={1.5} />
+                <span style={{ fontFamily: "var(--font-serif-display)" }}>Instagram</span>
               </a>
             </li>
-            <li><a href="#" onClick={(e) => e.preventDefault()}>RSS Feed</a></li>
+            <li>
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className="flex items-center gap-2 no-underline"
+                style={{ borderBottom: "none" }}
+              >
+                <Rss className="h-4 w-4" strokeWidth={1.5} />
+                <span style={{ fontFamily: "var(--font-serif-display)" }}>RSS</span>
+              </a>
+            </li>
           </ul>
         </div>
       </section>
