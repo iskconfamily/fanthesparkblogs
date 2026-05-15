@@ -1,23 +1,33 @@
 import { Link } from "@tanstack/react-router";
 import { getAllPosts, getAllTags } from "@/content/queries";
 import { tagSlug } from "@/content/posts";
+import postKhatvanga from "@/assets/post-khatvanga.jpg";
+import postAtma from "@/assets/post-atma.jpg";
+import postGratitude from "@/assets/post-gratitude.jpg";
+import postRabbits from "@/assets/post-rabbits.jpg";
+import postSunshine from "@/assets/post-sunshine.jpg";
+import postWholy from "@/assets/post-wholy.jpg";
 
-const recommended = [
+const favoriteBooks = [
   {
-    title: "On Solitude",
-    author: "M. Quennell",
-    src: "https://images.unsplash.com/photo-1535905557558-afc4877a26fc?w=200&auto=format&fit=crop&q=80",
+    title: "Our Family Business",
+    author: "Vaisesika Dasa",
+    href: "https://www.amazon.com/Our-Family-Business-Vaisesika-Dasa/dp/9171499008",
   },
   {
-    title: "Letters to the Garden",
-    author: "Iris Holloway",
-    src: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=200&auto=format&fit=crop&q=80",
+    title: "The Four Questions",
+    author: "A book of essential inquiry",
+    href: "https://thefourquestionsbook.com/",
   },
-  {
-    title: "The Lighted Room",
-    author: "F. Aldous",
-    src: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=200&auto=format&fit=crop&q=80",
-  },
+];
+
+const tiles = [
+  { src: postKhatvanga, slug: "the-khatvanga-moment", title: "The Khatvanga Moment" },
+  { src: postAtma, slug: "you-are-an-atma", title: "You Are an Atma" },
+  { src: postGratitude, slug: "cultivate-gratitude", title: "Cultivate Gratitude" },
+  { src: postRabbits, slug: "two-rabbits", title: "Two Rabbits" },
+  { src: postSunshine, slug: "sunshine-energy-in-unlimited-flavors", title: "Sunshine Energy" },
+  { src: postWholy, slug: "are-you-wholy", title: "Are You Wholy?" },
 ];
 
 export function Sidebar() {
@@ -50,6 +60,47 @@ export function Sidebar() {
         </Link>
       </section>
 
+      {/* Favorite Reads */}
+      <section>
+        <SectionLabel>Favorite Reads</SectionLabel>
+        <ul className="space-y-4 mb-6">
+          {favoriteBooks.map((b) => (
+            <li key={b.title}>
+              <a
+                href={b.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="italic"
+                style={{ fontFamily: "var(--font-serif-display)" }}
+              >
+                {b.title}
+              </a>
+              <p className="text-sm text-muted-foreground">{b.author}</p>
+            </li>
+          ))}
+        </ul>
+
+        {/* Article tiles */}
+        <div className="grid grid-cols-2 gap-3">
+          {tiles.map((t) => (
+            <Link
+              key={t.slug}
+              to="/post/$slug"
+              params={{ slug: t.slug }}
+              className="block no-underline group"
+              style={{ borderBottom: "none" }}
+              title={t.title}
+            >
+              <img
+                src={t.src}
+                alt={t.title}
+                className="w-full aspect-square object-cover transition-opacity group-hover:opacity-80"
+              />
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Newsletter */}
       <section className="border-y border-border py-6">
         <SectionLabel>The Sunday Letter</SectionLabel>
@@ -74,22 +125,6 @@ export function Sidebar() {
             Subscribe
           </button>
         </form>
-      </section>
-
-      {/* Recommended */}
-      <section>
-        <SectionLabel>Favorite Reads</SectionLabel>
-        <ul className="space-y-4">
-          {recommended.map((b) => (
-            <li key={b.title} className="flex gap-3">
-              <img src={b.src} alt={b.title} className="w-12 h-16 object-cover flex-shrink-0" />
-              <div className="text-sm">
-                <p className="italic" style={{ fontFamily: "var(--font-serif-display)" }}>{b.title}</p>
-                <p className="text-muted-foreground">{b.author}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
       </section>
 
       {/* Recent essays */}
@@ -128,11 +163,24 @@ export function Sidebar() {
 
       {/* Social */}
       <section>
-        <SectionLabel>Elsewhere</SectionLabel>
+        <SectionLabel>Connect</SectionLabel>
         <ul className="space-y-2 text-sm">
+          <li>
+            <a href="https://www.facebook.com/FanTheSpark/" target="_blank" rel="noopener noreferrer">
+              Facebook
+            </a>
+          </li>
+          <li>
+            <a href="https://www.youtube.com/FanTheSpark" target="_blank" rel="noopener noreferrer">
+              YouTube
+            </a>
+          </li>
+          <li>
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+              Instagram
+            </a>
+          </li>
           <li><a href="#" onClick={(e) => e.preventDefault()}>RSS Feed</a></li>
-          <li><a href="#" onClick={(e) => e.preventDefault()}>By Email</a></li>
-          <li><a href="#" onClick={(e) => e.preventDefault()}>On Mastodon</a></li>
         </ul>
       </section>
     </aside>
