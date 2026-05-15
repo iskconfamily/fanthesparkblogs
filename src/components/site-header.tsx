@@ -1,12 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { TAGS, tagSlug } from "@/content/posts";
-
-const PRIMARY = ["Bhakti Notes", "Intelligent Inquiries", "Spiritual Fitness", "Wisdom"] as const;
-const MORE = TAGS.filter((t) => !PRIMARY.includes(t as (typeof PRIMARY)[number]));
 
 export function SiteHeader() {
-  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <header className="border-b border-border">
