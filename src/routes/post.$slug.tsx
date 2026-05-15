@@ -9,9 +9,9 @@ import { getPublishedDbPostBySlug } from "@/lib/blog.functions";
 import type { Post } from "@/content/posts";
 
 export const Route = createFileRoute("/post/$slug")({
-  head: ({ loaderData }) => {
-    const post = loaderData?.post;
-    if (!post) return { meta: [{ title: "Not found — sravaṇādi jala" }] };
+  head: ({ params }) => {
+    const post = getPostBySlug(params.slug);
+    if (!post) return { meta: [{ title: "Essay — sravaṇādi jala" }] };
     return {
       meta: [
         { title: `${post.title} — sravaṇādi jala` },
