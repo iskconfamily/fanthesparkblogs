@@ -103,6 +103,7 @@ export const posts: Post[] = [
       { type: "p", text: "And so the small interior weather of the practitioner begins to change. The room of the chest, once crowded, becomes a room one can return to. The senses, once scattered, begin to point in the same direction — toward the holy name, toward the service at hand, toward the next quiet hour." },
       { type: "p", text: "There is no spectacle in this. There is only, slowly, a life that has become its own steady practice." },
     ],
+    imageLayout: "side",
     relatedSlugs: ["the-khatvanga-moment", "you-are-an-atma"],
   },
   {
@@ -127,6 +128,7 @@ export const posts: Post[] = [
       { type: "p", text: "We forget this most of the time, and the forgetting is itself a kind of weather we live inside. The reminder, when it arrives — in a verse, in a teacher's sentence, in the small clearing of an unhurried morning — does not add anything new. It only restores what was already, quietly, the case." },
       { type: "p", text: "Om Tat Sat." },
     ],
+    imageLayout: "none",
     relatedSlugs: ["the-khatvanga-moment", "the-quiet-discipline-of-the-senses"],
   },
 ];
