@@ -37,9 +37,9 @@
 :root {
   --radius: 0.125rem;
   /* Warm aged-paper palette */
-  --background: oklch(0.952 0.022 80);        /* #f6f0e4 ivory */
+  --background: oklch(0.985 0.006 85);        /* near-white warm paper */
   --foreground: oklch(0.235 0.012 50);        /* #2b2520 deep charcoal */
-  --card: oklch(0.965 0.018 82);
+  --card: oklch(0.99 0.004 85);
   --card-foreground: oklch(0.235 0.012 50);
   --popover: oklch(0.965 0.018 82);
   --popover-foreground: oklch(0.235 0.012 50);
