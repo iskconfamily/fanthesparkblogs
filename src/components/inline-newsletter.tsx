@@ -5,16 +5,16 @@ export function InlineNewsletter() {
         className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3"
         style={{ fontFamily: "var(--font-meta)" }}
       >
-        The Sunday Letter
+        Newsletter
       </p>
       <h3
         className="text-2xl italic mb-3"
         style={{ fontFamily: "var(--font-serif-display)" }}
       >
-        One quiet essay, every Sunday morning.
+        Occasional letters, one or two a week.
       </h3>
       <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
-        A weekly note on books, attention, and the slow practice of being alive. Free, ad-free, unhurried.
+        A short note on books, attention, and the slow practice of being alive. Free, ad-free, unhurried.
       </p>
       <form
         onSubmit={(e) => e.preventDefault()}
