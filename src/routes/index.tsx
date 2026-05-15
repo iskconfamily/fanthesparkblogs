@@ -6,10 +6,10 @@ import { getAllPosts } from "@/content/queries";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "The Marginalia — A literary journal of attention" },
-      { name: "description", content: "Long-form essays on poetry, books, and the slow practice of being alive." },
-      { property: "og:title", content: "The Marginalia" },
-      { property: "og:description", content: "A literary journal of attention, books, and quiet wonder." },
+      { title: "sravaṇādi jala — sprinkling the water of hearing & chanting" },
+      { name: "description", content: "Quiet, long-form bhakti essays on hearing, chanting, and the practice of remembering Krishna." },
+      { property: "og:title", content: "sravaṇādi jala" },
+      { property: "og:description", content: "Sprinkling the water of hearing and chanting — long-form bhakti essays." },
     ],
   }),
   component: Home,

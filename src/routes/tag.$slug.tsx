@@ -2,23 +2,25 @@ import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site-layout";
 import { PostPreview } from "@/components/post-preview";
 import { getPostsByTag } from "@/content/queries";
+import { tagFromSlug } from "@/content/posts";
 
 export const Route = createFileRoute("/tag/$slug")({
   head: ({ params }) => {
-    const label = params.slug.charAt(0).toUpperCase() + params.slug.slice(1);
+    const label = tagFromSlug(params.slug) ?? params.slug;
     return {
       meta: [
-        { title: `${label} — The Marginalia` },
-        { name: "description", content: `Essays tagged ${label}.` },
-        { property: "og:title", content: `${label} — The Marginalia` },
+        { title: `${label} — sravaṇādi jala` },
+        { name: "description", content: `Essays gathered under ${label}.` },
+        { property: "og:title", content: `${label} — sravaṇādi jala` },
         { property: "og:description", content: `A small archive of essays on ${label.toLowerCase()}.` },
       ],
     };
   },
   loader: ({ params }) => {
     const posts = getPostsByTag(params.slug);
-    if (!posts.length) throw notFound();
-    return { posts, slug: params.slug };
+    const label = tagFromSlug(params.slug);
+    if (!label) throw notFound();
+    return { posts, label };
   },
   component: TagPage,
   notFoundComponent: () => (
@@ -43,8 +45,7 @@ export const Route = createFileRoute("/tag/$slug")({
 });
 
 function TagPage() {
-  const { posts, slug } = Route.useLoaderData();
-  const label = slug.charAt(0).toUpperCase() + slug.slice(1);
+  const { posts, label } = Route.useLoaderData();
   return (
     <SiteLayout>
       <p
@@ -57,11 +58,16 @@ function TagPage() {
         {label}
       </h1>
       <p className="text-muted-foreground italic mb-12">
-        A small archive of essays gathered under {label.toLowerCase()}.
+        A small gathering of essays under {label.toLowerCase()}.
       </p>
-      {posts.map((p: typeof posts[number]) => (
-        <PostPreview key={p.slug} post={p} />
-      ))}
+      {posts.length === 0 ? (
+        <p className="text-muted-foreground italic">
+          Nothing here yet — this category is waiting for its first essay.{" "}
+          <Link to="/archive">Browse the archive</Link>.
+        </p>
+      ) : (
+        posts.map((p) => <PostPreview key={p.slug} post={p} />)
+      )}
     </SiteLayout>
   );
 }
