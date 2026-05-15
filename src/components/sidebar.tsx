@@ -108,7 +108,7 @@ export function Sidebar() {
       <section className="border-y border-border py-6">
         <SectionLabel>Newsletter</SectionLabel>
         <p className="text-sm text-muted-foreground mb-3">
-          Occasional letters, one or two a week. Free. No tracking.
+          Get the blogs delivered to your email — one or two a week.
         </p>
         <form
           onSubmit={(e) => e.preventDefault()}
@@ -128,6 +128,29 @@ export function Sidebar() {
             Subscribe
           </button>
         </form>
+
+        {/* Social — beneath the newsletter form */}
+        <div className="mt-6">
+          <SectionLabel>Connect</SectionLabel>
+          <ul className="space-y-2 text-sm">
+            <li>
+              <a href="https://www.facebook.com/FanTheSpark/" target="_blank" rel="noopener noreferrer">
+                Facebook
+              </a>
+            </li>
+            <li>
+              <a href="https://www.youtube.com/FanTheSpark" target="_blank" rel="noopener noreferrer">
+                YouTube
+              </a>
+            </li>
+            <li>
+              <a href="https://www.instagram.com/fanthesparkcom/" target="_blank" rel="noopener noreferrer">
+                Instagram
+              </a>
+            </li>
+            <li><a href="#" onClick={(e) => e.preventDefault()}>RSS Feed</a></li>
+          </ul>
+        </div>
       </section>
 
       {/* Recent essays */}
@@ -161,29 +184,6 @@ export function Sidebar() {
               <span className="text-muted-foreground ml-2">({count})</span>
             </li>
           ))}
-        </ul>
-      </section>
-
-      {/* Social */}
-      <section>
-        <SectionLabel>Connect</SectionLabel>
-        <ul className="space-y-2 text-sm">
-          <li>
-            <a href="https://www.facebook.com/FanTheSpark/" target="_blank" rel="noopener noreferrer">
-              Facebook
-            </a>
-          </li>
-          <li>
-            <a href="https://www.youtube.com/FanTheSpark" target="_blank" rel="noopener noreferrer">
-              YouTube
-            </a>
-          </li>
-          <li>
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
-              Instagram
-            </a>
-          </li>
-          <li><a href="#" onClick={(e) => e.preventDefault()}>RSS Feed</a></li>
         </ul>
       </section>
     </aside>
