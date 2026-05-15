@@ -93,7 +93,7 @@ export const savePost = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const now = new Date().toISOString();
-    const payload: Record<string, unknown> = {
+    const payload = {
       title: data.title,
       slug: data.slug,
       excerpt: data.excerpt || null,
