@@ -59,7 +59,7 @@ function TagPage() {
       <p className="text-muted-foreground italic mb-12">
         A small archive of essays gathered under {label.toLowerCase()}.
       </p>
-      {posts.map((p) => (
+      {posts.map((p: typeof posts[number]) => (
         <PostPreview key={p.slug} post={p} />
       ))}
     </SiteLayout>
