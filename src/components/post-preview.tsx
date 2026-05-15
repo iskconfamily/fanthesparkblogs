@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { Post, ArticleBlock } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
+import { Byline } from "@/components/byline";
 
 function Figure({
   post,
@@ -50,11 +51,12 @@ export function PostPreview({ post }: { post: Post }) {
         </Link>
       </h2>
       <p
-        className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-8"
+        className="text-xs uppercase tracking-[0.18em] text-muted-foreground"
         style={{ fontFamily: "var(--font-meta)" }}
       >
         {formatDate(post.date)}
       </p>
+      <Byline author={post.author} />
 
       {layout === "side" ? (
         <div>
