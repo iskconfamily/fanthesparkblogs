@@ -11,6 +11,8 @@ import postWater from "@/assets/post-water.jpg";
 import postRabbits from "@/assets/post-rabbits.jpg";
 import postPreparation from "@/assets/post-preparation.jpg";
 import postServe from "@/assets/post-serve.jpg";
+import postFamilyBusiness from "@/assets/post-family-business.jpg";
+import postFourQuestions from "@/assets/post-four-questions.jpg";
 
 export type ArticleBlock =
   | { type: "p"; text: string }
