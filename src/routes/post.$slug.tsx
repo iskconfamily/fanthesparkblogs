@@ -5,7 +5,7 @@ import { InlineNewsletter } from "@/components/inline-newsletter";
 import { RelatedArticles } from "@/components/related-articles";
 import { Byline } from "@/components/byline";
 import { getPostBySlug, getRelated, formatDate } from "@/content/queries";
-import { tagSlug } from "@/content/posts";
+
 
 export const Route = createFileRoute("/post/$slug")({
   head: ({ params }) => {
