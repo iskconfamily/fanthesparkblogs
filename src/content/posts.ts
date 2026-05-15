@@ -17,6 +17,8 @@ export type Post = {
   date: string;
   excerpt: string;
   featuredImage: { src: string; alt: string; caption?: string };
+  /** How the featured image appears on the home feed: a full-width hero, a smaller side image, or none. */
+  imageLayout?: "hero" | "side" | "none";
   body: ArticleBlock[];
   relatedSlugs?: string[];
 };
