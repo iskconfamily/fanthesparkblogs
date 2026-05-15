@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Facebook, Youtube, Instagram, Rss } from "lucide-react";
 import { getAllPosts, getAllTags } from "@/content/queries";
 import { tagSlug } from "@/content/posts";
 import postKhatvanga from "@/assets/post-khatvanga.jpg";
