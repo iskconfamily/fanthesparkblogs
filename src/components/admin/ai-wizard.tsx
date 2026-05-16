@@ -16,28 +16,23 @@ export type AiDraft = {
   image_prompts: { prompt: string; alt?: string; url?: string }[];
 };
 
-type SourceType = "topic" | "url" | "file" | "notes";
+type SourceType = "url" | "file" | "notes";
 
 export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
   const extract = useServerFn(extractFromUrl);
   const generate = useServerFn(generateBlogFromSource);
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [sourceType, setSourceType] = useState<SourceType>("topic");
-  const [topic, setTopic] = useState("");
+  const [step, setStep] = useState<1 | 2>(1);
+  const [sourceType, setSourceType] = useState<SourceType>("notes");
   const [url, setUrl] = useState("");
   const [notes, setNotes] = useState("");
   const [fileText, setFileText] = useState("");
   const [fileName, setFileName] = useState("");
 
-  const [tone, setTone] = useState("reflective, literary, spiritual");
-  const [length, setLength] = useState<"short" | "medium" | "long">("medium");
-
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const sourceText = (() => {
-    if (sourceType === "topic") return topic;
     if (sourceType === "url") return url;
     if (sourceType === "notes") return notes;
     return fileText;
@@ -66,25 +61,17 @@ export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
       if (sourceType === "url") {
         setBusy("Fetching article…");
         const ex = await extract({ data: { url } });
-        finalText = `${ex.title ? `Original title: ${ex.title}\n\n` : ""}${ex.text}`;
+        finalText = `${ex.title ? `${ex.title}\n\n` : ""}${ex.text}`;
         label = `URL: ${url}`;
       } else if (sourceType === "file") {
         label = `File: ${fileName}`;
-      } else if (sourceType === "topic") {
-        label = "Topic / instructions";
       } else {
         label = "Pasted notes";
       }
 
-      setBusy("Drafting with AI…");
+      setBusy("Formatting (preserving exact wording)…");
       const draft = await generate({
-        data: {
-          sourceType,
-          sourceText: finalText,
-          sourceLabel: label,
-          tone,
-          length,
-        },
+        data: { sourceType, sourceText: finalText, sourceLabel: label },
       });
       onApply(draft);
       setBusy(null);
@@ -105,12 +92,12 @@ export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
             AI Blog Assistant
           </h2>
           <p className="text-xs text-muted-foreground mt-1">
-            Step {step} of 3 ·{" "}
-            {step === 1 ? "Source" : step === 2 ? "Style" : "Generate"}
+            Step {step} of 2 · {step === 1 ? "Source" : "Format"} · Wording is
+            preserved exactly — AI only formats and generates metadata.
           </p>
         </div>
         <div className="flex items-center gap-1">
-          {[1, 2, 3].map((n) => (
+          {[1, 2].map((n) => (
             <span
               key={n}
               className={`h-1.5 w-8 rounded ${step >= n ? "bg-primary" : "bg-border"}`}
@@ -121,13 +108,12 @@ export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
 
       {step === 1 && (
         <div className="space-y-3">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {(
               [
-                ["topic", "Topic"],
                 ["url", "URL"],
                 ["file", "Upload file"],
-                ["notes", "Paste notes"],
+                ["notes", "Paste text"],
               ] as const
             ).map(([k, label]) => (
               <button
@@ -145,20 +131,12 @@ export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
             ))}
           </div>
 
-          {sourceType === "topic" && (
-            <Textarea
-              rows={5}
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g. The bhakti meaning of patience in daily work — draw on Bhagavatam if useful."
-            />
-          )}
           {sourceType === "url" && (
             <Input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://example.com/article-to-adapt"
+              placeholder="https://example.com/article-to-import"
             />
           )}
           {sourceType === "file" && (
@@ -175,26 +153,23 @@ export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
                 </p>
               )}
               <p className="text-xs text-muted-foreground">
-                Plain text / markdown / HTML. For PDFs, copy the text and use “Paste notes”.
+                Plain text / markdown / HTML. For PDF or Word, open the file,
+                copy the text, and paste it into the “Paste text” tab.
               </p>
             </div>
           )}
           {sourceType === "notes" && (
             <Textarea
-              rows={8}
+              rows={10}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Paste raw notes, quotes, an outline, journal fragments…"
+              placeholder="Paste the full blog text here. Every word will be preserved exactly."
             />
           )}
 
           <div className="flex justify-end">
-            <Button
-              size="sm"
-              onClick={() => setStep(2)}
-              disabled={!canContinue}
-            >
-              Next: Style
+            <Button size="sm" onClick={() => setStep(2)} disabled={!canContinue}>
+              Next: Format
             </Button>
           </div>
         </div>
@@ -202,66 +177,35 @@ export function AiWizard({ onApply }: { onApply: (draft: AiDraft) => void }) {
 
       {step === 2 && (
         <div className="space-y-3">
-          <div>
-            <label className="text-xs uppercase tracking-wide text-muted-foreground">
-              Tone
-            </label>
-            <Input value={tone} onChange={(e) => setTone(e.target.value)} />
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Style is matched to existing site voice automatically.
+          <div className="rounded border border-border bg-background p-3 text-sm space-y-2">
+            <p className="font-medium">The assistant will only:</p>
+            <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
+              <li>Add paragraph spacing and section headings where natural</li>
+              <li>Mark quoted passages as blockquotes</li>
+              <li>Suggest inline image placements (you generate the images)</li>
+              <li>Generate title, excerpt, tags, category, SEO meta, featured image prompt</li>
+            </ul>
+            <p className="font-medium pt-1">It will NOT:</p>
+            <ul className="list-disc pl-5 text-muted-foreground text-xs space-y-1">
+              <li>Rewrite, paraphrase, summarize, shorten, expand, or change tone</li>
+              <li>Add or remove sentences from the body</li>
+            </ul>
+            <p className="text-xs text-muted-foreground pt-1">
+              Saved as <strong>draft</strong> — nothing is published.
             </p>
           </div>
-          <div>
-            <label className="text-xs uppercase tracking-wide text-muted-foreground">
-              Length
-            </label>
-            <div className="grid grid-cols-3 gap-2 mt-1">
-              {(["short", "medium", "long"] as const).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => setLength(l)}
-                  className={`text-sm py-2 rounded border capitalize ${
-                    length === l
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-background text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex justify-between">
-            <Button size="sm" variant="outline" onClick={() => setStep(1)}>
-              Back
-            </Button>
-            <Button size="sm" onClick={() => setStep(3)}>
-              Next: Generate
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            AI will draft a full post: title, excerpt, body, category, tags, SEO meta,
-            and image prompts. Saved as <strong>draft</strong> — nothing is published.
-          </p>
           <div className="flex justify-between items-center">
-            <Button size="sm" variant="outline" onClick={() => setStep(2)} disabled={!!busy}>
+            <Button size="sm" variant="outline" onClick={() => setStep(1)} disabled={!!busy}>
               Back
             </Button>
             <Button size="sm" onClick={runGenerate} disabled={!!busy || !canContinue}>
-              {busy ?? "Generate Blog Draft"}
+              {busy ?? "Format & Generate Metadata"}
             </Button>
           </div>
         </div>
       )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
-      {busy && step !== 3 && <p className="text-sm text-muted-foreground">{busy}</p>}
     </div>
   );
 }
