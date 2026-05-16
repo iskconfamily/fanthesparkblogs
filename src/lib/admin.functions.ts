@@ -323,8 +323,6 @@ export const generateBlogFromSource = createServerFn({ method: "POST" })
     return runFullBlogGeneration({
       sourceText: data.sourceText,
       sourceLabel: data.sourceLabel ?? data.sourceType,
-      tone: data.tone,
-      length: data.length,
     });
   });
 
