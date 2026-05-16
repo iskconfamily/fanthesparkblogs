@@ -22,13 +22,22 @@ function blocksToMarkdown(blocks: ArticleBlock[]): string {
     .join("\n\n");
 }
 
+function absUrl(src: string): string {
+  if (/^https?:\/\//.test(src)) return src;
+  if (typeof window !== "undefined") return new URL(src, window.location.origin).toString();
+  return src;
+}
+
 function staticToSavePayload(p: Post) {
+  const body = p.body.map((b) =>
+    b.type === "figure" ? { ...b, src: absUrl(b.src) } : b,
+  );
   return {
     title: p.title,
     slug: p.slug,
     excerpt: p.excerpt ?? "",
-    content: blocksToMarkdown(p.body),
-    featured_image: typeof p.featuredImage.src === "string" ? p.featuredImage.src : "",
+    content: blocksToMarkdown(body),
+    featured_image: absUrl(p.featuredImage.src),
     category: p.category ?? "",
     author: p.author ?? "",
     status: "published" as const,
