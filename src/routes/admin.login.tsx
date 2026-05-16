@@ -1,16 +1,19 @@
 import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { hasAnyAdmin } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/login")({
+  validateSearch: z.object({ redirect: z.string().optional() }),
   component: LoginPage,
 });
 
 function LoginPage() {
   const router = useRouter();
+  const { redirect } = Route.useSearch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,7 +34,11 @@ function LoginPage() {
       setError(error.message);
       return;
     }
-    router.navigate({ to: "/admin" });
+    if (redirect && redirect.startsWith("/")) {
+      window.location.href = redirect;
+    } else {
+      router.navigate({ to: "/admin" });
+    }
   };
 
   return (

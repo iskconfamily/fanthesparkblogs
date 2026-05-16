@@ -1,6 +1,7 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { ArticleBody } from "@/components/article-body";
 import { Byline } from "@/components/byline";
@@ -9,28 +10,43 @@ import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin, getPreviewPostBySlug } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/preview/$slug")({
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) throw redirect({ to: "/admin/login" });
-    try {
-      const { isAdmin } = await checkIsAdmin();
-      if (!isAdmin) throw redirect({ to: "/admin/login" });
-    } catch {
-      throw redirect({ to: "/admin/login" });
-    }
-  },
   component: PreviewPage,
 });
 
 function PreviewPage() {
   const { slug } = Route.useParams();
+  const router = useRouter();
+  const [authed, setAuthed] = useState<"checking" | "ok" | "no">("checking");
   const fetchPost = useServerFn(getPreviewPostBySlug);
+  const checkAdmin = useServerFn(checkIsAdmin);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        router.navigate({ to: "/admin/login", search: { redirect: `/preview/${slug}` } });
+        return;
+      }
+      try {
+        const { isAdmin } = await checkAdmin();
+        if (!isAdmin) {
+          router.navigate({ to: "/admin/login", search: { redirect: `/preview/${slug}` } });
+          return;
+        }
+        setAuthed("ok");
+      } catch {
+        router.navigate({ to: "/admin/login", search: { redirect: `/preview/${slug}` } });
+      }
+    })();
+  }, [slug, router, checkAdmin]);
+
   const { data: post, isLoading } = useQuery({
     queryKey: ["preview-post", slug],
     queryFn: () => fetchPost({ data: { slug } }),
+    enabled: authed === "ok",
   });
 
-  if (isLoading) {
+  if (authed !== "ok" || isLoading) {
     return <SiteLayout><p className="text-muted-foreground">Loading preview…</p></SiteLayout>;
   }
   if (!post) {
