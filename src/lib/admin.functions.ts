@@ -171,65 +171,52 @@ export const deletePost = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ---- AI: legacy quick-draft (kept for back-compat) ----
-export const generateDraft = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i) => z.object({ prompt: z.string().min(3).max(4000) }).parse(i))
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
-    return runFullBlogGeneration({
-      sourceText: data.prompt,
-      sourceLabel: "Topic/notes",
-      tone: "reflective",
-      length: "medium",
-    });
-  });
+// ---- AI: Format-only blog assistant ----
+// CRITICAL: This assistant must NEVER rewrite, paraphrase, summarize,
+// shorten, expand, or change the wording of the source. It only:
+//   - extracts the source text exactly
+//   - adds formatting (headings, blank-line paragraphs, "> " quotes)
+//   - inserts image placement suggestions as ![alt](IMAGE:prompt)
+//   - returns metadata (title, excerpt, tags, category, SEO, image prompts)
+const FORMATTER_BRIEF = `You are a STRICT FORMATTER for a contemplative bhakti / wisdom blog.
 
-// ---- AI: Full blog wizard ----
-const STYLE_BRIEF = `You write for "sravaṇādi jala" — a contemplative bhakti / wisdom blog by Vaisesika Dasa.
-Voice: warm, literary, unhurried. Short paragraphs. Concrete images. Light, occasional Sanskrit when natural (with English meaning).
-Do NOT preach; invite. Avoid clichés ("in today's world…"), avoid hype, avoid bullet-point listicles unless asked.
-Structure long pieces with a few "## " subheadings, and use "> " for an occasional pulled quote.
-You may suggest where an inline image would help by inserting a line on its own:
-![short alt text](IMAGE:short visual prompt)
-Use this exact "IMAGE:" placeholder; the editor will replace it with a real URL later.`;
+ABSOLUTE RULES — violating any of these is a failure:
+1. The "content" you return MUST contain the original source text verbatim. Do NOT rewrite, paraphrase, summarize, shorten, expand, translate, "improve", or change wording in any way.
+2. Do NOT add new sentences, transitions, introductions, or conclusions. Do NOT remove sentences.
+3. Every word of the user's prose must appear, in the original order, spelled exactly as given.
+4. You MAY only:
+   - split run-on text into paragraphs with blank lines
+   - insert "## Heading" lines BETWEEN paragraphs where a natural section break exists (headings are NEW lines you add — they are the only new text allowed in the body, and must be short, neutral, drawn from the content's own themes)
+   - convert clearly-quoted passages to "> " blockquote lines (without changing the quoted words)
+   - fix obvious whitespace / smart-quote / line-break artifacts from copy-paste
+   - insert image placement suggestions on their own line: ![short alt](IMAGE:short visual prompt)
+5. Do NOT change punctuation or capitalization of the author's words. Do NOT "clean up" their phrasing.
+6. The excerpt, SEO description, tags, category, and image prompts ARE allowed to be your own writing (they describe the piece, they are not the piece).
+7. The title may be drawn from the source if one is obvious; otherwise propose a short neutral title that uses the source's own vocabulary.
+
+If the source is very short, return it as-is with no added headings.`;
 
 const WizardSchema = z.object({
-  sourceType: z.enum(["topic", "url", "file", "notes"]),
+  sourceType: z.enum(["url", "file", "notes"]),
   sourceText: z.string().min(3).max(60000),
   sourceLabel: z.string().max(500).optional(),
-  tone: z.string().max(100).default("reflective"),
-  length: z.enum(["short", "medium", "long"]).default("medium"),
 });
 
 async function runFullBlogGeneration(args: {
   sourceText: string;
   sourceLabel?: string;
-  tone: string;
-  length: "short" | "medium" | "long";
 }) {
   const apiKey = process.env.LOVABLE_API_KEY;
   if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
 
-  const lengthGuide =
-    args.length === "short"
-      ? "350–550 words, 3–5 short paragraphs, no subheadings."
-      : args.length === "long"
-        ? "1100–1600 words, 3–5 '## ' subheadings, 1–2 pulled quotes."
-        : "650–900 words, optionally 1–2 '## ' subheadings.";
+  const userPrompt = `Source label: ${args.sourceLabel ?? "pasted text"}
 
-  const userPrompt = `Source type: ${args.sourceLabel ?? "notes"}
-Tone: ${args.tone}
-Target length: ${lengthGuide}
-
-Source material:
+Source material (preserve every word EXACTLY):
 """
 ${args.sourceText.slice(0, 50000)}
 """
 
-Write a complete blog post in this site's voice. Then return the structured fields.
-Suggest 2–4 inline image placements using the "IMAGE:" placeholder syntax described.
-Suggest one strong featured image prompt suitable for a literary blog hero.`;
+Task: Return the source content reformatted for web display. Preserve every word of the source verbatim — only add paragraph breaks, optional "## " section headings between paragraphs, "> " for quoted passages, and 2–4 inline image placement suggestions using ![alt](IMAGE:visual prompt) on their own line. Then return metadata (title, excerpt, category, tags, SEO title, SEO description, featured image prompt).`;
 
   const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -237,33 +224,30 @@ Suggest one strong featured image prompt suitable for a literary blog hero.`;
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { role: "system", content: STYLE_BRIEF },
+        { role: "system", content: FORMATTER_BRIEF },
         { role: "user", content: userPrompt },
       ],
       tools: [
         {
           type: "function",
           function: {
-            name: "draft_blog",
-            description: "Return the full drafted blog post with metadata.",
+            name: "format_blog",
+            description:
+              "Return the source content reformatted (verbatim wording preserved) plus metadata.",
             parameters: {
               type: "object",
               properties: {
-                title: { type: "string" },
-                excerpt: { type: "string", description: "1–2 sentence summary." },
+                title: { type: "string", description: "Short title — drawn from source if obvious." },
+                excerpt: { type: "string", description: "1–2 sentence summary written by you (this is metadata, not body)." },
                 content: {
                   type: "string",
                   description:
-                    "Full body. Paragraphs separated by blank lines. '## ' for subheadings, '> ' for quotes, inline images as ![alt](IMAGE:visual prompt).",
+                    "The source text, VERBATIM, only with added paragraph breaks, optional '## ' headings between paragraphs, '> ' for quotes, and ![alt](IMAGE:prompt) image placement lines. No rewriting.",
                 },
                 category: { type: "string", description: "One short category." },
-                tags: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "3–6 short tags.",
-                },
-                seo_title: { type: "string", description: "≤60 chars, includes primary keyword." },
-                seo_description: { type: "string", description: "≤155 chars compelling meta description." },
+                tags: { type: "array", items: { type: "string" }, description: "3–6 short tags." },
+                seo_title: { type: "string", description: "≤60 chars." },
+                seo_description: { type: "string", description: "≤155 chars." },
                 featured_image_prompt: {
                   type: "string",
                   description: "A single rich visual prompt for the hero image — atmospheric, no text in image.",
@@ -284,7 +268,7 @@ Suggest one strong featured image prompt suitable for a literary blog hero.`;
           },
         },
       ],
-      tool_choice: { type: "function", function: { name: "draft_blog" } },
+      tool_choice: { type: "function", function: { name: "format_blog" } },
     }),
   });
 
