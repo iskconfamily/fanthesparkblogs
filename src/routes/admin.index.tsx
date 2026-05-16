@@ -58,15 +58,54 @@ function AdminList() {
     queryFn: () => fetchPosts(),
   });
 
-  const dbSlugs = useMemo(() => new Set(posts.map((p) => p.slug)), [posts]);
+  const dbPostsBySlug = useMemo(() => new Map(posts.map((p) => [p.slug, p])), [posts]);
   const notImported = useMemo(
-    () => staticPosts.filter((p) => !dbSlugs.has(p.slug)),
-    [dbSlugs],
+    () => staticPosts.filter((p) => !dbPostsBySlug.has(p.slug)),
+    [dbPostsBySlug],
   );
+  const allPosts = useMemo(() => {
+    const seen = new Set<string>();
 
-  const importOne = async (p: Post) => {
-    await save({ data: staticToSavePayload(p) });
-  };
+    const merged = staticPosts.map((p) => {
+      const dbPost = dbPostsBySlug.get(p.slug);
+      seen.add(p.slug);
+
+      if (dbPost) {
+        return {
+          kind: "db" as const,
+          slug: dbPost.slug,
+          sortDate: dbPost.updated_at ?? dbPost.created_at ?? null,
+          post: dbPost,
+        };
+      }
+
+      return {
+        kind: "static" as const,
+        slug: p.slug,
+        sortDate: p.date,
+        post: p,
+      };
+    });
+
+    for (const p of posts) {
+      if (!seen.has(p.slug)) {
+        merged.push({
+          kind: "db" as const,
+          slug: p.slug,
+          sortDate: p.updated_at ?? p.created_at ?? null,
+          post: p,
+        });
+      }
+    }
+
+    return merged.sort((a, b) => {
+      const aTime = a.sortDate ? new Date(a.sortDate).getTime() : 0;
+      const bTime = b.sortDate ? new Date(b.sortDate).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [dbPostsBySlug, posts]);
+
+  const importOne = async (p: Post) => save({ data: staticToSavePayload(p) });
 
   const importAll = async () => {
     setImporting(true);
@@ -107,100 +146,98 @@ function AdminList() {
         <p className="text-muted-foreground">Loading…</p>
       ) : (
         <>
-          {posts.length === 0 ? (
-            <p className="text-muted-foreground mb-8">No posts in the database yet.</p>
+          {allPosts.length === 0 ? (
+            <p className="text-muted-foreground mb-8">No posts found yet.</p>
           ) : (
             <ul className="divide-y divide-border border border-border rounded-md mb-10">
-              {posts.map((p) => (
-                <li key={p.id} className="p-4 flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span
-                        className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
-                          p.status === "published"
-                            ? "bg-primary/15 text-primary"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{p.category || "—"}</span>
-                    </div>
-                    <div className="font-medium truncate">{p.title}</div>
-                    <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <a
-                      href={`/preview/${p.slug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm underline text-muted-foreground"
-                    >
-                      Preview
-                    </a>
-                    <Link to="/admin/edit/$id" params={{ id: p.id }}>
-                      <Button variant="outline" size="sm">Edit</Button>
-                    </Link>
-                    {p.status === "published" ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          await setStatus({ data: { id: p.id, status: "draft" } });
-                          refetch();
-                          router.invalidate();
-                        }}
-                      >
-                        Unpublish
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          await setStatus({ data: { id: p.id, status: "published" } });
-                          refetch();
-                          router.invalidate();
-                        }}
-                      >
-                        Publish
-                      </Button>
-                    )}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={async () => {
-                        if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
-                        await del({ data: { id: p.id } });
-                        refetch();
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+              {allPosts.map((entry) => {
+                if (entry.kind === "db") {
+                  const p = entry.post;
+                  return (
+                    <li key={p.id} className="p-4 flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span
+                            className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded ${
+                              p.status === "published"
+                                ? "bg-primary/15 text-primary"
+                                : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                          <span className="text-xs text-muted-foreground">{p.category || "—"}</span>
+                        </div>
+                        <div className="font-medium truncate">{p.title}</div>
+                        <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                        <a
+                          href={`/preview/${p.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm underline text-muted-foreground"
+                        >
+                          Preview
+                        </a>
+                        <Link to="/admin/edit/$id" params={{ id: p.id }}>
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </Link>
+                        {p.status === "published" ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              await setStatus({ data: { id: p.id, status: "draft" } });
+                              refetch();
+                              router.invalidate();
+                            }}
+                          >
+                            Unpublish
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={async () => {
+                              await setStatus({ data: { id: p.id, status: "published" } });
+                              refetch();
+                              router.invalidate();
+                            }}
+                          >
+                            Publish
+                          </Button>
+                        )}
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={async () => {
+                            if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
+                            await del({ data: { id: p.id } });
+                            refetch();
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </li>
+                  );
+                }
 
-          {notImported.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl italic" style={{ fontFamily: "var(--font-serif-display)" }}>
-                  Existing blogs (not yet editable)
-                </h2>
-                <span className="text-xs text-muted-foreground">
-                  Import to edit, unpublish, or delete
-                </span>
-              </div>
-              <ul className="divide-y divide-border border border-dashed border-border rounded-md">
-                {notImported.map((p) => (
+                const p = entry.post;
+
+                return (
                   <li key={p.slug} className="p-4 flex items-center justify-between gap-4">
                     <div className="min-w-0">
-                      <div className="text-xs text-muted-foreground mb-1">{p.category}</div>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                          site post
+                        </span>
+                        <span className="text-xs text-muted-foreground">{p.category || "—"}</span>
+                      </div>
                       <div className="font-medium truncate">{p.title}</div>
                       <div className="text-xs text-muted-foreground truncate">/{p.slug}</div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                       <a
                         href={`/post/${p.slug}`}
                         target="_blank"
@@ -214,21 +251,25 @@ function AdminList() {
                         variant="outline"
                         onClick={async () => {
                           try {
-                            await importOne(p);
+                            const imported = await importOne(p);
                             toast.success("Imported — now editable");
                             refetch();
+                            await router.navigate({
+                              to: "/admin/edit/$id",
+                              params: { id: imported.id },
+                            });
                           } catch (e) {
                             toast.error(e instanceof Error ? e.message : "Import failed");
                           }
                         }}
                       >
-                        Import to edit
+                        Import & edit
                       </Button>
                     </div>
                   </li>
-                ))}
-              </ul>
-            </div>
+                );
+              })}
+            </ul>
           )}
         </>
       )}
