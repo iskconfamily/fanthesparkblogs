@@ -1,51 +1,43 @@
-# Admin Blog Management System
+## Final plan — Fan The Spark rebrand (minimal)
 
-## Overview
-Add a Supabase-backed blog CMS so an admin can write, AI-draft, preview, publish, and unpublish posts. Public site reads from the database (published only); existing static `src/content/posts.ts` posts remain as a fallback/seed.
+### 1. Add logo asset
+- Copy uploaded FTS logo stamp → `src/assets/fts-logo.png`
+- Copy same image → `public/favicon.png`
 
-## 1. Enable Lovable Cloud
-Provision Supabase (database + auth + storage for featured images).
+### 2. Header — `src/components/site-header.tsx`
+- Remove "sravaṇādi jala" wordmark and the "sprinkling the water…" tagline
+- Add centered FTS logo stamp (~96px) wrapped in `<Link to="/">`
+- Below it: **"Fan The Spark"** in **Inter Tight**, weight 600, **upright** (not italic), tracking ~-0.02em, same display size as before (`text-5xl md:text-6xl`)
 
-## 2. Database (migration)
-- `blog_posts` table with: `id (uuid pk)`, `title`, `slug (unique)`, `excerpt`, `content (text)`, `featured_image (text url)`, `category`, `author`, `status` (enum `draft`/`published`), `created_at`, `updated_at`, `published_at`. Trigger updates `updated_at`.
-- `app_role` enum (`admin`, `user`) + `user_roles` table (separate from profiles per security rules).
-- `has_role(uuid, app_role)` SECURITY DEFINER function.
-- Storage bucket `blog-images` (public read).
+### 3. Footer — `src/components/site-footer.tsx`
+- `© … sravaṇādi jala` → `© … Fan The Spark`
+- Keep existing italic footer line as-is
 
-## 3. RLS policies
-- `blog_posts`:
-  - SELECT for `anon` + `authenticated`: only `status = 'published'`.
-  - SELECT/INSERT/UPDATE/DELETE for admins (via `has_role`).
-- `user_roles`: only admins can manage; users can read their own.
-- Storage: public read on `blog-images`, admin-only write.
+### 4. Color + font tokens — `src/styles.css`
+- Add `--font-display-sans: "Inter Tight", system-ui, sans-serif;` (used by header title only — article headings keep Cormorant Garamond)
+- Change `--primary` from muted burgundy → **Sandstone `#f2673a`** (in `oklch`). Cascades to links, drop caps, buttons, ring, sidebar-primary so the site visually ties to the logo.
 
-## 4. Auth
-- Email/password sign-in at `/admin/login` (auto-confirm email enabled).
-- `/_authenticated` style guard on `/admin/*` — redirect to login if not signed in or not admin.
-- First admin: bootstrap by inserting a row in `user_roles` after the user signs up (documented; user can do via SQL or we provide a one-time seed flow).
+### 5. Root meta + fonts — `src/routes/__root.tsx`
+- Add **Inter Tight** to the Google Fonts URL (keep Cormorant Garamond, Lora, Libre Caslon Text)
+- Add `<link rel="icon" href="/favicon.png">`
 
-## 5. Routes & UI
-- `/admin/login` — sign in form.
-- `/admin` — list posts (drafts + published) with status badges, edit/delete/publish/unpublish actions, "New post" button.
-- `/admin/new` and `/admin/edit/$id` — editor with:
-  - Title, slug (auto from title, editable), excerpt, category, author, content (textarea / markdown), featured image upload.
-  - **AI Generate** button: prompt for topic/notes → calls server fn → fills title/excerpt/content via Lovable AI Gateway (`google/gemini-2.5-flash`).
-  - **Preview** button → opens `/preview/$slug?token=...` in new tab (works for drafts too, admin-only via auth check).
-  - **Save Draft**, **Publish**, **Unpublish** buttons.
+### 6. Per-route copy renames (all "sravaṇādi jala" → "Fan The Spark")
+- `src/routes/index.tsx` — head title + og:title/og:description
+- `src/routes/newsletter.tsx` — head title currently says "The Marginalia"; update to "The Sunday Letter — Fan The Spark"
+- `src/routes/about.tsx`, `src/routes/archive.tsx`, `src/routes/tag.$slug.tsx`, `src/routes/post.$slug.tsx`, `src/routes/surprise.tsx` — scan for any "sravaṇādi jala" / "Marginalia" / "Marginalian" strings in head meta and visible copy; rename to **Fan The Spark**
+- `src/components/inline-newsletter.tsx`, `src/components/sidebar.tsx`, `src/components/post-preview.tsx`, `src/components/article-body.tsx`, `src/components/byline.tsx`, `src/components/related-articles.tsx` — same scan + rename
+- `src/content/posts.ts`, `src/content/queries.ts` — same scan (only string literals referring to the site name, not post content)
 
-## 6. Public site integration
-- New server fn `getPublishedPosts()` / `getPublishedPostBySlug()` querying Supabase.
-- Homepage, category (`/tag/$slug`), post detail (`/post/$slug`), archive, RSS, sidebar tiles → merge DB published posts with existing static posts (DB takes precedence by slug).
-- Drafts never appear in any public list.
+I'll do a project-wide grep for `sravaṇādi jala`, `sravanadi jala`, `Marginalia`, `Marginalian` and update every match to **Fan The Spark** (preserving case).
 
-## 7. Preview mode
-- `/preview/$slug` route — requires admin session; fetches post regardless of status; renders with same template as `/post/$slug` plus a "DRAFT PREVIEW" banner.
+### Out of scope
+- No layout, spacing, or component structure changes
+- No changes to body font (Lora) or meta font (Libre Caslon Text)
+- No changes to background, foreground, border, or muted color tokens — only `--primary` shifts
+- No RSS / newsletter integration work
 
-## Technical notes
-- Server functions in `src/lib/admin.functions.ts` use `requireSupabaseAuth` + `has_role` check; AI generation uses `LOVABLE_API_KEY`.
-- Wire `attachSupabaseAuth` in `src/start.ts`.
-- Add Bearer-attaching middleware so server fns receive the user token.
-- RSS feed route updated to include DB published posts.
-
-## Out of scope
-- Multi-author workflows, scheduled publishing, revisions/history, comments.
+### Files touched
+- `src/assets/fts-logo.png` (new), `public/favicon.png` (new)
+- `src/components/site-header.tsx`, `src/components/site-footer.tsx`
+- `src/styles.css`
+- `src/routes/__root.tsx` + any route/component files containing the old name (final list determined by grep at implementation time)
