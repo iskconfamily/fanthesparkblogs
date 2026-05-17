@@ -16,8 +16,14 @@ export function SiteHeader() {
             className="h-16 w-16 object-contain"
           />
           <h1
-            className="text-4xl md:text-5xl tracking-tight text-foreground"
-            style={{ fontFamily: "var(--font-serif-display)", fontWeight: 500 }}
+            className="text-3xl md:text-4xl"
+            style={{
+              fontFamily: "var(--font-serif-display)",
+              fontWeight: 600,
+              fontVariant: "small-caps",
+              letterSpacing: "0.08em",
+              color: "var(--brand-olive)",
+            }}
           >
             Fan The Spark
           </h1>
