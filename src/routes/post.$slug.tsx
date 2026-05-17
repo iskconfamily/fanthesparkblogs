@@ -11,10 +11,10 @@ import type { Post } from "@/content/posts";
 export const Route = createFileRoute("/post/$slug")({
   head: ({ params }) => {
     const post = getPostBySlug(params.slug);
-    if (!post) return { meta: [{ title: "Essay — sravaṇādi jala" }] };
+    if (!post) return { meta: [{ title: "Essay — Fan The Spark" }] };
     return {
       meta: [
-        { title: `${post.title} — sravaṇādi jala` },
+        { title: `${post.title} — Fan The Spark` },
         { name: "description", content: post.excerpt },
         { property: "og:title", content: post.title },
         { property: "og:description", content: post.excerpt },
