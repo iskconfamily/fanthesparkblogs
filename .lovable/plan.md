@@ -1,30 +1,15 @@
-## Header refinement — horizontal logo + wordmark lockup
+## Header title — small-caps serif in olive
 
-### Problem
-Current header stacks logo above "Fan The Spark" in bold Inter Tight. The heavy sans-serif title clashes with the literary serif feel of the rest of the site (article titles in Cormorant Garamond italic, Lora body).
+### Change — `src/components/site-header.tsx` (h1 only)
+- Text stays "Fan The Spark"
+- Add `font-variant: small-caps` so F/T/S render full-height and the rest as small caps (matches reference)
+- Font: Cormorant Garamond (`var(--font-serif-display)`), weight **600**
+- Size: `text-3xl md:text-4xl` (small caps read larger, so step down one)
+- Letter-spacing: `0.08em`
+- Color: **Olive Green `#7e6c2a`**
 
-### Change — `src/components/site-header.tsx`
-Replace the stacked, centered, sans-serif layout with a **horizontal lockup**:
+### Change — `src/styles.css`
+- Add token `--brand-olive: oklch(0.52 0.07 95);` (≈ `#7e6c2a`)
 
-- Container: flex row, items-center, justify-center, gap-4
-- Logo: ~60px (h-15 w-15), unchanged image
-- Title beside logo: **"Fan The Spark"** in
-  - `var(--font-serif-display)` (Cormorant Garamond)
-  - `fontWeight: 500`, upright (not italic)
-  - `text-4xl md:text-5xl`
-  - default foreground color (deep charcoal) — lets the orange logo provide the brand pop without competing
-  - tracking-tight
-
-Wrap in `<Link to="/">` exactly as today.
-
-### Keep as-is
-- Border, padding (`pt-12 pb-6`), max-width
-- No tagline (already removed)
-- Sandstone primary color and all other tokens
-- `--font-display-sans` token can stay in styles.css (unused, harmless) or be removed — minor cleanup
-
-### Files touched
-- `src/components/site-header.tsx` (only)
-
-### Also worth doing in the same pass (small fix)
-The runtime hydration warning is caused by a browser extension (LastPass) injecting into the newsletter form input — not actionable in code. Ignore.
+### Out of scope
+Logo, layout, link wrapper, padding, body/article/footer styles, primary color — all unchanged.
