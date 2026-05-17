@@ -40,11 +40,11 @@
   --radius: 0.125rem;
   /* Warm aged-paper palette */
   --background: oklch(0.985 0.006 85);        /* near-white warm paper */
-  --foreground: oklch(0.235 0.012 50);        /* #2b2520 deep charcoal */
+  --foreground: oklch(0.42 0.07 95);          /* #7e6c2a olive green */
   --card: oklch(0.99 0.004 85);
-  --card-foreground: oklch(0.235 0.012 50);
+  --card-foreground: oklch(0.42 0.07 95);
   --popover: oklch(0.965 0.018 82);
-  --popover-foreground: oklch(0.235 0.012 50);
+  --popover-foreground: oklch(0.42 0.07 95);
   --primary: oklch(0.687 0.176 42);           /* #f2673a Sandstone */
   --primary-foreground: oklch(0.965 0.018 82);
   --secondary: oklch(0.91 0.022 80);
