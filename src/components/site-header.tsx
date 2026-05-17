@@ -25,7 +25,7 @@ export function SiteHeader() {
               color: "var(--brand-olive)",
             }}
           >
-            Fan The Spark
+            Fan The Spark Blogs
           </h1>
         </Link>
       </div>
