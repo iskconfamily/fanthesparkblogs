@@ -32,6 +32,7 @@
   --font-serif-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --font-serif-body: "Lora", Georgia, "Times New Roman", serif;
   --font-meta: "Libre Caslon Text", Georgia, serif;
+  --font-display-sans: "Inter Tight", system-ui, -apple-system, sans-serif;
 }
 
 :root {
@@ -43,7 +44,7 @@
   --card-foreground: oklch(0.235 0.012 50);
   --popover: oklch(0.965 0.018 82);
   --popover-foreground: oklch(0.235 0.012 50);
-  --primary: oklch(0.45 0.13 28);             /* #8f3028 muted burgundy */
+  --primary: oklch(0.687 0.176 42);           /* #f2673a Sandstone */
   --primary-foreground: oklch(0.965 0.018 82);
   --secondary: oklch(0.91 0.022 80);
   --secondary-foreground: oklch(0.235 0.012 50);
@@ -55,15 +56,15 @@
   --destructive-foreground: oklch(0.965 0.018 82);
   --border: oklch(0.82 0.03 75);              /* soft tan */
   --input: oklch(0.82 0.03 75);
-  --ring: oklch(0.45 0.13 28);
+  --ring: oklch(0.687 0.176 42);
   --sidebar: oklch(0.952 0.022 80);
   --sidebar-foreground: oklch(0.235 0.012 50);
-  --sidebar-primary: oklch(0.45 0.13 28);
+  --sidebar-primary: oklch(0.687 0.176 42);
   --sidebar-primary-foreground: oklch(0.965 0.018 82);
   --sidebar-accent: oklch(0.91 0.022 80);
   --sidebar-accent-foreground: oklch(0.235 0.012 50);
   --sidebar-border: oklch(0.82 0.03 75);
-  --sidebar-ring: oklch(0.45 0.13 28);
+  --sidebar-ring: oklch(0.687 0.176 42);
 }
 
 @layer base {
