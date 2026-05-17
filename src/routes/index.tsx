@@ -10,9 +10,9 @@ import type { Post } from "@/content/posts";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "sravaṇādi jala — sprinkling the water of hearing & chanting" },
+      { title: "Fan The Spark — sprinkling the water of hearing & chanting" },
       { name: "description", content: "Quiet, long-form bhakti essays on hearing, chanting, and the practice of remembering Krishna." },
-      { property: "og:title", content: "sravaṇādi jala" },
+      { property: "og:title", content: "Fan The Spark" },
       { property: "og:description", content: "Sprinkling the water of hearing and chanting — long-form bhakti essays." },
     ],
   }),

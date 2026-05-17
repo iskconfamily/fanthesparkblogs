@@ -17,7 +17,7 @@ export function SiteFooter() {
           <Link to="/tag/$slug" params={{ slug: "bhakti-notes" }} style={{ borderBottom: "none" }}>Bhakti Notes</Link>
           <Link to="/tag/$slug" params={{ slug: "wisdom" }} style={{ borderBottom: "none" }}>Wisdom</Link>
         </p>
-        <p className="mt-6 text-xs">© {new Date().getFullYear()} sravaṇādi jala. All essays original.</p>
+        <p className="mt-6 text-xs">© {new Date().getFullYear()} Fan The Spark. All essays original.</p>
       </div>
     </footer>
   );

@@ -5,7 +5,7 @@ import { InlineNewsletter } from "@/components/inline-newsletter";
 export const Route = createFileRoute("/newsletter")({
   head: () => ({
     meta: [
-      { title: "The Sunday Letter — The Marginalia" },
+      { title: "The Sunday Letter — Fan The Spark" },
       { name: "description", content: "One quiet essay, every Sunday morning. Free, ad-free, unhurried." },
       { property: "og:title", content: "The Sunday Letter" },
       { property: "og:description", content: "Subscribe to the Sunday Letter." },

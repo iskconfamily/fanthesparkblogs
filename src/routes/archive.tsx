@@ -9,9 +9,9 @@ import type { Post } from "@/content/posts";
 export const Route = createFileRoute("/archive")({
   head: () => ({
     meta: [
-      { title: "Archive — sravaṇādi jala" },
+      { title: "Archive — Fan The Spark" },
       { name: "description", content: "The full chronological archive of essays." },
-      { property: "og:title", content: "Archive — sravaṇādi jala" },
+      { property: "og:title", content: "Archive — Fan The Spark" },
       { property: "og:description", content: "Every essay, in order of arrival." },
     ],
   }),

@@ -9,9 +9,9 @@ export const Route = createFileRoute("/tag/$slug")({
     const label = tagFromSlug(params.slug) ?? params.slug;
     return {
       meta: [
-        { title: `${label} — sravaṇādi jala` },
+        { title: `${label} — Fan The Spark` },
         { name: "description", content: `Essays gathered under ${label}.` },
-        { property: "og:title", content: `${label} — sravaṇādi jala` },
+        { property: "og:title", content: `${label} — Fan The Spark` },
         { property: "og:description", content: `A small archive of essays on ${label.toLowerCase()}.` },
       ],
     };
