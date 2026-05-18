@@ -97,15 +97,18 @@ const FONT_BODY = "'Libre Baskerville', Georgia, 'Times New Roman', serif";
 const FONT_META = "'Libre Caslon Text', Georgia, serif";
 
 type FigureLayout = "hero" | "full" | "side-right" | "side-left" | "inline-small";
+type GalleryImg = { src: string; alt: string; caption?: string };
 type ContentBlock =
   | { type: "p"; text: string }
-  | { type: "h2"; text: string }
+  | { type: "h2"; text: string; level: 2 | 3 }
   | { type: "quote"; text: string; cite?: string }
   | { type: "pull-quote"; text: string; cite?: string }
   | { type: "figure"; src: string; alt: string; layout: FigureLayout; caption?: string }
   | { type: "image-text"; src: string; alt: string; text: string; imageSide: "left" | "right"; caption?: string }
+  | { type: "gallery"; images: GalleryImg[]; columns: 2 | 3 }
   | { type: "divider" }
-  | { type: "callout"; text: string };
+  | { type: "callout"; text: string; tone: "note" | "warning" }
+  | { type: "newsletter-cta" };
 
 function parseContentForEmail(content: string | null): ContentBlock[] {
   if (!content) return [];
@@ -114,7 +117,8 @@ function parseContentForEmail(content: string | null): ContentBlock[] {
     .map((c) => c.trim())
     .filter(Boolean)
     .map((chunk): ContentBlock => {
-      if (chunk.startsWith("## ")) return { type: "h2", text: chunk.slice(3).trim() };
+      if (chunk.startsWith("## ")) return { type: "h2", level: 2, text: chunk.slice(3).trim() };
+      if (chunk.startsWith("### ")) return { type: "h2", level: 3, text: chunk.slice(4).trim() };
       if (chunk.startsWith("> ")) return { type: "quote", text: chunk.slice(2).trim() };
       const fig = chunk.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
       if (fig) {
@@ -127,6 +131,22 @@ function parseContentForEmail(content: string | null): ContentBlock[] {
     });
 }
 
+function parseGalleryForEmail(value: unknown): GalleryImg[] {
+  if (!Array.isArray(value)) return [];
+  const out: GalleryImg[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    if (typeof r.src !== "string" || !r.src) continue;
+    out.push({
+      src: r.src,
+      alt: typeof r.alt === "string" ? r.alt : "",
+      caption: typeof r.caption === "string" ? r.caption : undefined,
+    });
+  }
+  return out;
+}
+
 function jsonBlocksToEmail(blocks: unknown): ContentBlock[] {
   if (!Array.isArray(blocks)) return [];
   const out: ContentBlock[] = [];
@@ -137,7 +157,7 @@ function jsonBlocksToEmail(blocks: unknown): ContentBlock[] {
     if (type === "paragraph" && typeof r.text === "string") {
       out.push({ type: "p", text: r.text });
     } else if (type === "heading" && typeof r.text === "string") {
-      out.push({ type: "h2", text: r.text });
+      out.push({ type: "h2", level: r.level === 3 ? 3 : 2, text: r.text });
     } else if (type === "quote" && typeof r.text === "string") {
       out.push({ type: "quote", text: r.text, cite: typeof r.cite === "string" ? r.cite : undefined });
     } else if (type === "pull-quote" && typeof r.text === "string") {
@@ -163,84 +183,146 @@ function jsonBlocksToEmail(blocks: unknown): ContentBlock[] {
         imageSide: r.imageSide === "left" ? "left" : "right",
         caption: typeof r.caption === "string" ? r.caption : undefined,
       });
+    } else if (type === "gallery") {
+      const images = parseGalleryForEmail(r.images);
+      if (images.length === 0) continue;
+      out.push({ type: "gallery", images, columns: r.columns === 3 ? 3 : 2 });
     } else if (type === "divider") {
       out.push({ type: "divider" });
     } else if (type === "callout" && typeof r.text === "string") {
-      out.push({ type: "callout", text: r.text });
+      out.push({ type: "callout", text: r.text, tone: r.tone === "warning" ? "warning" : "note" });
+    } else if (type === "newsletter-cta") {
+      out.push({ type: "newsletter-cta" });
     }
   }
   return out;
 }
 
-function renderImg(src: string, alt: string, extraStyle = "", attrs = ""): string {
-  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" ${attrs} style="display:block;width:100%;height:auto;${extraStyle}" />`;
+function renderImg(src: string, alt: string, extraStyle = ""): string {
+  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="display:block;width:100%;height:auto;${extraStyle}" />`;
 }
 
-function renderCaption(caption?: string): string {
+function renderCaption(caption: string | undefined, align: "center" | "left" = "center"): string {
   if (!caption) return "";
-  return `<span style="display:block;margin-top:8px;font-family:${FONT_DISPLAY};font-style:italic;font-size:14px;color:${MUTED};text-align:center;">${escapeHtml(caption)}</span>`;
+  return `<span style="display:block;margin-top:8px;font-family:${FONT_DISPLAY};font-style:italic;font-size:14px;color:${MUTED};text-align:${align};">${escapeHtml(caption)}</span>`;
 }
 
-function renderSideBySide(src: string, alt: string, text: string, side: "left" | "right", caption?: string): string {
-  // Email-safe two-column table; stacks naturally on narrow clients via width attrs
-  const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" width="240" style="display:block;width:100%;max-width:240px;height:auto;" />${renderCaption(caption)}`;
-  const para = `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0;">${escapeHtml(text)}</p>`;
-  const left = side === "left" ? img : para;
-  const right = side === "left" ? para : img;
-  const leftWidth = side === "left" ? 240 : undefined;
-  const rightWidth = side === "right" ? 240 : undefined;
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:24px 0;"><tr>` +
-    `<td valign="top" ${leftWidth ? `width="${leftWidth}"` : ""} style="padding-right:18px;">${left}</td>` +
-    `<td valign="top" ${rightWidth ? `width="${rightWidth}"` : ""} style="padding-left:${side === "right" ? 18 : 0}px;padding-right:0;">${right}</td>` +
-    `</tr></table>`;
+function renderImageTextTable(src: string, alt: string, text: string, side: "left" | "right", caption?: string): string {
+  // Matches site's md:grid-cols-2 gap-8 — 50/50 split.
+  const imgCell =
+    `<td valign="top" width="50%" style="padding:0 ${side === "left" ? "16px 0 0" : "0 0 16px"};">` +
+    `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" style="display:block;width:100%;height:auto;" />` +
+    renderCaption(caption, "left") +
+    `</td>`;
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((p) => `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0 0 14px;">${renderInlineHtml(p)}</p>`)
+    .join("");
+  const textCell =
+    `<td valign="top" width="50%" style="padding:0 ${side === "left" ? "0 0 16px" : "16px 0 0"};">` +
+    paragraphs +
+    `</td>`;
+  const row = side === "left" ? `${imgCell}${textCell}` : `${textCell}${imgCell}`;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:40px 0;"><tr>${row}</tr></table>`;
+}
+
+function renderGallery(images: GalleryImg[], columns: 2 | 3): string {
+  const cellWidth = Math.floor(100 / columns);
+  const rows: string[] = [];
+  for (let i = 0; i < images.length; i += columns) {
+    const cells: string[] = [];
+    for (let j = 0; j < columns; j++) {
+      const img = images[i + j];
+      if (!img) {
+        cells.push(`<td width="${cellWidth}%" style="padding:6px;"></td>`);
+        continue;
+      }
+      cells.push(
+        `<td valign="top" width="${cellWidth}%" style="padding:6px;">` +
+          `<img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt)}" style="display:block;width:100%;height:auto;" />` +
+          renderCaption(img.caption, "center") +
+          `</td>`,
+      );
+    }
+    rows.push(`<tr>${cells.join("")}</tr>`);
+  }
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:32px 0;">${rows.join("")}</table>`;
+}
+
+function renderNewsletterCta(): string {
+  // Recipients are already subscribed — surface a "read more on the site" CTA
+  // in the same Quiet Quill style as the inline newsletter component, without
+  // re-prompting an email address.
+  return (
+    `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:40px 0;">` +
+      `<tr><td align="center" style="border:1px solid ${HAIRLINE};background:#f5ecd9;padding:28px 24px;">` +
+        `<p style="margin:0 0 8px;font-family:${FONT_META};font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${MUTED};">Stay in touch</p>` +
+        `<p style="margin:0 0 18px;font-family:${FONT_DISPLAY};font-style:italic;font-size:22px;line-height:1.4;color:${OLIVE};">Read more essays at Fan The Spark.</p>` +
+        `<a href="${SITE_URL}" style="display:inline-block;background:${SANDSTONE};color:#ffffff;text-decoration:none;padding:12px 22px;font-family:${FONT_META};font-size:12px;letter-spacing:0.18em;text-transform:uppercase;">Visit the journal</a>` +
+      `</td></tr>` +
+    `</table>`
+  );
 }
 
 function renderBlocks(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
       if (b.type === "h2") {
-        return `<h2 style="font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:26px;line-height:1.25;color:${OLIVE};margin:36px 0 16px;">${escapeHtml(b.text)}</h2>`;
+        const size = b.level === 3 ? 22 : 26;
+        const margin = b.level === 3 ? "30px 0 12px" : "36px 0 16px";
+        const Tag = b.level === 3 ? "h3" : "h2";
+        return `<${Tag} style="font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:${size}px;line-height:1.25;color:${OLIVE};margin:${margin};">${escapeHtml(b.text)}</${Tag}>`;
       }
       if (b.type === "quote") {
         const cite = b.cite
           ? `<cite style="display:block;margin-top:10px;font-style:normal;font-family:${FONT_META};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};">— ${escapeHtml(b.cite)}</cite>`
           : "";
-        return `<blockquote style="margin:28px 0;padding:4px 0 4px 20px;border-left:2px solid ${SANDSTONE};font-family:${FONT_DISPLAY};font-style:italic;font-size:22px;line-height:1.5;color:${OLIVE};">${escapeHtml(b.text)}${cite}</blockquote>`;
+        return `<blockquote style="margin:28px 0;padding:4px 0 4px 20px;border-left:2px solid ${SANDSTONE};font-family:${FONT_DISPLAY};font-style:italic;font-size:22px;line-height:1.5;color:${OLIVE};">"${renderInlineHtml(b.text)}"${cite}</blockquote>`;
       }
       if (b.type === "pull-quote") {
         const cite = b.cite
-          ? `<cite style="display:block;margin-top:14px;font-style:normal;font-family:${FONT_META};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};">— ${escapeHtml(b.cite)}</cite>`
+          ? `<cite style="display:block;margin-top:14px;font-style:normal;font-family:${FONT_META};font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${MUTED};">— ${escapeHtml(b.cite)}</cite>`
           : "";
-        return `<p style="margin:36px 0;padding:0 12px;text-align:center;font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:30px;line-height:1.3;color:${OLIVE};">${escapeHtml(b.text)}${cite}</p>`;
+        return `<p style="margin:36px auto;padding:0 12px;max-width:640px;text-align:center;font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:30px;line-height:1.3;color:${OLIVE};">${renderInlineHtml(b.text)}${cite}</p>`;
       }
       if (b.type === "figure") {
-        // Signature stays inline-small (centered, tiny)
+        // Signature stays inline-small (centered, tiny) — matches site's 180px max.
         const isSig = /signature/i.test(b.src) || /^signature/i.test(b.alt);
         if (isSig) {
-          return `<p style="margin:18px 0;text-align:center;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:inline-block;max-width:200px;width:100%;height:auto;" />${renderCaption(b.caption)}</p>`;
+          return `<p style="margin:18px 0;text-align:left;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;max-width:180px;width:100%;height:auto;" />${renderCaption(b.caption, "left")}</p>`;
         }
         if (b.layout === "side-right" || b.layout === "side-left") {
+          // Matches site's w-[44%] max-w-[280px] float.
           const align = b.layout === "side-right" ? "right" : "left";
-          const margin = align === "right" ? "0 0 12px 18px" : "0 18px 12px 0";
-          return `<p style="margin:8px 0;overflow:hidden;">` +
-            `<img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" width="260" align="${align}" style="display:block;width:260px;max-width:45%;height:auto;margin:${margin};" />` +
-            renderCaption(b.caption) +
-            `</p>`;
+          const margin = align === "right" ? "0 0 12px 24px" : "0 24px 12px 0";
+          return `<div style="margin:8px 0;">` +
+            `<img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" width="280" align="${align}" style="display:block;width:44%;max-width:280px;height:auto;margin:${margin};" />` +
+            renderCaption(b.caption, "left") +
+            `</div>`;
         }
         if (b.layout === "inline-small") {
-          return `<p style="margin:18px 0;text-align:center;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:inline-block;max-width:360px;width:100%;height:auto;" />${renderCaption(b.caption)}</p>`;
+          // Matches site's mx-auto w-[60%].
+          return `<p style="margin:32px 0;text-align:center;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:inline-block;width:60%;max-width:480px;height:auto;" />${renderCaption(b.caption, "center")}</p>`;
         }
-        // hero or full
-        return `<p style="margin:24px 0;">${renderImg(b.src, b.alt)}${renderCaption(b.caption)}</p>`;
+        // hero or full — full-width.
+        return `<p style="margin:32px 0;">${renderImg(b.src, b.alt)}${renderCaption(b.caption, "center")}</p>`;
       }
       if (b.type === "image-text") {
-        return renderSideBySide(b.src, b.alt, b.text, b.imageSide, b.caption);
+        return renderImageTextTable(b.src, b.alt, b.text, b.imageSide, b.caption);
+      }
+      if (b.type === "gallery") {
+        return renderGallery(b.images, b.columns);
       }
       if (b.type === "divider") {
-        return `<hr style="border:none;border-top:1px solid ${HAIRLINE};margin:32px 0;" />`;
+        return `<hr style="border:none;border-top:1px solid ${HAIRLINE};margin:48px 0;clear:both;" />`;
       }
       if (b.type === "callout") {
-        return `<aside style="margin:24px 0;padding:14px 18px;border-left:4px solid ${SANDSTONE};background:#f5ecd9;font-family:${FONT_BODY};font-size:16px;line-height:1.65;color:${BODY_INK};">${escapeHtml(b.text)}</aside>`;
+        const border = b.tone === "warning" ? "#c54a1f" : SANDSTONE;
+        const bg = b.tone === "warning" ? "#fbe5d8" : "#f5ecd9";
+        return `<aside style="margin:32px 0;padding:18px 22px;border-left:4px solid ${border};background:${bg};font-family:${FONT_BODY};font-size:16px;line-height:1.65;color:${BODY_INK};">${renderInlineHtml(b.text)}</aside>`;
+      }
+      if (b.type === "newsletter-cta") {
+        return renderNewsletterCta();
       }
       return renderParagraph(b.text);
     })
@@ -250,13 +332,18 @@ function renderBlocks(blocks: ContentBlock[]): string {
 function blocksToText(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
-      if (b.type === "h2") return `\n${b.text}\n${"-".repeat(b.text.length)}`;
+      if (b.type === "h2") {
+        const underline = b.level === 3 ? "~" : "-";
+        return `\n${b.text}\n${underline.repeat(b.text.length)}`;
+      }
       if (b.type === "quote") return `  "${b.text}"${b.cite ? ` — ${b.cite}` : ""}`;
       if (b.type === "pull-quote") return `\n  "${b.text}"${b.cite ? ` — ${b.cite}` : ""}\n`;
       if (b.type === "figure") return b.alt ? `[image: ${b.alt}]` : "[image]";
       if (b.type === "image-text") return `${b.alt ? `[image: ${b.alt}]\n` : "[image]\n"}${b.text}`;
+      if (b.type === "gallery") return `[gallery: ${b.images.length} image${b.images.length === 1 ? "" : "s"}]`;
       if (b.type === "divider") return "---";
       if (b.type === "callout") return `> ${b.text}`;
+      if (b.type === "newsletter-cta") return `Read more on the site: ${SITE_URL}`;
       return b.text;
     })
     .join("\n\n");
