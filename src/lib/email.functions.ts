@@ -487,12 +487,13 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     }
 
     // Broadcast: fetch contacts from Brevo list, then send (BCC batches of 50)
+    const listId = data.listId ?? BREVO_LIST_ID;
     const contacts: string[] = [];
     let offset = 0;
     const limit = 500;
     while (true) {
       const listRes = await fetch(
-        `${GATEWAY_URL}/contacts/lists/${BREVO_LIST_ID}/contacts?limit=${limit}&offset=${offset}`,
+        `${GATEWAY_URL}/contacts/lists/${listId}/contacts?limit=${limit}&offset=${offset}`,
         { method: "GET", headers },
       );
       const listBody = await listRes.text();
@@ -508,7 +509,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     }
 
     if (contacts.length === 0) {
-      throw new Error(`No contacts in Brevo list #${BREVO_LIST_ID}. Add some in Brevo first.`);
+      throw new Error(`No contacts in Brevo list #${listId}. Add some in Brevo first.`);
     }
 
     // Send via Brevo - one email per recipient (transactional API requires this)
