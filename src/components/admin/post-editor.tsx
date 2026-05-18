@@ -243,6 +243,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Select a template campaign first.");
       return;
     }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setEmailMsg("blog_html is empty — add content to the post before sending.");
+      return;
+    }
     setBusy("Sending test…");
     setEmailMsg("");
     try {
@@ -274,6 +278,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     }
     if (selectedListId == null) {
       setEmailMsg("Select a Brevo list first.");
+      return;
+    }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setEmailMsg("blog_html is empty — add content to the post before sending.");
       return;
     }
     setBusy("Checking…");
