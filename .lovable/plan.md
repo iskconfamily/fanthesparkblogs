@@ -1,72 +1,59 @@
 ## Goal
+Make the announcement email feel like the website (same fonts, warm paper background, olive headings, sandstone CTA) and include the **full article body**, not just the excerpt.
 
-Snapshot the current visual design as **"style1"** and set up a system so future styles (style2, style3, …) can be previewed by passing a `?style=styleN` URL parameter on any page.
+## Changes — single file: `src/lib/email.functions.ts`
 
-## Approach
+### 1. Match the site's visual identity in `buildEmail`
 
-A theme registry + a tiny React provider that reads `?style=` from the URL and swaps a set of CSS variables on `<html>`. No component rewrites — every styled element already reads from CSS variables and a small set of named font/color tokens, so switching themes = swapping variable values.
+Pull the same tokens the site uses:
+- **Background**: warm aged-paper `#fbf8f1` (outer) and `#fdfbf5` (inner card) — matches `--background`
+- **Body text color**: warm olive-brown `#5a4a1f` for readability (slightly darker than site `--foreground` for email contrast)
+- **Heading color**: olive `#7e6c2a` (site `--foreground`)
+- **Primary / CTA**: sandstone `#f2673a` (site `--primary`)
+- **Muted text**: `#8a7a55` (byline, eyebrow, footer)
+- **Borders**: soft tan `#d9cdb3`
 
-## Files to add
+Typography (with Georgia fallback for Outlook):
+- Pull Cormorant Garamond + Libre Baskerville + Libre Caslon Text via a `<link>` to Google Fonts in `<head>`
+- Display headings: `'Cormorant Garamond', Georgia, serif` — italic for h1, matching the site
+- Body paragraphs: `'Libre Baskerville', Georgia, serif` at 17px / line-height 1.75
+- Eyebrow + meta: `'Libre Caslon Text', Georgia, serif`, uppercase, letter-spacing 0.18em
 
-```
-src/styles/themes/
-  style1.css          ← exact snapshot of today's tokens
-  index.ts            ← registry: { style1: "style1", ... }
-src/components/
-  theme-provider.tsx  ← reads ?style= search param, sets data-style on <html>
-```
+Layout:
+- Outer container 640px max, warm paper background
+- Inner card on `#fdfbf5` with 40px padding
+- Featured image full-width, no border-radius (site uses square images)
+- Eyebrow "New essay · Fan The Spark" in olive
+- H1 italic Cormorant ~34px
+- Byline "by Author" in meta font, small caps, muted
+- Hairline divider below byline (matches site)
+- Full article body
+- Sandstone CTA "Read on the site" at the bottom (still useful for sharing / canonical link)
+- Footer: small muted note about subscription
 
-## How style1 captures "today"
+### 2. Render full article content (not excerpt)
 
-`style1.css` will define a `[data-style="style1"]` block containing every token currently in use, so nothing visual changes when style1 is active (which will be the default):
+- Select `content` in the Supabase query alongside the existing fields
+- Add a small markdown-to-email-HTML renderer reusing the same block grammar as `src/lib/blog-adapter.ts` `parseContent`:
+  - `## heading` → `<h2>` (Cormorant italic, 26px, olive, top margin 32px)
+  - `> quote` → `<blockquote>` with left border in sandstone, italic Cormorant 22px
+  - `![alt](url)` on its own block → `<img>` full-width with optional caption
+  - Otherwise → `<p>` (Libre Baskerville, 17px/1.75, color `#5a4a1f`, margin 0 0 20px)
+- Escape all text content with the existing `escapeHtml` helper before injecting
+- Fallback to `excerpt` if `content` is empty (defensive — shouldn't happen for published posts)
+- Update the plain-text version to include the full content too (strip markdown markers to plain lines)
 
-- **Color tokens** (from `src/styles.css` `:root`): `--background`, `--foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--muted`, `--muted-foreground`, `--accent`, `--border`, `--input`, `--ring`, `--destructive`, sidebar tokens, `--brand-olive` — all current oklch values.
-- **Font tokens**: `--font-serif-display` (Cormorant Garamond), `--font-serif-body` (Lora), `--font-meta` (Libre Caslon Text), `--font-display-sans` (Inter Tight).
-- **Radius**: `--radius`, `--radius-sm/md/lg/xl`.
-- **Brand accent hexes** promoted to variables so future styles can override them:
-  - `--brand-header-bg: #faf6ee`
-  - `--brand-title-color: #7e6c2a`
-  - `--brand-gold: #d9a74e`
-  - `--brand-title-card-bg: rgba(239, 217, 180, 0.18)`
-  - `--brand-header-border: rgba(217, 167, 78, 0.22)`
-  - `--brand-header-shadow: rgba(126, 108, 42, 0.07)`
-- **Header geometry**: `--header-height-expanded: 124px`, `--header-height-scrolled: 64px`, mobile variants, logo heights, transition `380ms cubic-bezier(0.4,0,0.2,1)`.
+### 3. Subject line and preheader
 
-A small, surgical refactor will swap the hard-coded hex strings in `site-header.tsx`, `post-preview.tsx`, `post.$slug.tsx`, and `preview.$slug.tsx` to read from these variables — so style2 can rebrand without touching component code.
-
-## How `?style=` works
-
-`theme-provider.tsx` (mounted once inside `__root.tsx`):
-
-1. Reads `window.location.search` for `style` (e.g. `?style=style2`).
-2. Validates against the registry; falls back to `style1`.
-3. Sets `document.documentElement.dataset.style = "<name>"`.
-4. Re-runs on route changes via TanStack's `useRouterState`.
-
-`styles.css` imports each theme file. Each theme is scoped to `html[data-style="styleN"] { … }` so switching is instant and SSR-safe (no flash — style1 vars are also set on `:root` as the default).
-
-URLs after this change:
-- `/` → style1 (default, unchanged)
-- `/?style=style1` → explicit style1
-- `/post/some-slug?style=style2` → preview style2 (once style2 is added)
-- Works on every route automatically.
-
-## Adding future styles
-
-To add style2 later: create `src/styles/themes/style2.css` overriding any subset of variables, register it in `themes/index.ts`. No other changes needed.
-
-## What does NOT change
-
-- No visual difference when viewing the site today — style1 is byte-equivalent to current rendering.
-- No font, layout, header animation, article-body, or title-card behavior changes.
-- No backend, routing, or content changes.
+- Keep subject = post title (already correct)
+- Add a hidden preheader (`<div style="display:none;...">`) with the excerpt — improves inbox preview without showing in the body
 
 ## Out of scope
+- No DB schema changes
+- No changes to the admin UI or the broadcast/test send flow — only the email HTML/text is updated
+- No new dependencies
 
-- Building style2/style3 (you'll request those separately).
-- A UI style-switcher widget (URL param only, per your request).
-- Persisting the chosen style across navigation without the URL param.
-
----
-
-Shall I implement?
+## Verification
+- Send a test email to yourself from the admin "Send announcement" panel and compare side-by-side with the site
+- Confirm fonts render in Apple Mail / Gmail (Cormorant + Libre Baskerville) and gracefully fall back to Georgia in Outlook
+- Confirm full body text appears, including any `##` headings, quotes, and inline figures
