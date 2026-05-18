@@ -60,11 +60,14 @@ const FONT_DISPLAY = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
 const FONT_BODY = "'Libre Baskerville', Georgia, 'Times New Roman', serif";
 const FONT_META = "'Libre Caslon Text', Georgia, serif";
 
+type FigureLayout = "hero" | "full" | "side-right" | "side-left" | "inline-small";
 type ContentBlock =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
   | { type: "quote"; text: string; cite?: string }
-  | { type: "figure"; src: string; alt: string; small?: boolean }
+  | { type: "pull-quote"; text: string; cite?: string }
+  | { type: "figure"; src: string; alt: string; layout: FigureLayout; caption?: string }
+  | { type: "image-text"; src: string; alt: string; text: string; imageSide: "left" | "right"; caption?: string }
   | { type: "divider" }
   | { type: "callout"; text: string };
 
