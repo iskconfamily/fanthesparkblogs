@@ -120,6 +120,7 @@ export function Sidebar() {
         <form
           onSubmit={(e) => e.preventDefault()}
           className="flex flex-col gap-2"
+          suppressHydrationWarning
         >
           <input
             type="email"

@@ -164,6 +164,29 @@ export const setPostStatus = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const createDraftPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const stamp = Date.now().toString(36);
+    const slug = `untitled-${stamp}`;
+    const { data: inserted, error } = await supabaseAdmin
+      .from("blog_posts")
+      .insert({
+        title: "Untitled",
+        slug,
+        status: "draft",
+        tags: [],
+        image_prompts: [],
+        image_layout: "hero",
+        blocks: [],
+      })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return normalizeDbPost(inserted as unknown as Record<string, unknown>);
+  });
+
 export const deletePost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({ id: z.string().uuid() }).parse(i))

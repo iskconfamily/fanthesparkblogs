@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { listAllPosts, setPostStatus, deletePost, savePost } from "@/lib/admin.functions";
+import { listAllPosts, setPostStatus, deletePost, savePost, createDraftPost } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { posts as staticPosts, type Post, type ArticleBlock } from "@/content/posts";
 import { toast } from "sonner";
@@ -51,7 +51,9 @@ function AdminList() {
   const setStatus = useServerFn(setPostStatus);
   const del = useServerFn(deletePost);
   const save = useServerFn(savePost);
+  const createDraft = useServerFn(createDraftPost);
   const [importing, setImporting] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["admin-posts"],
@@ -136,10 +138,30 @@ function AdminList() {
               {importing ? "Importing…" : `Import ${notImported.length} existing blogs`}
             </Button>
           )}
-          <Link to="/admin/new">
-            <Button>New post</Button>
-          </Link>
+          <Button
+            disabled={creating}
+            onClick={async () => {
+              setCreating(true);
+              try {
+                const draft = await createDraft();
+                toast.success("Draft created — design it with AI");
+                await router.navigate({ to: "/admin/design/$id", params: { id: draft.id } });
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Could not create draft");
+              } finally {
+                setCreating(false);
+              }
+            }}
+          >
+            {creating ? "Creating…" : "New post (AI designer)"}
+          </Button>
         </div>
+      </div>
+
+      <div className="mb-6 p-4 border border-border rounded-md bg-muted/30 text-sm">
+        <strong>Design posts visually with AI.</strong> Click{" "}
+        <em>New post (AI designer)</em> to start fresh, or <em>Design with AI</em> on
+        any post below to lay out images and text exactly where you want.
       </div>
 
       {isLoading ? (
@@ -249,6 +271,24 @@ function AdminList() {
                       >
                         View
                       </a>
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const imported = await importOne(p);
+                            toast.success("Imported — opening AI designer");
+                            refetch();
+                            await router.navigate({
+                              to: "/admin/design/$id",
+                              params: { id: imported.id },
+                            });
+                          } catch (e) {
+                            toast.error(e instanceof Error ? e.message : "Import failed");
+                          }
+                        }}
+                      >
+                        Design with AI
+                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
