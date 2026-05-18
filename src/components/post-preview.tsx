@@ -34,13 +34,7 @@ export function PostPreview({ post }: { post: Post }) {
 
   return (
     <article className="border-b border-border pb-16 mb-16 last:border-b-0">
-      <div
-        className="mb-3 px-4 py-2.5 md:px-5 md:py-3 max-w-[560px]"
-        style={{
-          backgroundColor: "var(--brand-title-card-bg)",
-          borderRadius: "3px",
-        }}
-      >
+      <div className="mb-3 max-w-[560px]">
         <h2 className="mb-1">
           <Link
             to="/post/$slug"

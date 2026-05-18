@@ -59,13 +59,7 @@ function PreviewPage() {
         Draft preview — not visible to the public
       </div>
       <article>
-        <div
-          className="mb-3 px-4 py-3 md:px-5 md:py-3.5 max-w-[560px]"
-          style={{
-            backgroundColor: "var(--brand-title-card-bg)",
-            borderRadius: "3px",
-          }}
-        >
+        <div className="mb-3 max-w-[560px]">
           <h1
             className="text-4xl md:text-5xl italic leading-[1.1]"
             style={{ fontFamily: "var(--font-serif-display)", color: "var(--brand-title-color)" }}
