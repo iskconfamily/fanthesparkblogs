@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { listAllPosts, setPostStatus, deletePost, savePost } from "@/lib/admin.functions";
+import { listAllPosts, setPostStatus, deletePost, savePost, createDraftPost } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { posts as staticPosts, type Post, type ArticleBlock } from "@/content/posts";
 import { toast } from "sonner";
