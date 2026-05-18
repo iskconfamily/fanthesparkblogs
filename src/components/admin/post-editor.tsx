@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AiWizard, type AiDraft } from "./ai-wizard";
 
+const SITE_URL_PREVIEW = "https://fanthesparkblogs.lovable.app";
+
 const slugify = (s: string) =>
   s
     .toLowerCase()
