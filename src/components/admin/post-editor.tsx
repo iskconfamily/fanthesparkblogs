@@ -214,22 +214,23 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Save the post first.");
       return;
     }
-    if (selectedListId == null) {
-      setEmailMsg("Select a Brevo list first.");
+    if (selectedCampaignId == null) {
+      setEmailMsg("Select a Brevo campaign first.");
       return;
     }
-    setBusy("Checking list…");
+    setBusy("Checking campaign…");
     setEmailMsg("");
     try {
-      const info = await fetchListInfo({ data: { listId: selectedListId } });
+      const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
       if (!info.ok) {
         setEmailMsg(`Brevo error: ${info.error}`);
         setBusy(null);
         return;
       }
       const count = info.totalSubscribers ?? 0;
+      const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
       const ok = window.confirm(
-        `Send "${title}" to ${count} subscriber${count === 1 ? "" : "s"} in Brevo list "${info.name ?? info.listId}"?`,
+        `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`,
       );
       if (!ok) {
         setBusy(null);
@@ -237,14 +238,12 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       }
       setBusy(`Sending to ${count}…`);
       const r = await sendEmail({
-        data: { postId: id, mode: "broadcast", listId: selectedListId },
+        data: { postId: id, mode: "broadcast", campaignId: selectedCampaignId },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
-        `Sent to ${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.${
-          r.errors ? ` (${r.errors.length} batch errors)` : ""
-        }`,
+        `Sent campaign to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
