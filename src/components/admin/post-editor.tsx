@@ -21,6 +21,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const save = useServerFn(savePost);
   const upload = useServerFn(uploadImage);
   const genImage = useServerFn(generateBlogImage);
+  const sendEmail = useServerFn(sendBlogAnnouncement);
+  const fetchListInfo = useServerFn(getBrevoListInfo);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
