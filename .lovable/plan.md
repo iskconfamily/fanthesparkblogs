@@ -1,140 +1,70 @@
+
 ## Goal
 
-Turn the current admin AI flow into a true **Blog Studio**: admin gives raw material (text, Markdown, Word doc, URL, optional images, optional layout-reference image), AI arranges it beautifully inside the existing Quiet Quill style, admin keeps refining via chat and additional uploads. Body wording and links are preserved verbatim.
+Make the newsletter email render every blog block with the same layout, image placement, and visual hierarchy as the website. One source of truth for content (`blocks` JSONB), two renderers (web + email) that stay in lockstep.
 
-## What changes
+## Current gaps (site vs email)
 
-### 1. Richer block model (`src/lib/post-blocks.ts`)
+The website renders 10 block types via `src/components/article-body.tsx`. The email renderer in `src/lib/email.functions.ts` currently:
 
-Add new block types so the AI has real layout vocabulary:
+- Skips `gallery`, `newsletter-cta`, and `heading` level 3 entirely (they vanish from the email).
+- Ignores inline markdown (bold/italic/links written with `**…**`, `*…*`, `[label](url)`) — site uses `renderInline`, email escapes raw text.
+- Uses a 240px image column for `image-text`; site uses an even 50/50 grid.
+- Uses 260px for `side-right`/`side-left`; site uses `~44%` up to 280px.
+- Doesn't differentiate `callout` tone (note vs warning).
 
-- `pull-quote` — large display quote inside the column
-- `image-text` — image + paragraph(s) side-by-side
-- `gallery` — 2–4 image grid
-- `image-full` (already covered via `layout: "full"`, but expose as a clear option)
-- `newsletter-cta`
+So a blog that looks complete on the site can show up in the email missing sections or with images sized/placed differently.
 
-Existing types stay: `paragraph`, `heading`, `quote`, `image`, `divider`, `callout`.
+## What will change
 
-All rendered with the **existing Quiet Quill typography & spacing** — new blocks reuse current CSS tokens (`font-serif-display`, muted accents, generous spacing). No new visual style; just new arrangements.
+All edits are in `src/lib/email.functions.ts` — no schema, no website changes.
 
-### 2. Admin Blog Studio UI (`src/components/admin/blog-studio.tsx` — new)
+### 1. Inline markdown
+Add an email-side `renderInlineHtml(text)` that mirrors `src/lib/markdown-inline.tsx`:
+- `**bold**` → `<strong>`
+- `*italic*` → `<em>`
+- `[label](https://…)` → `<a href="…" style="color:SANDSTONE;text-decoration:underline;">label</a>`
+- Everything else escaped.
 
-Replaces the current "AI Wizard → Editor" two-step on `/admin/design/$id`.
+Use it in `paragraph`, `quote`, `pull-quote`, `callout`, and image-text body.
 
-Single page, three panels:
+### 2. Heading level 3
+Render `heading.level === 3` as an `<h3>` (smaller, same family/italic) to match the site.
 
-```text
-┌──────────────────────────┬─────────────────────────────┐
-│ INPUT PANEL              │ LIVE PREVIEW (Quiet Quill)  │
-│  · Source (tabs):        │  Renders the block document │
-│      Paste / MD / Word   │  exactly as it will appear  │
-│      / URL               │  on the published post page │
-│  · Images (drop zone,    │                             │
-│      multi-upload)       │                             │
-│  · Layout reference      │                             │
-│      image (single,      │                             │
-│      marked "inspiration │                             │
-│      only — not embedded")│                            │
-│  · "Generate blog"       │                             │
-│                          │                             │
-│ AFTER GENERATION:        │                             │
-│  · Add more images →     │                             │
-│      "Rework layout"     │                             │
-│  · Tag editor            │                             │
-│  · Title / excerpt / SEO │                             │
-│  · Publish / Save draft  │                             │
-├──────────────────────────┤                             │
-│ CHAT WITH AI             │                             │
-│  (existing block-chat,   │                             │
-│  upgraded — see §5)      │                             │
-└──────────────────────────┴─────────────────────────────┘
-```
+### 3. Image-text → 50/50 table
+Replace the 240px-column rendering with a two-column `<table>` where each `<td>` is `width="50%"`, image side controlled by `imageSide`, caption under the image, paragraphs in the other column. Matches `md:grid-cols-2 gap-8`.
 
-### 3. Multi-format ingest (server fns in `src/lib/admin.functions.ts`)
+### 4. Side-right / side-left figures
+Use `width="44%"` with `max-width:280px` and `align="right"`/`align="left"` to let body text wrap, matching the site's `w-[44%] max-w-[280px]`.
 
-New / upgraded server functions:
+### 5. Gallery
+Render as a `<table>` with 2 or 3 equal-width columns (driven by `columns`), each cell holding `<img>` + optional caption. Matches `md:grid-cols-2` / `md:grid-cols-3`.
 
-- `extractFromUrl` — already exists; keep but **preserve `<a href>` links** by converting to Markdown `[text](url)` before stripping HTML (currently links are lost).
-- `extractFromMarkdown` — new. Accepts raw `.md` text; already preserves links.
-- `extractFromDocx` — new. Accepts base64 `.docx`; uses `mammoth` (`bun add mammoth`) to convert to Markdown, which preserves hyperlinks and basic structure.
-- All extractors return `{ title?, markdown, sourceLabel }`.
+### 6. Newsletter CTA
+Render as a bordered section with the site's sandstone background, a short heading ("Stay in touch") and a button linking to `${SITE_URL}` — email recipients are already subscribed, so this is a "read more on the site" CTA, not a duplicate signup form. Matches the spirit of `InlineNewsletter` without re-prompting an email address.
 
-### 4. AI layout designer (`generateBlogFromSource` — rewritten)
+### 7. Callout tone
+`tone === "warning"` uses a warmer border/background; `note` keeps the existing styling.
 
-Inputs:
-
-- `markdown` (verbatim body)
-- `images: { url, alt? }[]` (already-uploaded user images)
-- `referenceLayoutImageUrl?` (passed to model as inspiration only; vision model sees it, does NOT embed it)
-
-The model emits a **block document** directly (not freeform markdown), via tool calling. New system prompt:
-
-> You are a layout arranger for The Quiet Quill — a contemplative literary blog with established typography. Preserve every word of the body verbatim, including all hyperlinks and YouTube URLs. Decide where each provided image goes (featured / inline / image-text / gallery / full-width). If the user provided a layout-reference image, use it ONLY as inspiration for arrangement — never include that image in the output. If no images were provided, propose 0–3 `image_prompts` if (and only if) the text would benefit. Suggest 1–3 tags. Output: blocks[], tags[], title, excerpt, seo_title, seo_description, featured_image_index (or null), suggested_image_prompts[].
-
-Link preservation:
-
-- Body text is split into paragraph blocks, each carrying inline markdown links. Renderer renders `[text](url)` as anchor tags (already partly handled; we'll ensure it covers `paragraph`, `quote`, `pull-quote`, `callout`, `image-text` blocks).
-- YouTube links: keep as-is in text (clickable). No auto-embed unless admin asks in chat.
-
-### 5. Post-draft refinement
-
-- **Upload more images later** → button under preview "Add images & rework". Calls `reworkLayoutWithNewImages(postId, newImageUrls[])` which re-runs the layout step using existing blocks + new images, only re-arranging image placements (paragraph text untouched).
-- **Chat designer** (existing `chatDesignPost`) — extend system prompt + `edit_post` tool with new block types (`pull-quote`, `image-text`, `gallery`, `newsletter-cta`) and ops: `replaceImage`, `removeImage`, `regenerateImagePrompt`.
-- Quick action buttons above chat: "Make calmer", "Make more minimal", "Regenerate featured image", "Replace featured image" (file picker).
-
-### 6. Tag UX
-
-- AI returns 1–3 suggested tags (max 5).
-- Editor shows tag chips with X to remove, plus free-text "+ add tag".
-- Enforced minimum: 1 tag required to publish (toast otherwise).
-
-### 7. Renderer updates (`src/components/article-body.tsx`, post-article, block-preview)
-
-- Render `pull-quote` (display serif, large, muted left rule)
-- Render `image-text` (CSS grid, image left/right by `layout` field)
-- Render `gallery` (responsive 2-col / 3-col grid)
-- Render `newsletter-cta` (reuse `<InlineNewsletter />`)
-- Inline link rendering in all text blocks via tiny markdown-to-JSX (links + bold/italic only — no full markdown parser; avoids `dangerouslySetInnerHTML`).
-
-### 8. Routes
-
-- `/admin/design/$id` → mounts new `<BlogStudio postId={id} />`
-- Old `AiWizard` component & `/admin/new` editor: keep as a fallback "Classic editor" linked from the studio for safety; not removed.
-
-## Technical notes
-
-- **`mammoth`** runs server-side only inside the `extractFromDocx` server function — Worker-compatible (pure JS).
-- **No new tables**: everything fits in existing `blog_posts.blocks` JSONB + `tags` array. We bump the block Zod schema in `updatePostBlocks` to allow new types.
-- **Link safety**: links rendered via React `<a href>` — never `dangerouslySetInnerHTML`. URLs validated with `new URL()`; non-http(s) dropped.
-- **Image upload**: reuse existing `uploadImage` server fn (base64). Multi-upload = loop client-side with a progress list.
-- **Reference layout image**: uploaded to storage, URL passed to `generateBlogFromSource`, then **deleted from storage after generation** (it's only inspiration, not an asset).
-- **Vision**: pass `referenceLayoutImageUrl` + uploaded image URLs as `image_url` content parts to `google/gemini-2.5-flash` so the model can actually see them when arranging.
-
-## Files
-
-Create:
-- `src/components/admin/blog-studio.tsx`
-- `src/components/admin/source-input.tsx`
-- `src/components/admin/image-uploader.tsx`
-- `src/components/admin/tag-editor.tsx`
-- `src/lib/markdown-inline.tsx` (tiny safe link/bold/italic renderer)
-
-Edit:
-- `src/lib/post-blocks.ts` (new block types)
-- `src/lib/admin.functions.ts` (extractors, rewritten generator, rework fn, expanded chat tool, expanded block schema)
-- `src/components/article-body.tsx`, `src/components/admin/block-preview.tsx`, `src/components/post-article.tsx` (render new blocks + inline links)
-- `src/components/admin/block-chat.tsx` (quick action buttons)
-- `src/routes/admin.design.$id.tsx` (mount studio)
-- `src/routes/admin.edit.$id.tsx` (link to studio)
-
-Add dep: `mammoth`.
+### 8. Text fallback
+Extend `blocksToText` to cover `gallery` (`[gallery: N images]`), `newsletter-cta` (`Read more on the site: <url>`), and heading level 3.
 
 ## Out of scope
 
-- Real-time collaborative editing
-- Image cropping / focal-point editor
-- Auto-embedding YouTube as video (only links preserved)
-- Drag-and-drop block reordering (chat covers this; can add later)
+- No changes to the website renderer, the block schema, or the AI studio prompts.
+- No new block types.
+- Hydration warning in the sidebar newsletter (LastPass extension artifact) is unrelated and not touched here.
 
-Ship in one pass, then we iterate.
+## Verification
+
+After the edit, send a test email for the "Overnight Success" post and confirm:
+- Hero `side-right` image floats right with text wrapping beside it (not stacked above).
+- Pull-quote ("I trained 17 years…") renders centered in display italic.
+- Signature image stays small and centered above the author line.
+- Any blog containing a gallery, an h3, a newsletter CTA, or inline `**bold**` / links shows them correctly in the email.
+
+## Technical notes
+
+- All layout uses email-safe `<table>` / `align` attributes — no flexbox/grid.
+- `renderInlineHtml` runs on already-escaped segments; URL is validated to start with `http(s)://` or `/` to avoid `javascript:` injection.
+- Existing `jsonBlocksToEmail` → `ContentBlock` union is extended with `gallery`, `newsletter-cta`, and `heading.level`; `renderBlocks` handles each new variant.
