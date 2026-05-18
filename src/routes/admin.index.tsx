@@ -273,6 +273,24 @@ function AdminList() {
                       </a>
                       <Button
                         size="sm"
+                        onClick={async () => {
+                          try {
+                            const imported = await importOne(p);
+                            toast.success("Imported — opening AI designer");
+                            refetch();
+                            await router.navigate({
+                              to: "/admin/design/$id",
+                              params: { id: imported.id },
+                            });
+                          } catch (e) {
+                            toast.error(e instanceof Error ? e.message : "Import failed");
+                          }
+                        }}
+                      >
+                        Design with AI
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={async () => {
                           try {
