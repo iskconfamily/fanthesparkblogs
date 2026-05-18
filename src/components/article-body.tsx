@@ -1,6 +1,18 @@
 import type { PostBlock } from "@/lib/post-blocks";
 
 function ImageBlock({ b }: { b: Extract<PostBlock, { type: "image" }> }) {
+  const alt = b.alt ?? "";
+  const isSignature =
+    /\/signature/i.test(b.src) || /^signature/i.test(alt);
+
+  if (isSignature) {
+    return (
+      <figure className="my-6 max-w-[300px] clear-both">
+        <img src={b.src} alt={alt} className="w-full" loading="lazy" />
+      </figure>
+    );
+  }
+
   const layout = b.layout ?? "hero";
 
   const cls =
@@ -16,7 +28,7 @@ function ImageBlock({ b }: { b: Extract<PostBlock, { type: "image" }> }) {
 
   return (
     <figure className={cls}>
-      <img src={b.src} alt={b.alt ?? ""} className="w-full" loading="lazy" />
+      <img src={b.src} alt={alt} className="w-full" loading="lazy" />
       {b.caption && (
         <figcaption
           className={`mt-2 text-sm italic text-muted-foreground ${captionAlign}`}
