@@ -516,53 +516,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Send to
-              </label>
-              <div className="flex gap-1 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setTarget("campaign")}
-                  className={`flex-1 px-2 py-1.5 rounded border ${target === "campaign" ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background"}`}
-                >
-                  Existing campaign
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTarget("list")}
-                  className={`flex-1 px-2 py-1.5 rounded border ${target === "list" ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background"}`}
-                >
-                  Pick a list
-                </button>
-              </div>
-            </div>
-            {target === "list" && (
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Brevo list
-                </label>
-                <select
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  value={selectedListId ?? ""}
-                  onChange={(e) =>
-                    setSelectedListId(e.target.value ? Number(e.target.value) : null)
-                  }
-                  disabled={!!busy || brevoLists.length === 0}
-                >
-                  {brevoLists.length === 0 && <option value="">Loading…</option>}
-                  {brevoLists.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name} — {l.totalSubscribers}
-                    </option>
-                  ))}
-                </select>
-                {listsError && (
-                  <p className="text-[11px] text-destructive break-words">{listsError}</p>
-                )}
-              </div>
-            )}
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                {target === "list" ? "Template campaign (HTML + sender)" : "Brevo campaign"}
+                Template campaign (HTML + sender)
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
@@ -573,6 +527,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
                 disabled={!!busy || brevoCampaigns.length === 0}
               >
                 {brevoCampaigns.length === 0 && <option value="">Loading…</option>}
+                {selectedCampaignId == null && <option value="">— select —</option>}
                 {brevoCampaigns.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name} — {c.status}
@@ -582,12 +537,35 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
               {campaignsError && (
                 <p className="text-[11px] text-destructive break-words">{campaignsError}</p>
               )}
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Brevo list (recipients)
+              </label>
+              <select
+                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                value={selectedListId ?? ""}
+                onChange={(e) =>
+                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
+                }
+                disabled={!!busy || brevoLists.length === 0}
+              >
+                {brevoLists.length === 0 && <option value="">Loading…</option>}
+                {selectedListId == null && <option value="">— select —</option>}
+                {brevoLists.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name} — {l.totalSubscribers}
+                  </option>
+                ))}
+              </select>
+              {listsError && (
+                <p className="text-[11px] text-destructive break-words">{listsError}</p>
+              )}
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                {target === "list"
-                  ? "We copy this campaign's HTML + sender into a new campaign targeted at the selected list, then sendNow."
-                  : "Brevo owns the HTML. We only inject params + subject, then trigger sendNow. Only draft/queued campaigns can actually be re-sent."}
+                Each send creates a NEW Brevo draft campaign (HTML + sender copied from the template, recipients set to this list, params injected), then triggers sendNow. Sent campaigns can never be re-sent — this avoids that.
               </p>
             </div>
+
             <div className="space-y-1 border border-border rounded p-2 bg-background">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Params sent to Brevo (use as {`{{ params.X }}`})
