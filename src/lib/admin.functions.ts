@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { dbPostToPost, type DbBlogPost, type ImagePrompt } from "./blog-adapter";
+import { dbPostToPost, normalizeDbPost, type DbBlogPost, type ImagePrompt } from "./blog-adapter";
+import { parseBlocks, type PostBlock } from "./post-blocks";
 
 async function assertAdmin(userId: string) {
   const { data, error } = await supabaseAdmin
@@ -37,7 +38,7 @@ export const listAllPosts = createServerFn({ method: "GET" })
       .select("*")
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data as unknown as DbBlogPost[];
+    return (data ?? []).map((r) => normalizeDbPost(r as unknown as Record<string, unknown>));
   });
 
 export const getPostById = createServerFn({ method: "GET" })
@@ -51,7 +52,7 @@ export const getPostById = createServerFn({ method: "GET" })
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return row as unknown as DbBlogPost | null;
+    return row ? normalizeDbPost(row as unknown as Record<string, unknown>) : null;
   });
 
 export const getPreviewPostBySlug = createServerFn({ method: "GET" })
@@ -127,7 +128,7 @@ export const savePost = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw new Error(error.message);
-      return updated as unknown as DbBlogPost;
+      return normalizeDbPost(updated as unknown as Record<string, unknown>);
     } else {
       const { data: inserted, error } = await supabaseAdmin
         .from("blog_posts")
@@ -135,7 +136,7 @@ export const savePost = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw new Error(error.message);
-      return inserted as unknown as DbBlogPost;
+      return normalizeDbPost(inserted as unknown as Record<string, unknown>);
     }
   });
 
