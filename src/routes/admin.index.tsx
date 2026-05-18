@@ -51,7 +51,9 @@ function AdminList() {
   const setStatus = useServerFn(setPostStatus);
   const del = useServerFn(deletePost);
   const save = useServerFn(savePost);
+  const createDraft = useServerFn(createDraftPost);
   const [importing, setImporting] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const { data: posts = [], isLoading, refetch } = useQuery({
     queryKey: ["admin-posts"],
