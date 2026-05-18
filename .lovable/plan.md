@@ -1,18 +1,22 @@
 ## Goal
-Make the signature image at the end of the "Appreciation" post render much smaller (roughly its natural ~300px width) instead of stretching to the full article column.
+Email newsletter should include the full article body (matching the site), not just the excerpt + CTA.
 
-## Change
-In `src/components/post-article.tsx`, inside `legacyToBlocks`, detect signature figures and emit them as `inline-small` (with a tighter cap) instead of `full`.
+## Root cause
+`src/lib/email.functions.ts` → `buildEmail()` reads only the `content` text field and parses it for paragraphs/headings/quotes/figures. Posts created with the AI block editor (like *Advent of the Bhagavad-gita*) store their body in the `blocks` JSONB field, leaving `content` empty. With no content to parse, the email falls back to just the excerpt + hero image + "Read on the site" button.
 
-Detection rule: figure block whose `src` contains `/appreciation/signature` OR whose `alt` starts with "Signature". This keeps the rule narrow so normal inline figures stay full-width.
-
-For these signature blocks:
-- `layout: "inline-small"`
-- no caption (the "Vaisesika Dasa" line below already serves as the label)
-
-If `inline-small` in `article-body.tsx` is still wider than the signature looks good at (~320px), add a small style override for `alt^="Signature"` images so they max out around 280–320px and stay left-aligned (matches the screenshot's natural placement).
+## Fix
+1. **Select `blocks` from DB** — add `blocks` to the `select(...)` in `sendBlogAnnouncement`.
+2. **Render from blocks first** — in `buildEmail`, if `post.blocks` is a non-empty array, convert it into the existing `ContentBlock[]` shape and render via `renderBlocks()` / `blocksToText()`. Mapping:
+   - `paragraph` → `{ type: "p", text }`
+   - `heading` → `{ type: "h2", text }`
+   - `quote` → `{ type: "quote", text }` (cite appended in italics if present)
+   - `image` → `{ type: "figure", src, alt }` — respect `layout: "inline-small"` and signature detection (small max-width, no caption) so the signature doesn't blow up to full width in email
+   - `divider` → render as `<hr>` (extend `ContentBlock` union with a `divider` type)
+   - `callout` → render as a left-bordered box (extend union with `callout`)
+3. **Fallback** — if no blocks, keep current behavior (parse `content`, else excerpt-only).
+4. **Hero image placement** — when rendering from blocks, do NOT inject `featured_image` after the first paragraph (blocks already contain their own image positioning, including the hero). Only inject the featured image when falling back to the legacy excerpt-only path.
 
 ## Out of scope
-- Changing the signature image file itself
-- Touching other posts' image rendering
-- Any DB changes — the markdown in `content` stays as-is
+- Changing the email layout/style.
+- Changing how the "Appreciation" or other posts store their body.
+- The admin "Edit post" textarea (separate confusion — already discussed).
