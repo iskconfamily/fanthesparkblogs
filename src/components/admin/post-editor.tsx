@@ -488,34 +488,52 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo list
+                Brevo campaign
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedListId ?? ""}
+                value={selectedCampaignId ?? ""}
                 onChange={(e) =>
-                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
+                  setSelectedCampaignId(e.target.value ? Number(e.target.value) : null)
                 }
-                disabled={!!busy || brevoLists.length === 0}
+                disabled={!!busy || brevoCampaigns.length === 0}
               >
-                {brevoLists.length === 0 && <option value="">Loading…</option>}
-                {brevoLists.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} ({l.totalSubscribers})
+                {brevoCampaigns.length === 0 && <option value="">Loading…</option>}
+                {brevoCampaigns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} — {c.status}
                   </option>
                 ))}
               </select>
-              {listsError && (
-                <p className="text-[11px] text-destructive break-words">{listsError}</p>
+              {campaignsError && (
+                <p className="text-[11px] text-destructive break-words">{campaignsError}</p>
               )}
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Brevo owns the HTML. We only inject params + subject, then trigger sendNow.
+                Only draft/queued campaigns can actually be re-sent.
+              </p>
+            </div>
+            <div className="space-y-1 border border-border rounded p-2 bg-background">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Params sent to Brevo (use as {`{{ params.X }}`})
+              </p>
+              <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono">
+{`subject        = ${title}
+title          = ${title}
+excerpt        = ${(excerpt || "").slice(0, 80)}${excerpt.length > 80 ? "…" : ""}
+url            = ${SITE_URL_PREVIEW}/post/${previewSlug}
+author         = ${author}
+featured_image = ${featuredImage || "(none)"}
+slug           = ${previewSlug}`}
+              </pre>
             </div>
             <Button
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedListId == null}
+              disabled={!!busy || !id || selectedCampaignId == null}
             >
-              {announcementSentAt ? "Resend to subscribers" : "Send to subscribers"}
+              {announcementSentAt ? "Resend campaign" : "Send campaign"}
             </Button>
             {emailMsg && (
               <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
