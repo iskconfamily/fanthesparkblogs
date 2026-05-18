@@ -1,59 +1,48 @@
 ## Goal
-Make the announcement email feel like the website (same fonts, warm paper background, olive headings, sandstone CTA) and include the **full article body**, not just the excerpt.
+Make the post detail page (`/post/$slug`) read like the home page card for the same post — same opening rhythm (lead paragraph → image → rest) and same visual styling for title/byline/body.
 
-## Changes — single file: `src/lib/email.functions.ts`
+## Observation
+Home (`PostPreview`, `hero` layout):
+- Title + date in a `max-w-[560px]` block
+- Byline
+- First body block as lead paragraph
+- Featured `<figure className="my-8">`
+- Remaining body blocks
 
-### 1. Match the site's visual identity in `buildEmail`
+Post page today:
+- Same title + date + byline block
+- Featured `<figure className="my-8">` (BEFORE any body)
+- Entire body
 
-Pull the same tokens the site uses:
-- **Background**: warm aged-paper `#fbf8f1` (outer) and `#fdfbf5` (inner card) — matches `--background`
-- **Body text color**: warm olive-brown `#5a4a1f` for readability (slightly darker than site `--foreground` for email contrast)
-- **Heading color**: olive `#7e6c2a` (site `--foreground`)
-- **Primary / CTA**: sandstone `#f2673a` (site `--primary`)
-- **Muted text**: `#8a7a55` (byline, eyebrow, footer)
-- **Borders**: soft tan `#d9cdb3`
+The title block, byline, and figure markup are already identical. Only the order of "image vs first paragraph" differs.
 
-Typography (with Georgia fallback for Outlook):
-- Pull Cormorant Garamond + Libre Baskerville + Libre Caslon Text via a `<link>` to Google Fonts in `<head>`
-- Display headings: `'Cormorant Garamond', Georgia, serif` — italic for h1, matching the site
-- Body paragraphs: `'Libre Baskerville', Georgia, serif` at 17px / line-height 1.75
-- Eyebrow + meta: `'Libre Caslon Text', Georgia, serif`, uppercase, letter-spacing 0.18em
+## Change — single file: `src/routes/post.$slug.tsx`
+In `PostPage`, replace the current figure + `<ArticleBody blocks={post.body} />` sequence with the hero-layout split used in `PostPreview`:
 
-Layout:
-- Outer container 640px max, warm paper background
-- Inner card on `#fdfbf5` with 40px padding
-- Featured image full-width, no border-radius (site uses square images)
-- Eyebrow "New essay · Fan The Spark" in olive
-- H1 italic Cormorant ~34px
-- Byline "by Author" in meta font, small caps, muted
-- Hairline divider below byline (matches site)
-- Full article body
-- Sandstone CTA "Read on the site" at the bottom (still useful for sharing / canonical link)
-- Footer: small muted note about subscription
+```tsx
+const [first, ...rest] = post.body;
+// ...
+{first && <ArticleBody blocks={[first]} />}
+<figure className="my-8">
+  <img src={post.featuredImage.src} alt={post.featuredImage.alt} className="w-full" />
+  {post.featuredImage.caption && (
+    <figcaption
+      className="mt-2 text-sm italic text-muted-foreground text-center"
+      style={{ fontFamily: "var(--font-serif-display)" }}
+    >
+      {post.featuredImage.caption}
+    </figcaption>
+  )}
+</figure>
+{rest.length > 0 && <ArticleBody blocks={rest} />}
+```
 
-### 2. Render full article content (not excerpt)
-
-- Select `content` in the Supabase query alongside the existing fields
-- Add a small markdown-to-email-HTML renderer reusing the same block grammar as `src/lib/blog-adapter.ts` `parseContent`:
-  - `## heading` → `<h2>` (Cormorant italic, 26px, olive, top margin 32px)
-  - `> quote` → `<blockquote>` with left border in sandstone, italic Cormorant 22px
-  - `![alt](url)` on its own block → `<img>` full-width with optional caption
-  - Otherwise → `<p>` (Libre Baskerville, 17px/1.75, color `#5a4a1f`, margin 0 0 20px)
-- Escape all text content with the existing `escapeHtml` helper before injecting
-- Fallback to `excerpt` if `content` is empty (defensive — shouldn't happen for published posts)
-- Update the plain-text version to include the full content too (strip markdown markers to plain lines)
-
-### 3. Subject line and preheader
-
-- Keep subject = post title (already correct)
-- Add a hidden preheader (`<div style="display:none;...">`) with the excerpt — improves inbox preview without showing in the body
+Keep `<InlineNewsletter />` and `<RelatedArticles />` after the body, unchanged.
 
 ## Out of scope
-- No DB schema changes
-- No changes to the admin UI or the broadcast/test send flow — only the email HTML/text is updated
-- No new dependencies
+- No changes to `PostPreview`, `ArticleBody`, `Byline`, or any styles.
+- No changes to home page, archive, or email templates.
+- Title stays at `text-4xl md:text-5xl` on the post page (one size up from the home card's `text-3xl md:text-4xl`) — that's the standard "detail page is slightly larger" convention; if you want them identical too, say so and I'll match.
 
 ## Verification
-- Send a test email to yourself from the admin "Send announcement" panel and compare side-by-side with the site
-- Confirm fonts render in Apple Mail / Gmail (Cormorant + Libre Baskerville) and gracefully fall back to Georgia in Outlook
-- Confirm full body text appears, including any `##` headings, quotes, and inline figures
+Open `/post/the-khatvanga-moment` and compare side-by-side with its card on `/` — the opening paragraph, then the leaf image, then the rest of the essay should appear in the same order with the same spacing.

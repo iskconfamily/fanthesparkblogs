@@ -57,6 +57,7 @@ export const Route = createFileRoute("/post/$slug")({
 
 function PostPage() {
   const { post, related } = Route.useLoaderData();
+  const [first, ...rest] = post.body;
   return (
     <SiteLayout>
       <article>
@@ -75,6 +76,7 @@ function PostPage() {
           </p>
         </div>
         <Byline author={post.author} />
+        {first && <ArticleBody blocks={[first]} />}
         <figure className="my-8">
           <img src={post.featuredImage.src} alt={post.featuredImage.alt} className="w-full" />
           {post.featuredImage.caption && (
@@ -86,7 +88,7 @@ function PostPage() {
             </figcaption>
           )}
         </figure>
-        <ArticleBody blocks={post.body} />
+        {rest.length > 0 && <ArticleBody blocks={rest} />}
         <InlineNewsletter />
         <RelatedArticles posts={related} />
       </article>
