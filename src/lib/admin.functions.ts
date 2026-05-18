@@ -85,6 +85,7 @@ const SaveSchema = z.object({
     .array(z.object({ prompt: z.string().max(2000), alt: z.string().max(300).optional(), url: z.string().max(2000).optional() }))
     .max(20)
     .optional(),
+  image_layout: z.enum(["hero", "side", "none"]).optional(),
 });
 
 export const savePost = createServerFn({ method: "POST" })
