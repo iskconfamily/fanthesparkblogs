@@ -152,6 +152,65 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     if (url) setFeaturedImage(url);
   };
 
+  const sendTest = async () => {
+    if (!id) {
+      setEmailMsg("Save the post first.");
+      return;
+    }
+    if (!testEmail) {
+      setEmailMsg("Enter a test email address.");
+      return;
+    }
+    setBusy("Sending test…");
+    setEmailMsg("");
+    try {
+      const r = await sendEmail({ data: { postId: id, mode: "test", testEmail } });
+      setEmailMsg(`Test sent to ${r.sentTo}`);
+    } catch (e) {
+      setEmailMsg(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const sendBroadcast = async () => {
+    if (!id) {
+      setEmailMsg("Save the post first.");
+      return;
+    }
+    setBusy("Checking list…");
+    setEmailMsg("");
+    try {
+      const info = await fetchListInfo({});
+      if (!info.ok) {
+        setEmailMsg(`Brevo error: ${info.error}`);
+        setBusy(null);
+        return;
+      }
+      const count = info.totalSubscribers ?? 0;
+      const ok = window.confirm(
+        `Send "${title}" to ${count} subscriber${count === 1 ? "" : "s"} in Brevo list "${info.name ?? info.listId}"?`,
+      );
+      if (!ok) {
+        setBusy(null);
+        return;
+      }
+      setBusy(`Sending to ${count}…`);
+      const r = await sendEmail({ data: { postId: id, mode: "broadcast" } });
+      setAnnouncementSentAt(new Date().toISOString());
+      setAnnouncementCount(r.recipientCount);
+      setEmailMsg(
+        `Sent to ${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.${
+          r.errors ? ` (${r.errors.length} batch errors)` : ""
+        }`,
+      );
+    } catch (e) {
+      setEmailMsg(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const previewSlug = slug || slugify(title);
 
   return (
