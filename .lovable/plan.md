@@ -1,48 +1,72 @@
-# Email integration with Brevo
+## Goal
 
-You'll manage subscribers inside Brevo's dashboard. The app just tells Brevo "send this blog to that list."
+Snapshot the current visual design as **"style1"** and set up a system so future styles (style2, style3, …) can be previewed by passing a `?style=styleN` URL parameter on any page.
 
-## How it will work (your day-to-day)
+## Approach
 
-1. In Brevo's dashboard, you create one **Contact List** (e.g. "Fan The Spark Blog Subscribers") and add/import emails there.
-2. In the blog admin editor, two new buttons appear:
-   - **Send test email to: [your@email]** — fires one email to that address only. Use this to preview before broadcasting.
-   - **Send announcement to subscribers** — sends to your full Brevo list. Has a confirm dialog showing the recipient count.
-3. Publishing a blog stays separate from emailing. Nothing goes out automatically — you decide when to click "Send announcement." This is the safest setup for testing.
-4. Each blog tracks whether an announcement was sent (date + recipient count), so you don't accidentally double-send.
+A theme registry + a tiny React provider that reads `?style=` from the URL and swaps a set of CSS variables on `<html>`. No component rewrites — every styled element already reads from CSS variables and a small set of named font/color tokens, so switching themes = swapping variable values.
 
-## What the email will look like
+## Files to add
 
-- Subject: the blog title
-- Body: blog title, featured image, excerpt, "Read full post" button linking to the live blog URL, simple olive-themed styling matching the site
-- From: a `noreply@…` sender (we'll pick a verified Brevo sender during setup)
+```
+src/styles/themes/
+  style1.css          ← exact snapshot of today's tokens
+  index.ts            ← registry: { style1: "style1", ... }
+src/components/
+  theme-provider.tsx  ← reads ?style= search param, sets data-style on <html>
+```
 
-## Setup steps I'll need from you
+## How style1 captures "today"
 
-1. **Connect Brevo** — I'll trigger the Brevo connector and you'll paste your Brevo API key (from Brevo → SMTP & API → API Keys).
-2. **Verify a sender in Brevo** — in Brevo's dashboard, add and verify the "From" email (e.g. `noreply@fanthespark.com` or just your gmail for testing). Tell me which address to use.
-3. **Create the Brevo list** — make one Contact List in Brevo and tell me its **List ID** (visible in the URL or list settings).
+`style1.css` will define a `[data-style="style1"]` block containing every token currently in use, so nothing visual changes when style1 is active (which will be the default):
 
-## What I'll build
+- **Color tokens** (from `src/styles.css` `:root`): `--background`, `--foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--muted`, `--muted-foreground`, `--accent`, `--border`, `--input`, `--ring`, `--destructive`, sidebar tokens, `--brand-olive` — all current oklch values.
+- **Font tokens**: `--font-serif-display` (Cormorant Garamond), `--font-serif-body` (Lora), `--font-meta` (Libre Caslon Text), `--font-display-sans` (Inter Tight).
+- **Radius**: `--radius`, `--radius-sm/md/lg/xl`.
+- **Brand accent hexes** promoted to variables so future styles can override them:
+  - `--brand-header-bg: #faf6ee`
+  - `--brand-title-color: #7e6c2a`
+  - `--brand-gold: #d9a74e`
+  - `--brand-title-card-bg: rgba(239, 217, 180, 0.18)`
+  - `--brand-header-border: rgba(217, 167, 78, 0.22)`
+  - `--brand-header-shadow: rgba(126, 108, 42, 0.07)`
+- **Header geometry**: `--header-height-expanded: 124px`, `--header-height-scrolled: 64px`, mobile variants, logo heights, transition `380ms cubic-bezier(0.4,0,0.2,1)`.
 
-- A small server function `sendBlogAnnouncement(postId, mode)` where `mode` is `"test"` (single email) or `"broadcast"` (Brevo list). It calls Brevo's transactional email API through the connector gateway.
-- Two buttons + a test-email input in `src/components/admin/post-editor.tsx`.
-- A new column `announcement_sent_at` on `blog_posts` to record broadcasts.
-- A small toast/notification showing success or error from Brevo.
+A small, surgical refactor will swap the hard-coded hex strings in `site-header.tsx`, `post-preview.tsx`, `post.$slug.tsx`, and `preview.$slug.tsx` to read from these variables — so style2 can rebrand without touching component code.
 
-## What's NOT in this plan (we can add later)
+## How `?style=` works
 
-- Auto-send on publish
-- Subscribe form on the public site (subscribers come from Brevo for now — you can import a CSV there)
-- Open/click tracking dashboards (Brevo has these in its own UI)
-- Scheduled/delayed sending
+`theme-provider.tsx` (mounted once inside `__root.tsx`):
 
-## Technical details
+1. Reads `window.location.search` for `style` (e.g. `?style=style2`).
+2. Validates against the registry; falls back to `style1`.
+3. Sets `document.documentElement.dataset.style = "<name>"`.
+4. Re-runs on route changes via TanStack's `useRouterState`.
 
-- Brevo connector uses Lovable's connector gateway, so the API key is stored securely server-side — never exposed to the browser.
-- Endpoint used: `POST /smtp/email` via `https://connector-gateway.lovable.dev/brevo/smtp/email`.
-- For broadcast mode, we pass `{ to: [{ email: "noreply@…" }], bcc: [...everyone from list...] }` OR use Brevo's `messageVersions` / list-targeted sending — I'll use whichever Brevo recommends for the list ID approach (likely fetching contacts from the list, then sending in batches of ~50 BCC, or using Brevo's campaign API for true list send).
-- Migration adds: `ALTER TABLE blog_posts ADD COLUMN announcement_sent_at timestamptz, ADD COLUMN announcement_recipient_count int;`
-- Server function is admin-protected via `requireSupabaseAuth` + `has_role(uid, 'admin')` check.
+`styles.css` imports each theme file. Each theme is scoped to `html[data-style="styleN"] { … }` so switching is instant and SSR-safe (no flash — style1 vars are also set on `:root` as the default).
 
-Approve this and I'll start with step 1 (connecting Brevo).
+URLs after this change:
+- `/` → style1 (default, unchanged)
+- `/?style=style1` → explicit style1
+- `/post/some-slug?style=style2` → preview style2 (once style2 is added)
+- Works on every route automatically.
+
+## Adding future styles
+
+To add style2 later: create `src/styles/themes/style2.css` overriding any subset of variables, register it in `themes/index.ts`. No other changes needed.
+
+## What does NOT change
+
+- No visual difference when viewing the site today — style1 is byte-equivalent to current rendering.
+- No font, layout, header animation, article-body, or title-card behavior changes.
+- No backend, routing, or content changes.
+
+## Out of scope
+
+- Building style2/style3 (you'll request those separately).
+- A UI style-switcher widget (URL param only, per your request).
+- Persisting the chosen style across navigation without the URL param.
+
+---
+
+Shall I implement?

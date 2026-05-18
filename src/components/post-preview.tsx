@@ -37,7 +37,7 @@ export function PostPreview({ post }: { post: Post }) {
       <div
         className="mb-3 px-4 py-2.5 md:px-5 md:py-3 max-w-[560px]"
         style={{
-          backgroundColor: "rgba(239, 217, 180, 0.18)",
+          backgroundColor: "var(--brand-title-card-bg)",
           borderRadius: "3px",
         }}
       >
@@ -52,7 +52,7 @@ export function PostPreview({ post }: { post: Post }) {
               borderBottom: "none",
               display: "inline-block",
               lineHeight: 1.15,
-              color: "#7e6c2a",
+              color: "var(--brand-title-color)",
             }}
           >
             {post.title}

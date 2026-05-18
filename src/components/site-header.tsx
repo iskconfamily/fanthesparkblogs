@@ -39,10 +39,10 @@ export function SiteHeader() {
       className="sticky top-0 z-40 w-full"
       style={{
         height: headerHeight,
-        backgroundColor: "#faf6ee",
-        borderBottom: "1px solid rgba(217, 167, 78, 0.22)",
+        backgroundColor: "var(--brand-header-bg)",
+        borderBottom: "1px solid var(--brand-header-border)",
         transition: `height ${duration} ${ease}, box-shadow ${duration} ${ease}`,
-        boxShadow: isScrolled ? "0 1px 10px rgba(126, 108, 42, 0.07)" : "none",
+        boxShadow: isScrolled ? "0 1px 10px var(--brand-header-shadow)" : "none",
       }}
     >
       <div className="relative mx-auto h-full max-w-[1200px]">
