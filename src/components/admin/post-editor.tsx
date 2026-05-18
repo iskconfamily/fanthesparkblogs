@@ -212,7 +212,21 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     setBusy("Sending test…");
     setEmailMsg("");
     try {
-      const r = await sendEmail({ data: { postId: id, mode: "test", testEmail } });
+      if (selectedCampaignId == null) {
+        setEmailMsg("Select a Brevo campaign (used as template) first.");
+        setBusy(null);
+        return;
+      }
+      const r = await sendEmail({
+        data: {
+          postId: id,
+          mode: "test",
+          testEmail,
+          target,
+          campaignId: selectedCampaignId,
+          listId: target === "list" ? selectedListId ?? undefined : undefined,
+        },
+      });
       setEmailMsg(`Test sent to ${r.sentTo}`);
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
