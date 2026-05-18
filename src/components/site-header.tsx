@@ -7,7 +7,14 @@ export function SiteHeader() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 60);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setIsScrolled((prev) => {
+        if (!prev && y > 80) return true;
+        if (prev && y < 20) return false;
+        return prev;
+      });
+    };
     const onResize = () => setIsMobile(window.innerWidth < 768);
     onScroll();
     onResize();
