@@ -51,36 +51,37 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [announcementCount, setAnnouncementCount] = useState<number | null>(
     existing?.announcement_recipient_count ?? null,
   );
-  const [brevoLists, setBrevoLists] = useState<
-    Array<{ id: number; name: string; totalSubscribers: number }>
+  const [brevoCampaigns, setBrevoCampaigns] = useState<
+    Array<{ id: number; name: string; status: string; subject: string | null; listIds: number[] }>
   >([]);
-  const [selectedListId, setSelectedListId] = useState<number | null>(null);
-  const [listsError, setListsError] = useState("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
+  const [campaignsError, setCampaignsError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetchLists();
+        const r = await fetchCampaigns();
         if (cancelled) return;
         if (!r.ok) {
-          setListsError(r.error ?? "Failed to load Brevo lists");
+          setCampaignsError(r.error ?? "Failed to load Brevo campaigns");
           return;
         }
-        setBrevoLists(r.lists);
-        setSelectedListId((prev) => {
+        setBrevoCampaigns(r.campaigns);
+        setSelectedCampaignId((prev) => {
           if (prev != null) return prev;
-          if (r.lists.some((l) => l.id === r.defaultListId)) return r.defaultListId;
-          return r.lists[0]?.id ?? null;
+          // Prefer first draft, else first campaign
+          const firstDraft = r.campaigns.find((c) => c.status === "draft");
+          return firstDraft?.id ?? r.campaigns[0]?.id ?? null;
         });
       } catch (e) {
-        if (!cancelled) setListsError(e instanceof Error ? e.message : "Failed to load lists");
+        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load campaigns");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fetchLists]);
+  }, [fetchCampaigns]);
 
   const id = existing?.id;
 
