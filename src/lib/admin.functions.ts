@@ -932,26 +932,28 @@ type StudioAiResult = {
   suggested_image_prompts: { prompt: string; alt?: string }[];
 };
 
+const newBlockId = () =>
+  `b_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+
 function materializeStudioBlocks(
   raw: StudioBlockOut[],
   images: { url: string; alt?: string }[],
 ): PostBlock[] {
   const out: PostBlock[] = [];
-  const newId = () => `b_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
   for (const b of raw) {
     if (b.type === "paragraph" && typeof b.text === "string") {
-      out.push({ id: newId(), type: "paragraph", text: b.text });
+      out.push({ id: newBlockId(), type: "paragraph", text: b.text });
     } else if (b.type === "heading" && typeof b.text === "string") {
-      out.push({ id: newId(), type: "heading", level: b.level === 3 ? 3 : 2, text: b.text });
+      out.push({ id: newBlockId(), type: "heading", level: b.level === 3 ? 3 : 2, text: b.text });
     } else if (b.type === "quote" && typeof b.text === "string") {
-      out.push({ id: newId(), type: "quote", text: b.text, cite: b.cite });
+      out.push({ id: newBlockId(), type: "quote", text: b.text, cite: b.cite });
     } else if (b.type === "pull-quote" && typeof b.text === "string") {
-      out.push({ id: newId(), type: "pull-quote", text: b.text, cite: b.cite });
+      out.push({ id: newBlockId(), type: "pull-quote", text: b.text, cite: b.cite });
     } else if (b.type === "image" && typeof b.imageIndex === "number") {
       const img = images[b.imageIndex];
       if (!img) continue;
       out.push({
-        id: newId(),
+        id: newBlockId(),
         type: "image",
         src: img.url,
         alt: img.alt ?? "",
@@ -962,7 +964,7 @@ function materializeStudioBlocks(
       const img = images[b.imageIndex];
       if (!img) continue;
       out.push({
-        id: newId(),
+        id: newBlockId(),
         type: "image-text",
         src: img.url,
         alt: img.alt ?? "",
@@ -977,20 +979,121 @@ function materializeStudioBlocks(
         .map((img) => ({ src: img.url, alt: img.alt ?? "" }));
       if (galleryImages.length === 0) continue;
       out.push({
-        id: newId(),
+        id: newBlockId(),
         type: "gallery",
         images: galleryImages,
         columns: b.columns === 3 ? 3 : 2,
       });
     } else if (b.type === "divider") {
-      out.push({ id: newId(), type: "divider" });
+      out.push({ id: newBlockId(), type: "divider" });
     } else if (b.type === "callout" && typeof b.text === "string") {
-      out.push({ id: newId(), type: "callout", tone: b.tone === "warning" ? "warning" : "note", text: b.text });
+      out.push({ id: newBlockId(), type: "callout", tone: b.tone === "warning" ? "warning" : "note", text: b.text });
     } else if (b.type === "newsletter-cta") {
-      out.push({ id: newId(), type: "newsletter-cta" });
+      out.push({ id: newBlockId(), type: "newsletter-cta" });
     }
   }
   return out;
+}
+
+/**
+ * Fallback: split raw markdown into Quiet Quill blocks when the AI returns
+ * an empty / unusable blocks array. Preserves every word and link verbatim.
+ * Handles: ##/### headings, > quotes, --- dividers, and paragraphs.
+ * Drops the first H1 if present (used as the title).
+ */
+function markdownToBlocksFallback(
+  markdown: string,
+  images: { url: string; alt?: string }[],
+): PostBlock[] {
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+  const blocks: PostBlock[] = [];
+  let buf: string[] = [];
+  let quoteBuf: string[] = [];
+  let droppedH1 = false;
+
+  const flushPara = () => {
+    const t = buf.join(" ").trim();
+    if (t) blocks.push({ id: newBlockId(), type: "paragraph", text: t });
+    buf = [];
+  };
+  const flushQuote = () => {
+    const t = quoteBuf.join(" ").trim();
+    if (t) blocks.push({ id: newBlockId(), type: "quote", text: t });
+    quoteBuf = [];
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    if (!line.trim()) {
+      flushPara();
+      flushQuote();
+      continue;
+    }
+    const h1 = /^#\s+(.+)$/.exec(line);
+    const h2 = /^##\s+(.+)$/.exec(line);
+    const h3 = /^###\s+(.+)$/.exec(line);
+    const quote = /^>\s?(.*)$/.exec(line);
+    if (h1) {
+      flushPara(); flushQuote();
+      if (!droppedH1) { droppedH1 = true; continue; }
+      blocks.push({ id: newBlockId(), type: "heading", level: 2, text: h1[1].trim() });
+    } else if (h2) {
+      flushPara(); flushQuote();
+      blocks.push({ id: newBlockId(), type: "heading", level: 2, text: h2[1].trim() });
+    } else if (h3) {
+      flushPara(); flushQuote();
+      blocks.push({ id: newBlockId(), type: "heading", level: 3, text: h3[1].trim() });
+    } else if (/^---+$/.test(line)) {
+      flushPara(); flushQuote();
+      blocks.push({ id: newBlockId(), type: "divider" });
+    } else if (quote) {
+      flushPara();
+      quoteBuf.push(quote[1]);
+    } else {
+      flushQuote();
+      buf.push(line.trim());
+    }
+  }
+  flushPara();
+  flushQuote();
+
+  // Place uploaded images: first as hero at top, rest distributed every ~3 paragraphs.
+  if (images.length > 0) {
+    const [hero, ...rest] = images;
+    blocks.unshift({
+      id: newBlockId(),
+      type: "image",
+      src: hero.url,
+      alt: hero.alt ?? "",
+      layout: "hero",
+    });
+    let inserted = 0;
+    const stride = 3;
+    for (let i = 0; i < rest.length; i++) {
+      const target = (i + 1) * (stride + 1) + 1;
+      if (target < blocks.length) {
+        blocks.splice(target, 0, {
+          id: newBlockId(),
+          type: "image",
+          src: rest[i].url,
+          alt: rest[i].alt ?? "",
+          layout: "full",
+        });
+        inserted++;
+      } else {
+        blocks.push({
+          id: newBlockId(),
+          type: "image",
+          src: rest[i].url,
+          alt: rest[i].alt ?? "",
+          layout: "full",
+        });
+      }
+    }
+    void inserted;
+  }
+
+  return blocks;
 }
 
 async function callStudioLayoutAi(args: {
