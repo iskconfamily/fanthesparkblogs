@@ -162,6 +162,7 @@ function AdminList() {
         <strong>Design posts visually with AI.</strong> Click{" "}
         <em>New post (AI designer)</em> to start fresh, or <em>Design with AI</em> on
         any post below to lay out images and text exactly where you want.
+      </div>
 
       {isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
