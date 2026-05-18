@@ -26,6 +26,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const sendEmail = useServerFn(sendBlogAnnouncement);
   const fetchCampaignInfo = useServerFn(getBrevoCampaignInfo);
   const fetchCampaigns = useServerFn(listBrevoCampaigns);
+  const fetchLists = useServerFn(listBrevoLists);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
