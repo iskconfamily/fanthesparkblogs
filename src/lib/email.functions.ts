@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { buildBlogEmailHtml } from "@/lib/email-html";
 
 const SITE_URL = "https://fanthesparkblogs.lovable.app";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/brevo";
@@ -35,7 +36,18 @@ function buildParams(post: {
   excerpt: string | null;
   featured_image: string | null;
   author: string | null;
+  content: string | null;
+  blocks: unknown;
+  image_layout: string | null;
 }) {
+  const blog_html = buildBlogEmailHtml({
+    title: post.title,
+    excerpt: post.excerpt,
+    content: post.content,
+    featured_image: post.featured_image,
+    blocks: post.blocks,
+    image_layout: post.image_layout,
+  });
   return {
     subject: post.title,
     title: post.title,
@@ -44,8 +56,32 @@ function buildParams(post: {
     author: post.author ?? "",
     featured_image: post.featured_image ?? "",
     slug: post.slug,
+    blog_html,
   };
 }
+
+export const getBlogEmailHtml = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => z.object({ postId: z.string().uuid() }).parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { data: post, error } = await supabaseAdmin
+      .from("blog_posts")
+      .select("title,excerpt,content,featured_image,blocks,image_layout")
+      .eq("id", data.postId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!post) throw new Error("Post not found");
+    const html = buildBlogEmailHtml({
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      featured_image: post.featured_image,
+      blocks: post.blocks,
+      image_layout: post.image_layout,
+    });
+    return { html, length: html.length };
+  });
 
 export const listBrevoCampaigns = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -199,13 +235,16 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     const { data: post, error } = await supabaseAdmin
       .from("blog_posts")
-      .select("id,title,slug,excerpt,featured_image,author")
+      .select("id,title,slug,excerpt,featured_image,author,content,blocks,image_layout")
       .eq("id", data.postId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!post) throw new Error("Post not found");
 
     const params = buildParams(post);
+    if (!params.blog_html || params.blog_html.trim().length === 0) {
+      throw new Error("blog_html is empty — add content/blocks to the post before sending.");
+    }
     const headers = brevoHeaders();
 
     // ALWAYS clone the selected (template) campaign into a fresh draft. Brevo

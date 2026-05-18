@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, listBrevoCampaigns, listBrevoLists } from "@/lib/email.functions";
+import { sendBlogAnnouncement, listBrevoCampaigns, listBrevoLists, getBlogEmailHtml } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   
   const fetchCampaigns = useServerFn(listBrevoCampaigns);
   const fetchLists = useServerFn(listBrevoLists);
+  const fetchBlogHtml = useServerFn(getBlogEmailHtml);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
@@ -64,6 +65,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   >([]);
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
   const [listsError, setListsError] = useState("");
+  const [blogHtml, setBlogHtml] = useState<string>("");
+  const [blogHtmlError, setBlogHtmlError] = useState<string>("");
+
   
 
   useEffect(() => {
@@ -96,6 +100,32 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   }, [fetchCampaigns, fetchLists]);
 
   const id = existing?.id;
+
+  useEffect(() => {
+    if (!id) {
+      setBlogHtml("");
+      setBlogHtmlError("");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetchBlogHtml({ data: { postId: id } });
+        if (cancelled) return;
+        setBlogHtml(r.html);
+        setBlogHtmlError("");
+      } catch (e) {
+        if (!cancelled) {
+          setBlogHtml("");
+          setBlogHtmlError(e instanceof Error ? e.message : "Failed to build blog_html");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, fetchBlogHtml, content, existing?.updated_at]);
+
 
   const parsedTags = tagsText
     .split(",")
@@ -213,6 +243,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Select a template campaign first.");
       return;
     }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setEmailMsg("blog_html is empty — add content to the post before sending.");
+      return;
+    }
     setBusy("Sending test…");
     setEmailMsg("");
     try {
@@ -244,6 +278,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     }
     if (selectedListId == null) {
       setEmailMsg("Select a Brevo list first.");
+      return;
+    }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setEmailMsg("blog_html is empty — add content to the post before sending.");
       return;
     }
     setBusy("Checking…");
@@ -577,17 +615,32 @@ excerpt        = ${(excerpt || "").slice(0, 80)}${excerpt.length > 80 ? "…" : 
 url            = ${SITE_URL_PREVIEW}/post/${previewSlug}
 author         = ${author}
 featured_image = ${featuredImage || "(none)"}
-slug           = ${previewSlug}`}
+slug           = ${previewSlug}
+blog_html      = ${blogHtml.length} chars`}
               </pre>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground pt-1">
+                blog_html preview (first 300 chars)
+              </p>
+              <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono max-h-32 overflow-auto">
+{blogHtml ? blogHtml.slice(0, 300) + (blogHtml.length > 300 ? "…" : "") : "(empty — save the post and add content)"}
+              </pre>
+              {blogHtmlError && (
+                <p className="text-[11px] text-destructive break-words">{blogHtmlError}</p>
+              )}
+              <p className="text-[10px] text-muted-foreground leading-relaxed pt-1">
+                In Brevo templates, render the full body with:{" "}
+                <code>{`{% autoescape off %}{{ params.blog_html }}{% endautoescape %}`}</code>
+              </p>
             </div>
             <Button
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedCampaignId == null}
+              disabled={!!busy || !id || selectedCampaignId == null || !blogHtml}
             >
               {announcementSentAt ? "Resend campaign" : "Send campaign"}
             </Button>
+
             {emailMsg && (
               <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
             )}
