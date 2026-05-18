@@ -31,49 +31,59 @@ export function SiteHeader() {
         <Link
           to="/"
           aria-label="Fan The Spark — Home"
-          className="no-underline absolute inset-0 flex items-center"
+          className="no-underline absolute inset-0"
           style={{ borderBottom: "none" }}
         >
-          {/* Logo: centered at top, slides to left when scrolled */}
+          {/* Centered lockup container — fades out on scroll */}
+          <div
+            className="absolute inset-0 flex items-center justify-center gap-4 px-6"
+            style={{
+              opacity: isScrolled ? 0 : 1,
+              visibility: isScrolled ? "hidden" : "visible",
+              transition: isScrolled
+                ? `opacity 200ms ${ease}, visibility 0s linear 200ms`
+                : `opacity 260ms ${ease} 80ms, visibility 0s linear 0s`,
+            }}
+          >
+            <img
+              src={logoUrl}
+              alt=""
+              style={{ width: 64, height: 64, objectFit: "contain" }}
+            />
+            <h1
+              className="text-2xl md:text-3xl whitespace-nowrap"
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontWeight: 600,
+                fontVariant: "small-caps",
+                letterSpacing: "0.08em",
+                color: "var(--brand-olive)",
+                margin: 0,
+              }}
+            >
+              Fan The Spark Blogs
+            </h1>
+          </div>
+
+          {/* Compact left-aligned logo — fades in on scroll */}
           <img
             src={logoUrl}
             alt="Fan The Spark"
             style={{
               position: "absolute",
               top: "50%",
-              left: isScrolled ? "24px" : "50%",
+              left: 24,
               width: logoSize,
               height: logoSize,
-              transform: isScrolled
-                ? "translate(0, -50%)"
-                : "translate(calc(-50% - 130px), -50%)",
+              transform: "translateY(-50%)",
               objectFit: "contain",
-              transition: `all 320ms ${ease}`,
-            }}
-            className={isScrolled ? "" : "md:!left-1/2"}
-          />
-          {/* Title: centered at top, fades out on scroll */}
-          <h1
-            className="text-2xl md:text-3xl whitespace-nowrap"
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(calc(-50% + 40px), -50%)",
-              fontFamily: "var(--font-serif-display)",
-              fontWeight: 600,
-              fontVariant: "small-caps",
-              letterSpacing: "0.08em",
-              color: "var(--brand-olive)",
-              opacity: isScrolled ? 0 : 1,
-              visibility: isScrolled ? "hidden" : "visible",
+              opacity: isScrolled ? 1 : 0,
+              visibility: isScrolled ? "visible" : "hidden",
               transition: isScrolled
-                ? `opacity 200ms ${ease}, visibility 0s linear 200ms`
-                : `opacity 260ms ${ease} 60ms, visibility 0s linear 0s`,
+                ? `opacity 260ms ${ease} 80ms, width 320ms ${ease}, height 320ms ${ease}, visibility 0s linear 0s`
+                : `opacity 180ms ${ease}, visibility 0s linear 180ms`,
             }}
-          >
-            Fan The Spark Blogs
-          </h1>
+          />
         </Link>
       </div>
     </header>
