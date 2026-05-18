@@ -1,47 +1,35 @@
 ## Goal
 
-Create a new published blog post in the database from the source article:
-`https://fanthespark.com/wisdom/blog/want-to-change-stress-to-serenity-read-this/`
-— "Want to change Stress to Serenity? Read this." by Vaisesika Dasa.
+Fix two things on the "Want to change Stress to Serenity?" post:
+1. Make the second image actually prominent, not a small floated thumbnail.
+2. Unpublish it so you can review/edit before it goes live.
 
-Generate two original images that fit the article (mind/meditation theme) and place them inline.
+## Changes
 
-## Content
+### 1. Make it a draft
+Update the `blog_posts` row for slug `want-to-change-stress-to-serenity`:
+- `status` → `draft`
+- `published_at` → `NULL`
 
-- **Title**: Want to change Stress to Serenity? Read this.
-- **Slug**: `want-to-change-stress-to-serenity`
-- **Author**: Vaisesika Dasa
-- **Category**: Bhakti Notes
-- **Tags**: meditation, mantra, stress, mindfulness, yoga sutras
-- **Excerpt**: A disturbed mind brings anxiety. Mantra meditation runs like an antivirus program for the mind — clearing the noise so inner peace can surface.
-- **Body**: The 7 paragraphs from the source article (verbatim, lightly cleaned), with the Epictetus line pulled out as a block quote.
-- **Original date**: November 18, 2018 (preserved in `published_at`)
+Result: it disappears from the public site and homepage, but is fully visible/editable in `/admin` and previewable at `/preview/want-to-change-stress-to-serenity`.
 
-## Images (2, AI-generated)
+### 2. Use the second image properly
 
-1. **Hero image** (`src/assets/blog-serenity-hero.jpg`, ~1600×900): a meditative figure silhouetted at sunrise with soft golden light, calm water, peaceful mood — used as the featured image at the top.
-2. **Inline image** (`src/assets/blog-serenity-mind.jpg`, ~1200×800): an abstract visual of a calm mind — soft glowing concentric circles / lotus over a serene watercolor background — placed mid-article, floated right (~280px) next to the "vrittis / mind viruses" paragraph, matching the size pattern we just fixed on "Our Family Business".
+Currently the lotus/mind image is `layout: "side-right"` (small float). I'll change it to a larger centered placement so both images read as real images, not decoration:
 
-Both images are saved as project assets, then uploaded to the `blog-images` storage bucket so the database row references public URLs.
+- **Image 1 (hero)** — meditation silhouette at sunrise → stays as the featured/hero image at the top.
+- **Image 2 (lotus mind)** — change `layout` from `side-right` to `inline-small` (centered, ~60% column width) and move it between the "vrittis" paragraph and the Epictetus quote, with a short caption like *"A calm mind: the goal of mantra meditation."*
 
-## How it's saved
+This is a targeted JSONB edit to that one row — no schema or code changes.
 
-Single `blog_posts` row inserted with `status = 'published'`, `image_layout = 'hero'`, and a `blocks` jsonb array structured as:
+## Review flow
 
-```
-[ paragraph, quote (Epictetus), paragraph, image (side-right), paragraph, ... ]
-```
-
-Renderer already handles `side-right` correctly, so the inline image will float at ~280px with text wrapping.
-
-## Verification
-
-1. Visit `/post/want-to-change-stress-to-serenity` — hero image at top, body text reads cleanly, inline image floats right around the "vrittis" section.
-2. Home page card shows the new post with the hero thumbnail.
-3. `/admin` lists it as a published DB post (editable / re-designable with AI).
+After the update:
+1. Open `/admin` → post shows with a **draft** badge.
+2. Click **Preview** to see the layout exactly as readers will.
+3. Click **Design with AI** or **Edit** to tweak text/images further.
+4. When happy, click **Publish** in the admin list.
 
 ## Out of scope
-
-- Importing the rest of the fanthespark.com archive.
-- Changing the chat-bot/admin designer behavior (that was the previous question — leaving as-is for now).
-- Restyling the post page.
+- Re-generating the images (keeping the two we already have).
+- Changing the default behavior of new posts created from the admin (those already default to draft).
