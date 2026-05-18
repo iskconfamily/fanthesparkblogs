@@ -845,3 +845,422 @@ export const chatDesignPost = createServerFn({ method: "POST" })
       blocks: newBlocks,
     };
   });
+
+// ============================================================================
+//  Blog Studio: layout-aware generator + rework + helpers
+// ============================================================================
+
+const STUDIO_SYSTEM_PROMPT = `You are the LAYOUT DESIGNER for The Quiet Quill — a contemplative literary blog with an established calm, editorial style (serif typography, generous whitespace, restrained quotes, no banners). You arrange a single blog post.
+
+ABSOLUTE RULES (violating any is a failure):
+1. PRESERVE THE BODY VERBATIM. Every word the author wrote must appear, in the original order, spelled exactly as given. Do NOT rewrite, paraphrase, summarize, shorten, expand, translate, or "improve" any sentence.
+2. PRESERVE ALL LINKS. If the source contains markdown links \`[text](url)\`, YouTube URLs, or any http(s) links, keep them inside the corresponding paragraph/quote text. Never remove or rewrite them unless the user asked.
+3. You may only:
+   - split the prose into paragraph, heading, quote, pull-quote, callout blocks
+   - decide where to place the images the user uploaded (as image, image-text, gallery, or featured)
+   - insert at most one newsletter-cta near the end
+   - insert dividers between sections when natural
+   - propose 0–3 short suggested_image_prompts ONLY if no images were uploaded AND the piece would benefit
+4. If the user uploaded a reference-layout image, study it for ARRANGEMENT INSPIRATION only — do NOT include that image in the output blocks.
+5. Do not invent images. Only place images whose index is in the uploaded set.
+
+OUTPUT: call the design_post tool. blocks[] uses the schema below.
+
+Block schema:
+- { type:"paragraph", text }                                          // text may contain [label](url)
+- { type:"heading", level:2|3, text }
+- { type:"quote", text, cite? }
+- { type:"pull-quote", text, cite? }
+- { type:"image", imageIndex, layout:"hero"|"full"|"side-right"|"side-left"|"inline-small", caption? }
+- { type:"image-text", imageIndex, text, imageSide:"left"|"right", caption? }
+- { type:"gallery", imageIndices:[…], columns:2|3 }
+- { type:"divider" }
+- { type:"callout", tone:"note", text }
+- { type:"newsletter-cta" }
+
+featured_image_index: the index of the image that should also be the post's featured image (or null if none of the uploaded images should be the featured one).
+
+TAGS: suggest 1–3 short tags drawn from the post's actual themes. Avoid generic catch-all tags. Most posts should have 1–2 tags; only add a 3rd if it genuinely adds something.
+
+STYLE GUIDANCE: Quiet Quill prefers small quiet arrangements over banner-heavy layouts. Don't open with a giant image unless it really earns it. Pull-quotes are sparing — at most one per post. Galleries only when there are 3+ thematically related images.`;
+
+const StudioImageInput = z.object({
+  url: z.string().url().max(2000),
+  alt: z.string().max(300).optional(),
+});
+
+const StudioGenerateSchema = z.object({
+  id: z.string().uuid(),
+  markdown: z.string().min(3).max(80000),
+  sourceLabel: z.string().max(500).optional(),
+  images: z.array(StudioImageInput).max(20).default([]),
+  referenceLayoutImageUrl: z.string().url().max(2000).optional(),
+});
+
+type StudioBlockOut =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; level?: 2 | 3; text: string }
+  | { type: "quote"; text: string; cite?: string }
+  | { type: "pull-quote"; text: string; cite?: string }
+  | {
+      type: "image";
+      imageIndex: number;
+      layout?: "hero" | "full" | "side-right" | "side-left" | "inline-small";
+      caption?: string;
+    }
+  | {
+      type: "image-text";
+      imageIndex: number;
+      text: string;
+      imageSide?: "left" | "right";
+      caption?: string;
+    }
+  | { type: "gallery"; imageIndices: number[]; columns?: 2 | 3 }
+  | { type: "divider" }
+  | { type: "callout"; tone?: "note" | "warning"; text: string }
+  | { type: "newsletter-cta" };
+
+type StudioAiResult = {
+  title: string;
+  excerpt: string;
+  category: string;
+  tags: string[];
+  seo_title: string;
+  seo_description: string;
+  blocks: StudioBlockOut[];
+  featured_image_index: number | null;
+  suggested_image_prompts: { prompt: string; alt?: string }[];
+};
+
+function materializeStudioBlocks(
+  raw: StudioBlockOut[],
+  images: { url: string; alt?: string }[],
+): PostBlock[] {
+  const out: PostBlock[] = [];
+  const newId = () => `b_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  for (const b of raw) {
+    if (b.type === "paragraph" && typeof b.text === "string") {
+      out.push({ id: newId(), type: "paragraph", text: b.text });
+    } else if (b.type === "heading" && typeof b.text === "string") {
+      out.push({ id: newId(), type: "heading", level: b.level === 3 ? 3 : 2, text: b.text });
+    } else if (b.type === "quote" && typeof b.text === "string") {
+      out.push({ id: newId(), type: "quote", text: b.text, cite: b.cite });
+    } else if (b.type === "pull-quote" && typeof b.text === "string") {
+      out.push({ id: newId(), type: "pull-quote", text: b.text, cite: b.cite });
+    } else if (b.type === "image" && typeof b.imageIndex === "number") {
+      const img = images[b.imageIndex];
+      if (!img) continue;
+      out.push({
+        id: newId(),
+        type: "image",
+        src: img.url,
+        alt: img.alt ?? "",
+        caption: b.caption,
+        layout: b.layout ?? "hero",
+      });
+    } else if (b.type === "image-text" && typeof b.imageIndex === "number" && typeof b.text === "string") {
+      const img = images[b.imageIndex];
+      if (!img) continue;
+      out.push({
+        id: newId(),
+        type: "image-text",
+        src: img.url,
+        alt: img.alt ?? "",
+        caption: b.caption,
+        text: b.text,
+        imageSide: b.imageSide === "left" ? "left" : "right",
+      });
+    } else if (b.type === "gallery" && Array.isArray(b.imageIndices)) {
+      const galleryImages = b.imageIndices
+        .map((i) => images[i])
+        .filter((x): x is { url: string; alt?: string } => !!x)
+        .map((img) => ({ src: img.url, alt: img.alt ?? "" }));
+      if (galleryImages.length === 0) continue;
+      out.push({
+        id: newId(),
+        type: "gallery",
+        images: galleryImages,
+        columns: b.columns === 3 ? 3 : 2,
+      });
+    } else if (b.type === "divider") {
+      out.push({ id: newId(), type: "divider" });
+    } else if (b.type === "callout" && typeof b.text === "string") {
+      out.push({ id: newId(), type: "callout", tone: b.tone === "warning" ? "warning" : "note", text: b.text });
+    } else if (b.type === "newsletter-cta") {
+      out.push({ id: newId(), type: "newsletter-cta" });
+    }
+  }
+  return out;
+}
+
+async function callStudioLayoutAi(args: {
+  markdown: string;
+  sourceLabel?: string;
+  images: { url: string; alt?: string }[];
+  referenceLayoutImageUrl?: string;
+  existingBlocksJson?: string;
+  modeNote?: string;
+}): Promise<StudioAiResult> {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
+
+  const imageList = args.images
+    .map((img, i) => `  [${i}] ${img.url}${img.alt ? `  alt="${img.alt}"` : ""}`)
+    .join("\n");
+
+  const userTextParts: string[] = [];
+  userTextParts.push(`Source label: ${args.sourceLabel ?? "pasted text"}`);
+  if (args.modeNote) userTextParts.push(args.modeNote);
+  if (args.existingBlocksJson) {
+    userTextParts.push(
+      `EXISTING BLOCKS (you are reworking layout only — preserve every text block verbatim, only re-place images):\n${args.existingBlocksJson.slice(0, 30000)}`,
+    );
+  }
+  userTextParts.push(
+    `Available images (${args.images.length}):\n${imageList || "  (none — user uploaded no images)"}`,
+  );
+  if (args.referenceLayoutImageUrl) {
+    userTextParts.push(
+      "A reference-layout image is attached below. Use it for ARRANGEMENT INSPIRATION ONLY — do not include it in the output.",
+    );
+  }
+  userTextParts.push(
+    `Body source (preserve every word and every link EXACTLY):\n"""\n${args.markdown.slice(0, 60000)}\n"""\n\nNow call design_post with the final blocks, tags, metadata, and featured_image_index.`,
+  );
+
+  const content: Array<
+    | { type: "text"; text: string }
+    | { type: "image_url"; image_url: { url: string } }
+  > = [{ type: "text", text: userTextParts.join("\n\n") }];
+
+  if (args.referenceLayoutImageUrl) {
+    content.push({ type: "image_url", image_url: { url: args.referenceLayoutImageUrl } });
+  }
+  for (const img of args.images) {
+    content.push({ type: "image_url", image_url: { url: img.url } });
+  }
+
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: STUDIO_SYSTEM_PROMPT },
+        { role: "user", content },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "design_post",
+            description:
+              "Return the post laid out as typed blocks plus metadata. Body text is verbatim from source.",
+            parameters: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                excerpt: { type: "string" },
+                category: { type: "string" },
+                tags: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 5 },
+                seo_title: { type: "string" },
+                seo_description: { type: "string" },
+                featured_image_index: { type: ["integer", "null"] },
+                suggested_image_prompts: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      prompt: { type: "string" },
+                      alt: { type: "string" },
+                    },
+                    required: ["prompt"],
+                  },
+                  maxItems: 5,
+                },
+                blocks: {
+                  type: "array",
+                  items: { type: "object" },
+                },
+              },
+              required: [
+                "title",
+                "excerpt",
+                "category",
+                "tags",
+                "seo_title",
+                "seo_description",
+                "blocks",
+                "featured_image_index",
+              ],
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "design_post" } },
+    }),
+  });
+
+  if (res.status === 429) throw new Error("Rate limit — try again shortly.");
+  if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace → Usage.");
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`AI gateway error: ${res.status} ${t.slice(0, 200)}`);
+  }
+  const json = await res.json();
+  const tc = json.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) throw new Error("AI returned no layout.");
+  return JSON.parse(tc.function.arguments) as StudioAiResult;
+}
+
+export const studioGenerateBlog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => StudioGenerateSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const ai = await callStudioLayoutAi({
+      markdown: data.markdown,
+      sourceLabel: data.sourceLabel,
+      images: data.images,
+      referenceLayoutImageUrl: data.referenceLayoutImageUrl,
+    });
+
+    const blocks = materializeStudioBlocks(ai.blocks, data.images);
+    const featuredUrl =
+      ai.featured_image_index !== null && data.images[ai.featured_image_index]
+        ? data.images[ai.featured_image_index].url
+        : null;
+
+    const update = {
+      title: ai.title,
+      excerpt: ai.excerpt,
+      category: ai.category,
+      tags: ai.tags.slice(0, 5),
+      seo_title: ai.seo_title.slice(0, 200),
+      seo_description: ai.seo_description.slice(0, 400),
+      featured_image: featuredUrl,
+      image_prompts: ai.suggested_image_prompts ?? [],
+      blocks: blocks as unknown as never,
+    };
+
+    const { data: updated, error } = await supabaseAdmin
+      .from("blog_posts")
+      .update(update)
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return normalizeDbPost(updated as unknown as Record<string, unknown>);
+  });
+
+const StudioReworkSchema = z.object({
+  id: z.string().uuid(),
+  newImages: z.array(StudioImageInput).max(20).default([]),
+  note: z.string().max(2000).optional(),
+});
+
+/**
+ * Re-arrange image placements (and optionally add newly uploaded images) without
+ * touching the existing text content. The AI receives the current blocks plus
+ * the full image inventory and returns a new block list.
+ */
+export const studioReworkLayout = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => StudioReworkSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { data: row, error } = await supabaseAdmin
+      .from("blog_posts")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error || !row) throw new Error("Post not found");
+    const post = normalizeDbPost(row as unknown as Record<string, unknown>);
+
+    // Collect markdown from existing text blocks (verbatim), and inventory of
+    // existing images + newly uploaded ones.
+    const existingImages: { url: string; alt?: string }[] = [];
+    const textChunks: string[] = [];
+    for (const b of post.blocks) {
+      if (b.type === "paragraph") textChunks.push(b.text);
+      else if (b.type === "heading") textChunks.push(`## ${b.text}`);
+      else if (b.type === "quote") textChunks.push(`> ${b.text}`);
+      else if (b.type === "pull-quote") textChunks.push(`>> ${b.text}`);
+      else if (b.type === "callout") textChunks.push(b.text);
+      else if (b.type === "image") existingImages.push({ url: b.src, alt: b.alt });
+      else if (b.type === "image-text") {
+        existingImages.push({ url: b.src, alt: b.alt });
+        textChunks.push(b.text);
+      } else if (b.type === "gallery") {
+        for (const g of b.images) existingImages.push({ url: g.src, alt: g.alt });
+      }
+    }
+    const allImages = [...existingImages, ...data.newImages];
+
+    const ai = await callStudioLayoutAi({
+      markdown: textChunks.join("\n\n"),
+      sourceLabel: "rework",
+      images: allImages,
+      modeNote: data.note
+        ? `User wants you to rework the layout. Note: ${data.note}`
+        : "User uploaded additional images. Re-arrange the layout to incorporate them. Preserve every text block verbatim.",
+    });
+
+    const blocks = materializeStudioBlocks(ai.blocks, allImages);
+    const featuredUrl =
+      ai.featured_image_index !== null && allImages[ai.featured_image_index]
+        ? allImages[ai.featured_image_index].url
+        : (post.featured_image ?? null);
+
+    const { data: updated, error: updErr } = await supabaseAdmin
+      .from("blog_posts")
+      .update({
+        blocks: blocks as unknown as never,
+        featured_image: featuredUrl,
+      })
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (updErr) throw new Error(updErr.message);
+    return normalizeDbPost(updated as unknown as Record<string, unknown>);
+  });
+
+/**
+ * Save the small editable fields admin can tweak in the studio
+ * (title, slug, excerpt, tags, featured image, SEO).
+ */
+const StudioMetaSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string().min(1).max(300),
+  slug: z.string().min(1).max(255).regex(/^[a-z0-9-]+$/),
+  excerpt: z.string().max(2000).optional().nullable(),
+  category: z.string().max(100).optional().nullable(),
+  tags: z.array(z.string().min(1).max(80)).min(1).max(10),
+  seo_title: z.string().max(200).optional().nullable(),
+  seo_description: z.string().max(400).optional().nullable(),
+  featured_image: z.string().url().max(2000).optional().nullable().or(z.literal("")),
+});
+
+export const studioSaveMeta = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) => StudioMetaSchema.parse(i))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { data: updated, error } = await supabaseAdmin
+      .from("blog_posts")
+      .update({
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt || null,
+        category: data.category || null,
+        tags: data.tags,
+        seo_title: data.seo_title || null,
+        seo_description: data.seo_description || null,
+        featured_image: data.featured_image || null,
+      })
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return normalizeDbPost(updated as unknown as Record<string, unknown>);
+  });
