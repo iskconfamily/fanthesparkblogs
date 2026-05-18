@@ -742,7 +742,7 @@ export const chatDesignPost = createServerFn({ method: "POST" })
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "edit_post" } },
+        tool_choice: "auto",
       }),
     });
 
@@ -754,10 +754,16 @@ export const chatDesignPost = createServerFn({ method: "POST" })
     }
 
     const json = await res.json();
-    const tc = json.choices?.[0]?.message?.tool_calls?.[0];
+    const msg = json.choices?.[0]?.message;
+    const tc = msg?.tool_calls?.[0];
+
+    // No tool call — it's a conversational reply. Return text, don't touch blocks.
     if (!tc) {
-      return { message: "I couldn't propose any changes for that. Try rephrasing?", blocks: post.blocks };
+      const text = (msg?.content ?? "").toString().trim()
+        || "Tell me what you'd like to change and I'll update the post.";
+      return { message: text, blocks: post.blocks };
     }
+
     const args = JSON.parse(tc.function.arguments) as {
       message: string;
       operations: Operation[];
