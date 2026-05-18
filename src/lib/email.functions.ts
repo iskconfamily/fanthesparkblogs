@@ -104,16 +104,29 @@ function jsonBlocksToEmail(blocks: unknown): ContentBlock[] {
       out.push({ type: "h2", text: r.text });
     } else if (type === "quote" && typeof r.text === "string") {
       out.push({ type: "quote", text: r.text, cite: typeof r.cite === "string" ? r.cite : undefined });
+    } else if (type === "pull-quote" && typeof r.text === "string") {
+      out.push({ type: "pull-quote", text: r.text, cite: typeof r.cite === "string" ? r.cite : undefined });
     } else if (type === "image" && typeof r.src === "string") {
       const alt = typeof r.alt === "string" ? r.alt : "";
-      const layout = typeof r.layout === "string" ? r.layout : "";
-      const small =
-        layout === "inline-small" ||
-        layout === "side-left" ||
-        layout === "side-right" ||
-        /\/signature/i.test(r.src as string) ||
-        /^signature/i.test(alt);
-      out.push({ type: "figure", src: r.src as string, alt, small });
+      const rawLayout = typeof r.layout === "string" ? r.layout : "";
+      const isSig = /\/signature/i.test(r.src as string) || /^signature/i.test(alt);
+      const layout: FigureLayout = isSig
+        ? "inline-small"
+        : rawLayout === "hero" || rawLayout === "full" || rawLayout === "side-right" ||
+          rawLayout === "side-left" || rawLayout === "inline-small"
+          ? rawLayout
+          : "full";
+      const caption = typeof r.caption === "string" ? r.caption : undefined;
+      out.push({ type: "figure", src: r.src as string, alt, layout, caption });
+    } else if (type === "image-text" && typeof r.src === "string" && typeof r.text === "string") {
+      out.push({
+        type: "image-text",
+        src: r.src as string,
+        alt: typeof r.alt === "string" ? r.alt : "",
+        text: r.text,
+        imageSide: r.imageSide === "left" ? "left" : "right",
+        caption: typeof r.caption === "string" ? r.caption : undefined,
+      });
     } else if (type === "divider") {
       out.push({ type: "divider" });
     } else if (type === "callout" && typeof r.text === "string") {
@@ -121,6 +134,29 @@ function jsonBlocksToEmail(blocks: unknown): ContentBlock[] {
     }
   }
   return out;
+}
+
+function renderImg(src: string, alt: string, extraStyle = "", attrs = ""): string {
+  return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" ${attrs} style="display:block;width:100%;height:auto;${extraStyle}" />`;
+}
+
+function renderCaption(caption?: string): string {
+  if (!caption) return "";
+  return `<span style="display:block;margin-top:8px;font-family:${FONT_DISPLAY};font-style:italic;font-size:14px;color:${MUTED};text-align:center;">${escapeHtml(caption)}</span>`;
+}
+
+function renderSideBySide(src: string, alt: string, text: string, side: "left" | "right", caption?: string): string {
+  // Email-safe two-column table; stacks naturally on narrow clients via width attrs
+  const img = `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" width="240" style="display:block;width:100%;max-width:240px;height:auto;" />${renderCaption(caption)}`;
+  const para = `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0;">${escapeHtml(text)}</p>`;
+  const left = side === "left" ? img : para;
+  const right = side === "left" ? para : img;
+  const leftWidth = side === "left" ? 240 : undefined;
+  const rightWidth = side === "right" ? 240 : undefined;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:24px 0;"><tr>` +
+    `<td valign="top" ${leftWidth ? `width="${leftWidth}"` : ""} style="padding-right:18px;">${left}</td>` +
+    `<td valign="top" ${rightWidth ? `width="${rightWidth}"` : ""} style="padding-left:${side === "right" ? 18 : 0}px;padding-right:0;">${right}</td>` +
+    `</tr></table>`;
 }
 
 function renderBlocks(blocks: ContentBlock[]): string {
@@ -135,12 +171,34 @@ function renderBlocks(blocks: ContentBlock[]): string {
           : "";
         return `<blockquote style="margin:28px 0;padding:4px 0 4px 20px;border-left:2px solid ${SANDSTONE};font-family:${FONT_DISPLAY};font-style:italic;font-size:22px;line-height:1.5;color:${OLIVE};">${escapeHtml(b.text)}${cite}</blockquote>`;
       }
+      if (b.type === "pull-quote") {
+        const cite = b.cite
+          ? `<cite style="display:block;margin-top:14px;font-style:normal;font-family:${FONT_META};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};">— ${escapeHtml(b.cite)}</cite>`
+          : "";
+        return `<p style="margin:36px 0;padding:0 12px;text-align:center;font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:30px;line-height:1.3;color:${OLIVE};">${escapeHtml(b.text)}${cite}</p>`;
+      }
       if (b.type === "figure") {
-        if (b.small) {
-          const maxW = /signature/i.test(b.src) || /^signature/i.test(b.alt) ? 200 : 360;
-          return `<p style="margin:18px 0;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;max-width:${maxW}px;width:100%;height:auto;" /></p>`;
+        // Signature stays inline-small (centered, tiny)
+        const isSig = /signature/i.test(b.src) || /^signature/i.test(b.alt);
+        if (isSig) {
+          return `<p style="margin:18px 0;text-align:center;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:inline-block;max-width:200px;width:100%;height:auto;" />${renderCaption(b.caption)}</p>`;
         }
-        return `<p style="margin:24px 0;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;width:100%;height:auto;" /></p>`;
+        if (b.layout === "side-right" || b.layout === "side-left") {
+          const align = b.layout === "side-right" ? "right" : "left";
+          const margin = align === "right" ? "0 0 12px 18px" : "0 18px 12px 0";
+          return `<p style="margin:8px 0;overflow:hidden;">` +
+            `<img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" width="260" align="${align}" style="display:block;width:260px;max-width:45%;height:auto;margin:${margin};" />` +
+            renderCaption(b.caption) +
+            `</p>`;
+        }
+        if (b.layout === "inline-small") {
+          return `<p style="margin:18px 0;text-align:center;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:inline-block;max-width:360px;width:100%;height:auto;" />${renderCaption(b.caption)}</p>`;
+        }
+        // hero or full
+        return `<p style="margin:24px 0;">${renderImg(b.src, b.alt)}${renderCaption(b.caption)}</p>`;
+      }
+      if (b.type === "image-text") {
+        return renderSideBySide(b.src, b.alt, b.text, b.imageSide, b.caption);
       }
       if (b.type === "divider") {
         return `<hr style="border:none;border-top:1px solid ${HAIRLINE};margin:32px 0;" />`;
