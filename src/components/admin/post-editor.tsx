@@ -65,6 +65,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   >([]);
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
   const [listsError, setListsError] = useState("");
+  const [blogHtml, setBlogHtml] = useState<string>("");
+  const [blogHtmlError, setBlogHtmlError] = useState<string>("");
+
   
 
   useEffect(() => {
