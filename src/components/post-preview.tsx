@@ -34,7 +34,7 @@ export function PostPreview({ post }: { post: Post }) {
 
   return (
     <article className="border-b border-border pb-16 mb-16 last:border-b-0">
-      <h2 className="mb-2">
+      <h2 className="mb-5">
         <Link
           to="/post/$slug"
           params={{ slug: post.slug }}
@@ -43,19 +43,23 @@ export function PostPreview({ post }: { post: Post }) {
             fontFamily: "var(--font-serif-display)",
             fontWeight: 500,
             borderBottom: "none",
-            display: "inline",
+            display: "inline-block",
             lineHeight: 1.15,
             color: "#7e6c2a",
-            backgroundImage:
-              "linear-gradient(180deg, transparent 0%, transparent 55%, #f2e199 55%, #efd9b4 100%)",
-            padding: "0.05em 0.25em",
-            WebkitBoxDecorationBreak: "clone",
-            boxDecorationBreak: "clone",
           }}
         >
           {post.title}
         </Link>
       </h2>
+      <div
+        aria-hidden
+        className="mb-4"
+        style={{
+          width: "96px",
+          height: "2px",
+          backgroundColor: "#f2673a",
+        }}
+      />
       <p
         className="text-xs uppercase tracking-[0.18em] text-muted-foreground"
         style={{ fontFamily: "var(--font-meta)" }}

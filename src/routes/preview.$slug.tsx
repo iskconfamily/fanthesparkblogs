@@ -59,20 +59,17 @@ function PreviewPage() {
         Draft preview — not visible to the public
       </div>
       <article>
-        <h1 className="text-4xl md:text-5xl italic leading-[1.1]" style={{ fontFamily: "var(--font-serif-display)" }}>
-          <span
-            style={{
-              backgroundImage:
-                "linear-gradient(180deg, transparent 0%, transparent 55%, #f2e199 55%, #efd9b4 100%)",
-              padding: "0.05em 0.25em",
-              WebkitBoxDecorationBreak: "clone",
-              boxDecorationBreak: "clone",
-              color: "#7e6c2a",
-            }}
-          >
-            {post.title}
-          </span>
+        <h1
+          className="text-4xl md:text-5xl italic leading-[1.1]"
+          style={{ fontFamily: "var(--font-serif-display)", color: "#7e6c2a" }}
+        >
+          {post.title}
         </h1>
+        <div
+          aria-hidden
+          className="mt-5"
+          style={{ width: "112px", height: "2px", backgroundColor: "#f2673a" }}
+        />
         <p
           className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
           style={{ fontFamily: "var(--font-meta)" }}
