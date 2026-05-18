@@ -1,8 +1,10 @@
-/* Style 1 — original literary aged-paper palette.
- * Applied when html[data-style="style1"]. Style2 is now the default on :root.
+/* Style 2 — current refined baseline (default).
+ * Identical tokens to style1; set on :root so it's the SSR default with no flash.
+ * Also re-applied under html[data-style="style2"] for explicit selection.
  */
 
-html[data-style="style1"] {
+:root,
+html[data-style="style2"] {
   --brand-header-bg: #faf6ee;
   --brand-title-color: #7e6c2a;
   --brand-gold: #d9a74e;
