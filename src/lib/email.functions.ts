@@ -447,6 +447,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
         postId: z.string().uuid(),
         mode: z.enum(["test", "broadcast"]),
         testEmail: z.string().email().optional(),
+        listId: z.number().int().positive().optional(),
       })
       .parse(i),
   )
@@ -486,12 +487,13 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     }
 
     // Broadcast: fetch contacts from Brevo list, then send (BCC batches of 50)
+    const listId = data.listId ?? BREVO_LIST_ID;
     const contacts: string[] = [];
     let offset = 0;
     const limit = 500;
     while (true) {
       const listRes = await fetch(
-        `${GATEWAY_URL}/contacts/lists/${BREVO_LIST_ID}/contacts?limit=${limit}&offset=${offset}`,
+        `${GATEWAY_URL}/contacts/lists/${listId}/contacts?limit=${limit}&offset=${offset}`,
         { method: "GET", headers },
       );
       const listBody = await listRes.text();
@@ -507,7 +509,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     }
 
     if (contacts.length === 0) {
-      throw new Error(`No contacts in Brevo list #${BREVO_LIST_ID}. Add some in Brevo first.`);
+      throw new Error(`No contacts in Brevo list #${listId}. Add some in Brevo first.`);
     }
 
     // Send via Brevo - one email per recipient (transactional API requires this)
@@ -558,23 +560,54 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     };
   });
 
-export const getBrevoListInfo = createServerFn({ method: "GET" })
+export const getBrevoListInfo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((i) =>
+    z.object({ listId: z.number().int().positive().optional() }).parse(i ?? {}),
+  )
+  .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-    const res = await fetch(`${GATEWAY_URL}/contacts/lists/${BREVO_LIST_ID}`, {
+    const listId = data.listId ?? BREVO_LIST_ID;
+    const res = await fetch(`${GATEWAY_URL}/contacts/lists/${listId}`, {
       method: "GET",
       headers: brevoHeaders(),
     });
     const body = await res.text();
     if (!res.ok) {
-      return { ok: false, listId: BREVO_LIST_ID, error: `${res.status}: ${body.slice(0, 200)}` };
+      return { ok: false as const, listId, error: `${res.status}: ${body.slice(0, 200)}` };
     }
     const parsed = JSON.parse(body) as { name?: string; totalSubscribers?: number };
     return {
-      ok: true,
-      listId: BREVO_LIST_ID,
+      ok: true as const,
+      listId,
       name: parsed.name,
       totalSubscribers: parsed.totalSubscribers ?? 0,
     };
   });
+
+export const listBrevoLists = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const res = await fetch(`${GATEWAY_URL}/contacts/lists?limit=50&offset=0`, {
+      method: "GET",
+      headers: brevoHeaders(),
+    });
+    const body = await res.text();
+    if (!res.ok) {
+      return { ok: false as const, error: `${res.status}: ${body.slice(0, 200)}`, lists: [] };
+    }
+    const parsed = JSON.parse(body) as {
+      lists?: Array<{ id: number; name: string; totalSubscribers?: number }>;
+    };
+    return {
+      ok: true as const,
+      defaultListId: BREVO_LIST_ID,
+      lists: (parsed.lists ?? []).map((l) => ({
+        id: l.id,
+        name: l.name,
+        totalSubscribers: l.totalSubscribers ?? 0,
+      })),
+    };
+  });
+

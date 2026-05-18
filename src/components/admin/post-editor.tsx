@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, getBrevoListInfo } from "@/lib/email.functions";
+import { sendBlogAnnouncement, getBrevoListInfo, listBrevoLists } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const genImage = useServerFn(generateBlogImage);
   const sendEmail = useServerFn(sendBlogAnnouncement);
   const fetchListInfo = useServerFn(getBrevoListInfo);
+  const fetchLists = useServerFn(listBrevoLists);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
@@ -50,6 +51,36 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [announcementCount, setAnnouncementCount] = useState<number | null>(
     existing?.announcement_recipient_count ?? null,
   );
+  const [brevoLists, setBrevoLists] = useState<
+    Array<{ id: number; name: string; totalSubscribers: number }>
+  >([]);
+  const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [listsError, setListsError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetchLists();
+        if (cancelled) return;
+        if (!r.ok) {
+          setListsError(r.error ?? "Failed to load Brevo lists");
+          return;
+        }
+        setBrevoLists(r.lists);
+        setSelectedListId((prev) => {
+          if (prev != null) return prev;
+          if (r.lists.some((l) => l.id === r.defaultListId)) return r.defaultListId;
+          return r.lists[0]?.id ?? null;
+        });
+      } catch (e) {
+        if (!cancelled) setListsError(e instanceof Error ? e.message : "Failed to load lists");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchLists]);
 
   const id = existing?.id;
 
@@ -182,10 +213,14 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Save the post first.");
       return;
     }
+    if (selectedListId == null) {
+      setEmailMsg("Select a Brevo list first.");
+      return;
+    }
     setBusy("Checking list…");
     setEmailMsg("");
     try {
-      const info = await fetchListInfo({});
+      const info = await fetchListInfo({ data: { listId: selectedListId } });
       if (!info.ok) {
         setEmailMsg(`Brevo error: ${info.error}`);
         setBusy(null);
@@ -200,7 +235,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
         return;
       }
       setBusy(`Sending to ${count}…`);
-      const r = await sendEmail({ data: { postId: id, mode: "broadcast" } });
+      const r = await sendEmail({
+        data: { postId: id, mode: "broadcast", listId: selectedListId },
+      });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
@@ -449,11 +486,34 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
                 Send test email
               </Button>
             </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Brevo list
+              </label>
+              <select
+                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                value={selectedListId ?? ""}
+                onChange={(e) =>
+                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
+                }
+                disabled={!!busy || brevoLists.length === 0}
+              >
+                {brevoLists.length === 0 && <option value="">Loading…</option>}
+                {brevoLists.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name} ({l.totalSubscribers})
+                  </option>
+                ))}
+              </select>
+              {listsError && (
+                <p className="text-[11px] text-destructive break-words">{listsError}</p>
+              )}
+            </div>
             <Button
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id}
+              disabled={!!busy || !id || selectedListId == null}
             >
               {announcementSentAt ? "Resend to subscribers" : "Send to subscribers"}
             </Button>
