@@ -1,35 +1,38 @@
 ## Goal
-
-Fix two things on the "Want to change Stress to Serenity?" post:
-1. Make the second image actually prominent, not a small floated thumbnail.
-2. Unpublish it so you can review/edit before it goes live.
+The inline image in the "Advent of the Bhagavad-gita" draft is broken (the Blogger-hosted URL is hotlink-blocked, so only the alt text shows). Replace it with your attached chariot painting, placed where it best fits the narrative.
 
 ## Changes
 
-### 1. Make it a draft
-Update the `blog_posts` row for slug `want-to-change-stress-to-serenity`:
-- `status` → `draft`
-- `published_at` → `NULL`
+### 1. Upload the attached image
+Copy `user-uploads://bhagavadgita-6.jpg` into project storage and upload to the `blog-images` bucket as `advent-of-the-gita/chariot-inline.jpg` → returns a stable public URL.
 
-Result: it disappears from the public site and homepage, but is fully visible/editable in `/admin` and previewable at `/preview/want-to-change-stress-to-serenity`.
+### 2. Replace the broken inline image block
+In the post's `blocks` JSONB, update the existing image block `g8`:
+- `src` → new uploaded URL
+- `alt` → "Krishna serving as Arjuna's charioteer on the battlefield of Kurukshetra"
+- `caption` → *"Krishna becomes Arjuna's charioteer — and ours, when we are ready to hear."*
+- `layout` stays `inline-small` (centered, ~60% column width)
 
-### 2. Use the second image properly
+### 3. Reposition for narrative fit
+Move the image so it sits **right after the Prabhupada quote (g7)** — *"…To this end He spoke the Bhagavad-gita, making His friend Arjuna His student."* — and **before paragraph g9** ("Before hearing Bhagavad-gita…").
 
-Currently the lotus/mind image is `layout: "side-right"` (small float). I'll change it to a larger centered placement so both images read as real images, not decoration:
+That spot is the article's pivot from "we are lost in nescience" to "Krsna comes as teacher" — the chariot painting visually anchors that turn.
 
-- **Image 1 (hero)** — meditation silhouette at sunrise → stays as the featured/hero image at the top.
-- **Image 2 (lotus mind)** — change `layout` from `side-right` to `inline-small` (centered, ~60% column width) and move it between the "vrittis" paragraph and the Epictetus quote, with a short caption like *"A calm mind: the goal of mantra meditation."*
+Final order around the change:
+```text
+g7  quote — "swallowed by the tigress of nescience… making Arjuna His student"
+g8  image — chariot painting (new)
+g9  paragraph — "Before hearing Bhagavad-gita…"
+g10 paragraph — "As Arjuna set aside his bow…"
+```
 
-This is a targeted JSONB edit to that one row — no schema or code changes.
+## Note on the hero image
+The current hero is also a Krishna+Arjuna chariot scene (Wikimedia). The attached painting is more vivid and detailed. Two options — I'll default to **A** unless you say otherwise:
 
-## Review flow
-
-After the update:
-1. Open `/admin` → post shows with a **draft** badge.
-2. Click **Preview** to see the layout exactly as readers will.
-3. Click **Design with AI** or **Edit** to tweak text/images further.
-4. When happy, click **Publish** in the admin list.
+- **A. Keep current hero, use attached image inline** (as planned above). Two different chariot artworks, hero stays calm/classical, inline adds color at the narrative pivot.
+- **B. Promote the attached image to hero** and pick a non-chariot inline image (e.g. an open Gita / temple altar) so the article doesn't repeat the same scene.
 
 ## Out of scope
-- Re-generating the images (keeping the two we already have).
-- Changing the default behavior of new posts created from the admin (those already default to draft).
+- Rewriting body copy.
+- Changing the hero image (unless you pick option B).
+- Publishing — stays a draft for your review at `/preview/advent-of-the-bhagavad-gita`.
