@@ -34,38 +34,34 @@ export function PostPreview({ post }: { post: Post }) {
 
   return (
     <article className="border-b border-border pb-16 mb-16 last:border-b-0">
-      <h2 className="mb-5">
-        <Link
-          to="/post/$slug"
-          params={{ slug: post.slug }}
-          className="text-3xl md:text-4xl italic hover:text-primary"
-          style={{
-            fontFamily: "var(--font-serif-display)",
-            fontWeight: 500,
-            borderBottom: "none",
-            display: "inline-block",
-            lineHeight: 1.15,
-            color: "#7e6c2a",
-          }}
-        >
-          {post.title}
-        </Link>
-      </h2>
       <div
-        aria-hidden
-        className="mb-4"
-        style={{
-          width: "96px",
-          height: "2px",
-          backgroundColor: "#f2673a",
-        }}
-      />
-      <p
-        className="text-xs uppercase tracking-[0.18em] text-muted-foreground"
-        style={{ fontFamily: "var(--font-meta)" }}
+        className="mb-8 px-6 py-6 md:px-8 md:py-7"
+        style={{ backgroundColor: "#f7efe3", borderRadius: "3px" }}
       >
-        {formatDate(post.date)}
-      </p>
+        <h2 className="mb-3">
+          <Link
+            to="/post/$slug"
+            params={{ slug: post.slug }}
+            className="text-3xl md:text-4xl italic hover:text-primary"
+            style={{
+              fontFamily: "var(--font-serif-display)",
+              fontWeight: 500,
+              borderBottom: "none",
+              display: "inline-block",
+              lineHeight: 1.15,
+              color: "#7e6c2a",
+            }}
+          >
+            {post.title}
+          </Link>
+        </h2>
+        <p
+          className="text-xs uppercase tracking-[0.18em] text-muted-foreground"
+          style={{ fontFamily: "var(--font-meta)" }}
+        >
+          {formatDate(post.date)}
+        </p>
+      </div>
       <Byline author={post.author} />
 
       {layout === "side" ? (
