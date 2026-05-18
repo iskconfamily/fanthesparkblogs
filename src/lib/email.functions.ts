@@ -84,8 +84,8 @@ function parseContentForEmail(content: string | null): ContentBlock[] {
       if (fig) {
         const alt = fig[1] || "";
         const src = fig[2];
-        const small = /\/signature/i.test(src) || /^signature/i.test(alt);
-        return { type: "figure", src, alt, small };
+        const isSig = /\/signature/i.test(src) || /^signature/i.test(alt);
+        return { type: "figure", src, alt, layout: isSig ? "inline-small" : "full" };
       }
       return { type: "p", text: chunk };
     });
