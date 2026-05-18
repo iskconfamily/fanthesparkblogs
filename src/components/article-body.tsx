@@ -7,7 +7,7 @@ function ImageBlock({ b }: { b: Extract<PostBlock, { type: "image" }> }) {
 
   if (isSignature) {
     return (
-      <figure className="my-6 max-w-[300px] clear-both">
+      <figure className="my-6 max-w-[180px] clear-both">
         <img src={b.src} alt={alt} className="w-full" loading="lazy" />
       </figure>
     );
