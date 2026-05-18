@@ -447,6 +447,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
         postId: z.string().uuid(),
         mode: z.enum(["test", "broadcast"]),
         testEmail: z.string().email().optional(),
+        listId: z.number().int().positive().optional(),
       })
       .parse(i),
   )
