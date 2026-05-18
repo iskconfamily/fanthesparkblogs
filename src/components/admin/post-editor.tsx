@@ -244,32 +244,50 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Select a Brevo campaign first.");
       return;
     }
-    setBusy("Checking campaign…");
+    if (target === "list" && selectedListId == null) {
+      setEmailMsg("Select a Brevo list first.");
+      return;
+    }
+    setBusy("Checking…");
     setEmailMsg("");
     try {
-      const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
-      if (!info.ok) {
-        setEmailMsg(`Brevo error: ${info.error}`);
-        setBusy(null);
-        return;
+      let count = 0;
+      let confirmMsg = "";
+      if (target === "campaign") {
+        const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
+        if (!info.ok) {
+          setEmailMsg(`Brevo error: ${info.error}`);
+          setBusy(null);
+          return;
+        }
+        count = info.totalSubscribers ?? 0;
+        const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
+        confirmMsg = `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`;
+      } else {
+        const list = brevoLists.find((l) => l.id === selectedListId);
+        count = list?.totalSubscribers ?? 0;
+        const tpl = brevoCampaigns.find((c) => c.id === selectedCampaignId);
+        confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using "${tpl?.name ?? selectedCampaignId}" as HTML template?\n\nThis creates a NEW Brevo campaign and triggers sendNow.`;
       }
-      const count = info.totalSubscribers ?? 0;
-      const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
-      const ok = window.confirm(
-        `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`,
-      );
+      const ok = window.confirm(confirmMsg);
       if (!ok) {
         setBusy(null);
         return;
       }
       setBusy(`Sending to ${count}…`);
       const r = await sendEmail({
-        data: { postId: id, mode: "broadcast", campaignId: selectedCampaignId },
+        data: {
+          postId: id,
+          mode: "broadcast",
+          target,
+          campaignId: selectedCampaignId,
+          listId: target === "list" ? selectedListId ?? undefined : undefined,
+        },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
-        `Sent campaign to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
+        `Sent to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
