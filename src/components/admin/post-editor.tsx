@@ -101,6 +101,32 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
 
   const id = existing?.id;
 
+  useEffect(() => {
+    if (!id) {
+      setBlogHtml("");
+      setBlogHtmlError("");
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetchBlogHtml({ data: { postId: id } });
+        if (cancelled) return;
+        setBlogHtml(r.html);
+        setBlogHtmlError("");
+      } catch (e) {
+        if (!cancelled) {
+          setBlogHtml("");
+          setBlogHtmlError(e instanceof Error ? e.message : "Failed to build blog_html");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, fetchBlogHtml, content, existing?.updated_at]);
+
+
   const parsedTags = tagsText
     .split(",")
     .map((t) => t.trim())
