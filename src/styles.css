@@ -31,7 +31,7 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
   --font-serif-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --font-serif-body: "Lora", Georgia, "Times New Roman", serif;
+  --font-serif-body: "Libre Baskerville", Georgia, "Times New Roman", serif;
   --font-meta: "Libre Caslon Text", Georgia, serif;
   --font-display-sans: "Inter Tight", system-ui, -apple-system, sans-serif;
   --brand-olive: oklch(0.52 0.07 95);
