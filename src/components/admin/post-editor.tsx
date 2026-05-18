@@ -39,6 +39,14 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [testEmail, setTestEmail] = useState("");
+  const [emailMsg, setEmailMsg] = useState("");
+  const [announcementSentAt, setAnnouncementSentAt] = useState<string | null>(
+    existing?.announcement_sent_at ?? null,
+  );
+  const [announcementCount, setAnnouncementCount] = useState<number | null>(
+    existing?.announcement_recipient_count ?? null,
+  );
 
   const id = existing?.id;
 
