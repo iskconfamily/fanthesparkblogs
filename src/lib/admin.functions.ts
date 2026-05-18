@@ -37,7 +37,7 @@ export const listAllPosts = createServerFn({ method: "GET" })
       .select("*")
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data as unknown as unknown as DbBlogPost[];
+    return data as unknown as DbBlogPost[];
   });
 
 export const getPostById = createServerFn({ method: "GET" })

@@ -15,7 +15,7 @@ export const getPublishedDbPosts = createServerFn({ method: "GET" }).handler(asy
     console.error("getPublishedDbPosts error:", error);
     return [] as ReturnType<typeof dbPostToPost>[];
   }
-  return (data as unknown as unknown as DbBlogPost[]).map(dbPostToPost);
+  return (data as unknown as DbBlogPost[]).map(dbPostToPost);
 });
 
 export const getPublishedDbPostBySlug = createServerFn({ method: "GET" })
