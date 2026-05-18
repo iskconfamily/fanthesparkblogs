@@ -1,10 +1,9 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site-layout";
-import { ArticleBody } from "@/components/article-body";
 import { InlineNewsletter } from "@/components/inline-newsletter";
 import { RelatedArticles } from "@/components/related-articles";
-import { Byline } from "@/components/byline";
-import { getPostBySlug, getRelated, formatDate, getAllPosts } from "@/content/queries";
+import { PostArticle } from "@/components/post-article";
+import { getPostBySlug, getRelated, getAllPosts } from "@/content/queries";
 import { getPublishedDbPostBySlug } from "@/lib/blog.functions";
 import type { Post } from "@/content/posts";
 
@@ -57,38 +56,10 @@ export const Route = createFileRoute("/post/$slug")({
 
 function PostPage() {
   const { post, related } = Route.useLoaderData();
-  const [first, ...rest] = post.body;
   return (
     <SiteLayout>
       <article>
-        <div className="mb-3 max-w-[560px]">
-          <h1
-            className="text-4xl md:text-5xl italic leading-[1.1]"
-            style={{ fontFamily: "var(--font-serif-display)", color: "var(--brand-title-color)" }}
-          >
-            {post.title}
-          </h1>
-          <p
-            className="mt-2.5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
-            style={{ fontFamily: "var(--font-meta)" }}
-          >
-            {formatDate(post.date)}
-          </p>
-        </div>
-        <Byline author={post.author} />
-        {first && <ArticleBody blocks={[first]} />}
-        <figure className="my-8">
-          <img src={post.featuredImage.src} alt={post.featuredImage.alt} className="w-full" />
-          {post.featuredImage.caption && (
-            <figcaption
-              className="mt-2 text-sm italic text-muted-foreground text-center"
-              style={{ fontFamily: "var(--font-serif-display)" }}
-            >
-              {post.featuredImage.caption}
-            </figcaption>
-          )}
-        </figure>
-        {rest.length > 0 && <ArticleBody blocks={rest} />}
+        <PostArticle post={post} as="h1" titleClassName="text-4xl md:text-5xl" />
         <InlineNewsletter />
         <RelatedArticles posts={related} />
       </article>
