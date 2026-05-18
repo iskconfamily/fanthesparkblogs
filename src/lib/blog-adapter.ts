@@ -19,7 +19,7 @@ export type DbBlogPost = {
   seo_description: string | null;
   image_prompts: ImagePrompt[];
   image_layout?: "hero" | "side" | "none" | null;
-  blocks?: unknown; // raw JSON from supabase
+  blocks: PostBlock[];
   announcement_sent_at?: string | null;
   announcement_recipient_count?: number | null;
 };
@@ -47,11 +47,19 @@ function parseContent(content: string | null): ArticleBlock[] {
     });
 }
 
+/** Normalize a raw supabase row (where `blocks` is `Json`/unknown) into a typed DbBlogPost. */
+export function normalizeDbPost(raw: Record<string, unknown>): DbBlogPost {
+  return {
+    ...(raw as unknown as DbBlogPost),
+    blocks: parseBlocks(raw.blocks),
+  };
+}
+
 export function dbPostToPost(row: DbBlogPost): Post {
   const date = (row.published_at ?? row.created_at).slice(0, 10);
   const category = row.category ?? "Bhakti Notes";
   const tags = row.tags && row.tags.length ? row.tags : [category];
-  const blocks: PostBlock[] = parseBlocks(row.blocks);
+  const blocks: PostBlock[] = row.blocks ?? [];
   return {
     slug: row.slug,
     title: row.title,
