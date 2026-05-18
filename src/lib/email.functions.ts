@@ -43,6 +43,10 @@ function escapeHtml(s: string) {
     .replace(/'/g, "&#39;");
 }
 
+function renderParagraph(text: string) {
+  return `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0 0 20px;">${escapeHtml(text)}</p>`;
+}
+
 // Site-matching palette (derived from src/styles.css)
 const PAPER_OUTER = "#fbf8f1";
 const PAPER_INNER = "#fdfbf5";
@@ -89,7 +93,7 @@ function renderBlocks(blocks: ContentBlock[]): string {
       if (b.type === "figure") {
         return `<p style="margin:24px 0;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;width:100%;height:auto;" /></p>`;
       }
-      return `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0 0 20px;">${escapeHtml(b.text)}</p>`;
+      return renderParagraph(b.text);
     })
     .join("\n");
 }
@@ -119,11 +123,21 @@ function buildEmail(post: {
   const url = `${SITE_URL}/post/${post.slug}`;
   const image = post.featured_image ?? "";
   const blocks = parseContentForEmail(post.content);
+  const [firstBlock, ...remainingBlocks] = blocks;
+  const featuredImageHtml = image
+    ? `<p style="margin:28px 0;"><img src="${escapeHtml(image)}" alt="${title}" style="display:block;width:100%;height:auto;" /></p>`
+    : "";
   const bodyHtml = blocks.length
-    ? renderBlocks(blocks)
-    : excerpt
-      ? `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0 0 20px;">${excerpt}</p>`
-      : "";
+    ? [
+        firstBlock ? renderBlocks([firstBlock]) : "",
+        featuredImageHtml,
+        remainingBlocks.length ? renderBlocks(remainingBlocks) : "",
+      ]
+        .filter(Boolean)
+        .join("\n")
+    : [excerpt ? renderParagraph(post.excerpt ?? "") : "", featuredImageHtml]
+        .filter(Boolean)
+        .join("\n");
 
   const html = `<!doctype html>
 <html><head>
@@ -142,7 +156,6 @@ function buildEmail(post: {
           <p style="font-family:${FONT_META};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};margin:0 0 28px;">
             New essay &middot; Fan The Spark
           </p>
-          ${image ? `<p style="margin:0 0 28px;"><img src="${escapeHtml(image)}" alt="" style="display:block;width:100%;height:auto;" /></p>` : ""}
           <h1 style="font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:34px;line-height:1.15;margin:0 0 10px;color:${OLIVE};">
             ${title}
           </h1>
