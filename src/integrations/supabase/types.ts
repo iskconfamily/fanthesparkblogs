@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       blog_posts: {
         Row: {
+          announcement_recipient_count: number | null
+          announcement_sent_at: string | null
           author: string | null
           category: string | null
           content: string | null
@@ -34,6 +36,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          announcement_recipient_count?: number | null
+          announcement_sent_at?: string | null
           author?: string | null
           category?: string | null
           content?: string | null
@@ -52,6 +56,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          announcement_recipient_count?: number | null
+          announcement_sent_at?: string | null
           author?: string | null
           category?: string | null
           content?: string | null

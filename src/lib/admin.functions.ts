@@ -37,7 +37,7 @@ export const listAllPosts = createServerFn({ method: "GET" })
       .select("*")
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data as DbBlogPost[];
+    return data as unknown as DbBlogPost[];
   });
 
 export const getPostById = createServerFn({ method: "GET" })
@@ -51,7 +51,7 @@ export const getPostById = createServerFn({ method: "GET" })
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return row as DbBlogPost | null;
+    return row as unknown as DbBlogPost | null;
   });
 
 export const getPreviewPostBySlug = createServerFn({ method: "GET" })
@@ -65,7 +65,7 @@ export const getPreviewPostBySlug = createServerFn({ method: "GET" })
       .eq("slug", data.slug)
       .maybeSingle();
     if (error || !row) return null;
-    return dbPostToPost(row as DbBlogPost);
+    return dbPostToPost(row as unknown as DbBlogPost);
   });
 
 const SaveSchema = z.object({
@@ -125,7 +125,7 @@ export const savePost = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw new Error(error.message);
-      return updated as DbBlogPost;
+      return updated as unknown as DbBlogPost;
     } else {
       const { data: inserted, error } = await supabaseAdmin
         .from("blog_posts")
@@ -133,7 +133,7 @@ export const savePost = createServerFn({ method: "POST" })
         .select()
         .single();
       if (error) throw new Error(error.message);
-      return inserted as DbBlogPost;
+      return inserted as unknown as DbBlogPost;
     }
   });
 
