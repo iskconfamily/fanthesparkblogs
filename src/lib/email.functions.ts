@@ -63,8 +63,10 @@ const FONT_META = "'Libre Caslon Text', Georgia, serif";
 type ContentBlock =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
-  | { type: "quote"; text: string }
-  | { type: "figure"; src: string; alt: string };
+  | { type: "quote"; text: string; cite?: string }
+  | { type: "figure"; src: string; alt: string; small?: boolean }
+  | { type: "divider" }
+  | { type: "callout"; text: string };
 
 function parseContentForEmail(content: string | null): ContentBlock[] {
   if (!content) return [];
@@ -76,9 +78,46 @@ function parseContentForEmail(content: string | null): ContentBlock[] {
       if (chunk.startsWith("## ")) return { type: "h2", text: chunk.slice(3).trim() };
       if (chunk.startsWith("> ")) return { type: "quote", text: chunk.slice(2).trim() };
       const fig = chunk.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
-      if (fig) return { type: "figure", src: fig[2], alt: fig[1] || "" };
+      if (fig) {
+        const alt = fig[1] || "";
+        const src = fig[2];
+        const small = /\/signature/i.test(src) || /^signature/i.test(alt);
+        return { type: "figure", src, alt, small };
+      }
       return { type: "p", text: chunk };
     });
+}
+
+function jsonBlocksToEmail(blocks: unknown): ContentBlock[] {
+  if (!Array.isArray(blocks)) return [];
+  const out: ContentBlock[] = [];
+  for (const raw of blocks) {
+    if (!raw || typeof raw !== "object") continue;
+    const r = raw as Record<string, unknown>;
+    const type = r.type;
+    if (type === "paragraph" && typeof r.text === "string") {
+      out.push({ type: "p", text: r.text });
+    } else if (type === "heading" && typeof r.text === "string") {
+      out.push({ type: "h2", text: r.text });
+    } else if (type === "quote" && typeof r.text === "string") {
+      out.push({ type: "quote", text: r.text, cite: typeof r.cite === "string" ? r.cite : undefined });
+    } else if (type === "image" && typeof r.src === "string") {
+      const alt = typeof r.alt === "string" ? r.alt : "";
+      const layout = typeof r.layout === "string" ? r.layout : "";
+      const small =
+        layout === "inline-small" ||
+        layout === "side-left" ||
+        layout === "side-right" ||
+        /\/signature/i.test(r.src as string) ||
+        /^signature/i.test(alt);
+      out.push({ type: "figure", src: r.src as string, alt, small });
+    } else if (type === "divider") {
+      out.push({ type: "divider" });
+    } else if (type === "callout" && typeof r.text === "string") {
+      out.push({ type: "callout", text: r.text });
+    }
+  }
+  return out;
 }
 
 function renderBlocks(blocks: ContentBlock[]): string {
@@ -88,10 +127,23 @@ function renderBlocks(blocks: ContentBlock[]): string {
         return `<h2 style="font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:26px;line-height:1.25;color:${OLIVE};margin:36px 0 16px;">${escapeHtml(b.text)}</h2>`;
       }
       if (b.type === "quote") {
-        return `<blockquote style="margin:28px 0;padding:4px 0 4px 20px;border-left:2px solid ${SANDSTONE};font-family:${FONT_DISPLAY};font-style:italic;font-size:22px;line-height:1.5;color:${OLIVE};">${escapeHtml(b.text)}</blockquote>`;
+        const cite = b.cite
+          ? `<cite style="display:block;margin-top:10px;font-style:normal;font-family:${FONT_META};font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:${MUTED};">— ${escapeHtml(b.cite)}</cite>`
+          : "";
+        return `<blockquote style="margin:28px 0;padding:4px 0 4px 20px;border-left:2px solid ${SANDSTONE};font-family:${FONT_DISPLAY};font-style:italic;font-size:22px;line-height:1.5;color:${OLIVE};">${escapeHtml(b.text)}${cite}</blockquote>`;
       }
       if (b.type === "figure") {
+        if (b.small) {
+          const maxW = /signature/i.test(b.src) || /^signature/i.test(b.alt) ? 200 : 360;
+          return `<p style="margin:18px 0;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;max-width:${maxW}px;width:100%;height:auto;" /></p>`;
+        }
         return `<p style="margin:24px 0;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;width:100%;height:auto;" /></p>`;
+      }
+      if (b.type === "divider") {
+        return `<hr style="border:none;border-top:1px solid ${HAIRLINE};margin:32px 0;" />`;
+      }
+      if (b.type === "callout") {
+        return `<aside style="margin:24px 0;padding:14px 18px;border-left:4px solid ${SANDSTONE};background:#f5ecd9;font-family:${FONT_BODY};font-size:16px;line-height:1.65;color:${BODY_INK};">${escapeHtml(b.text)}</aside>`;
       }
       return renderParagraph(b.text);
     })
@@ -102,8 +154,10 @@ function blocksToText(blocks: ContentBlock[]): string {
   return blocks
     .map((b) => {
       if (b.type === "h2") return `\n${b.text}\n${"-".repeat(b.text.length)}`;
-      if (b.type === "quote") return `  "${b.text}"`;
+      if (b.type === "quote") return `  "${b.text}"${b.cite ? ` — ${b.cite}` : ""}`;
       if (b.type === "figure") return b.alt ? `[image: ${b.alt}]` : "[image]";
+      if (b.type === "divider") return "---";
+      if (b.type === "callout") return `> ${b.text}`;
       return b.text;
     })
     .join("\n\n");
@@ -116,28 +170,45 @@ function buildEmail(post: {
   content: string | null;
   featured_image: string | null;
   author: string | null;
+  blocks?: unknown;
 }) {
   const title = escapeHtml(post.title);
   const excerpt = escapeHtml(post.excerpt ?? "");
   const author = escapeHtml(post.author ?? "");
   const url = `${SITE_URL}/post/${post.slug}`;
   const image = post.featured_image ?? "";
-  const blocks = parseContentForEmail(post.content);
-  const [firstBlock, ...remainingBlocks] = blocks;
+
+  // Prefer the structured blocks (AI block editor). Fall back to parsing the
+  // legacy `content` text field. Last resort: excerpt + hero teaser.
+  const jsonBlocks = jsonBlocksToEmail(post.blocks);
+  const blocks: ContentBlock[] = jsonBlocks.length
+    ? jsonBlocks
+    : parseContentForEmail(post.content);
+
   const featuredImageHtml = image
     ? `<p style="margin:28px 0;"><img src="${escapeHtml(image)}" alt="${title}" style="display:block;width:100%;height:auto;" /></p>`
     : "";
-  const bodyHtml = blocks.length
-    ? [
-        firstBlock ? renderBlocks([firstBlock]) : "",
-        featuredImageHtml,
-        remainingBlocks.length ? renderBlocks(remainingBlocks) : "",
-      ]
-        .filter(Boolean)
-        .join("\n")
-    : [excerpt ? renderParagraph(post.excerpt ?? "") : "", featuredImageHtml]
-        .filter(Boolean)
-        .join("\n");
+
+  let bodyHtml: string;
+  if (jsonBlocks.length) {
+    // Blocks already include any inline images (incl. hero positioning).
+    // Don't re-inject featured_image.
+    bodyHtml = renderBlocks(blocks);
+  } else if (blocks.length) {
+    // Legacy content path: inject hero after first paragraph.
+    const [firstBlock, ...remainingBlocks] = blocks;
+    bodyHtml = [
+      firstBlock ? renderBlocks([firstBlock]) : "",
+      featuredImageHtml,
+      remainingBlocks.length ? renderBlocks(remainingBlocks) : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  } else {
+    bodyHtml = [excerpt ? renderParagraph(post.excerpt ?? "") : "", featuredImageHtml]
+      .filter(Boolean)
+      .join("\n");
+  }
 
   const html = `<!doctype html>
 <html><head>
