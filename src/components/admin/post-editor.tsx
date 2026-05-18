@@ -615,17 +615,32 @@ excerpt        = ${(excerpt || "").slice(0, 80)}${excerpt.length > 80 ? "…" : 
 url            = ${SITE_URL_PREVIEW}/post/${previewSlug}
 author         = ${author}
 featured_image = ${featuredImage || "(none)"}
-slug           = ${previewSlug}`}
+slug           = ${previewSlug}
+blog_html      = ${blogHtml.length} chars`}
               </pre>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground pt-1">
+                blog_html preview (first 300 chars)
+              </p>
+              <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono max-h-32 overflow-auto">
+{blogHtml ? blogHtml.slice(0, 300) + (blogHtml.length > 300 ? "…" : "") : "(empty — save the post and add content)"}
+              </pre>
+              {blogHtmlError && (
+                <p className="text-[11px] text-destructive break-words">{blogHtmlError}</p>
+              )}
+              <p className="text-[10px] text-muted-foreground leading-relaxed pt-1">
+                In Brevo templates, render the full body with:{" "}
+                <code>{`{% autoescape off %}{{ params.blog_html }}{% endautoescape %}`}</code>
+              </p>
             </div>
             <Button
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedCampaignId == null}
+              disabled={!!busy || !id || selectedCampaignId == null || !blogHtml}
             >
               {announcementSentAt ? "Resend campaign" : "Send campaign"}
             </Button>
+
             {emailMsg && (
               <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
             )}
