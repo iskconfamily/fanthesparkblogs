@@ -1,31 +1,76 @@
 import { Link } from "@tanstack/react-router";
 import type { Post, ArticleBlock } from "@/content/posts";
+import type { PostBlock } from "@/lib/post-blocks";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
 import { Byline } from "@/components/byline";
 
-function Figure({
-  post,
-  className,
-  captionAlign = "center",
-}: {
-  post: Post;
-  className?: string;
-  captionAlign?: "center" | "left";
-}) {
-  return (
-    <figure className={className}>
-      <img src={post.featuredImage.src} alt={post.featuredImage.alt} className="w-full" loading="lazy" />
-      {post.featuredImage.caption && (
-        <figcaption
-          className={`mt-2 text-sm italic text-muted-foreground ${captionAlign === "center" ? "text-center" : ""}`}
-          style={{ fontFamily: "var(--font-serif-display)" }}
-        >
-          {post.featuredImage.caption}
-        </figcaption>
-      )}
-    </figure>
-  );
+/**
+ * Convert legacy `body` + `featuredImage` + `imageLayout` into a `PostBlock[]`
+ * so the renderer only has one code path. New posts edited via the AI chat
+ * designer skip this entirely.
+ */
+function legacyToBlocks(post: Post): PostBlock[] {
+  const blocks: PostBlock[] = [];
+  const layout = post.imageLayout ?? "hero";
+  const featured = post.featuredImage;
+
+  if (featured?.src && layout === "side") {
+    blocks.push({
+      id: "legacy-featured",
+      type: "image",
+      src: featured.src,
+      alt: featured.alt,
+      caption: featured.caption,
+      layout: "side-right",
+    });
+  }
+
+  let insertedHero = layout !== "hero" || !featured?.src;
+  let firstPara = true;
+  for (const b of post.body as ArticleBlock[]) {
+    if (b.type === "p") {
+      blocks.push({ id: `legacy-p-${blocks.length}`, type: "paragraph", text: b.text });
+      if (!insertedHero && firstPara) {
+        blocks.push({
+          id: "legacy-featured",
+          type: "image",
+          src: featured.src,
+          alt: featured.alt,
+          caption: featured.caption,
+          layout: "hero",
+        });
+        insertedHero = true;
+      }
+      firstPara = false;
+    } else if (b.type === "h2") {
+      blocks.push({ id: `legacy-h-${blocks.length}`, type: "heading", level: 2, text: b.text });
+    } else if (b.type === "quote") {
+      blocks.push({ id: `legacy-q-${blocks.length}`, type: "quote", text: b.text, cite: b.cite });
+    } else if (b.type === "figure") {
+      blocks.push({
+        id: `legacy-f-${blocks.length}`,
+        type: "image",
+        src: b.src,
+        alt: b.alt,
+        caption: b.caption,
+        layout: "full",
+      });
+    }
+  }
+
+  if (!insertedHero && featured?.src) {
+    blocks.push({
+      id: "legacy-featured",
+      type: "image",
+      src: featured.src,
+      alt: featured.alt,
+      caption: featured.caption,
+      layout: "hero",
+    });
+  }
+
+  return blocks;
 }
 
 export type PostArticleProps = {
@@ -41,8 +86,7 @@ export function PostArticle({
   titleClassName = "text-4xl md:text-5xl",
   titleLink,
 }: PostArticleProps) {
-  const layout = post.imageLayout ?? "hero";
-  const [first, ...rest] = post.body as ArticleBlock[];
+  const blocks: PostBlock[] = post.blocks && post.blocks.length ? post.blocks : legacyToBlocks(post);
   const HeadingTag = as;
 
   const titleStyle = {
@@ -80,25 +124,8 @@ export function PostArticle({
       </div>
       <Byline author={post.author} />
 
-      {layout === "side" ? (
-        <div>
-          <Figure
-            post={post}
-            captionAlign="left"
-            className="float-right ml-6 mb-3 w-[44%] max-w-[280px]"
-          />
-          <ArticleBody blocks={post.body} />
-          <div className="clear-both" />
-        </div>
-      ) : layout === "hero" ? (
-        <>
-          {first && <ArticleBody blocks={[first]} />}
-          <Figure post={post} className="my-8" />
-          {rest.length > 0 && <ArticleBody blocks={rest} />}
-        </>
-      ) : (
-        <ArticleBody blocks={post.body} />
-      )}
+      <ArticleBody blocks={blocks} />
+      <div className="clear-both" />
     </>
   );
 }
