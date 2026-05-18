@@ -23,6 +23,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const genImage = useServerFn(generateBlogImage);
   const sendEmail = useServerFn(sendBlogAnnouncement);
   const fetchListInfo = useServerFn(getBrevoListInfo);
+  const fetchLists = useServerFn(listBrevoLists);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
