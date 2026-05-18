@@ -51,6 +51,36 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [announcementCount, setAnnouncementCount] = useState<number | null>(
     existing?.announcement_recipient_count ?? null,
   );
+  const [brevoLists, setBrevoLists] = useState<
+    Array<{ id: number; name: string; totalSubscribers: number }>
+  >([]);
+  const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [listsError, setListsError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetchLists();
+        if (cancelled) return;
+        if (!r.ok) {
+          setListsError(r.error ?? "Failed to load Brevo lists");
+          return;
+        }
+        setBrevoLists(r.lists);
+        setSelectedListId((prev) => {
+          if (prev != null) return prev;
+          if (r.lists.some((l) => l.id === r.defaultListId)) return r.defaultListId;
+          return r.lists[0]?.id ?? null;
+        });
+      } catch (e) {
+        if (!cancelled) setListsError(e instanceof Error ? e.message : "Failed to load lists");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchLists]);
 
   const id = existing?.id;
 
