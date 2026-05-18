@@ -65,7 +65,7 @@ export function dbPostToPost(row: DbBlogPost): Post {
       src: row.featured_image || FALLBACK_IMG,
       alt: row.title,
     },
-    imageLayout: "hero",
+    imageLayout: row.image_layout ?? "hero",
     body: parseContent(row.content),
   };
 }
