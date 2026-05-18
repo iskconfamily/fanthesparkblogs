@@ -107,6 +107,7 @@ export const savePost = createServerFn({ method: "POST" })
       seo_title: data.seo_title || null,
       seo_description: data.seo_description || null,
       image_prompts: data.image_prompts ?? [],
+      image_layout: data.image_layout ?? "hero",
       published_at: data.status === "published" ? now : null,
     };
 
