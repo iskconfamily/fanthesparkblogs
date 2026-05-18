@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, getBrevoCampaignInfo, listBrevoCampaigns } from "@/lib/email.functions";
+import { sendBlogAnnouncement, getBrevoCampaignInfo, listBrevoCampaigns, listBrevoLists } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const sendEmail = useServerFn(sendBlogAnnouncement);
   const fetchCampaignInfo = useServerFn(getBrevoCampaignInfo);
   const fetchCampaigns = useServerFn(listBrevoCampaigns);
+  const fetchLists = useServerFn(listBrevoLists);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
@@ -58,32 +59,41 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   >([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
   const [campaignsError, setCampaignsError] = useState("");
+  const [brevoLists, setBrevoLists] = useState<
+    Array<{ id: number; name: string; totalSubscribers: number }>
+  >([]);
+  const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [listsError, setListsError] = useState("");
+  const [target, setTarget] = useState<"campaign" | "list">("campaign");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetchCampaigns();
+        const [cRes, lRes] = await Promise.all([fetchCampaigns(), fetchLists()]);
         if (cancelled) return;
-        if (!r.ok) {
-          setCampaignsError(r.error ?? "Failed to load Brevo campaigns");
-          return;
+        if (!cRes.ok) setCampaignsError(cRes.error ?? "Failed to load Brevo campaigns");
+        else {
+          setBrevoCampaigns(cRes.campaigns);
+          setSelectedCampaignId((prev) => {
+            if (prev != null) return prev;
+            const firstDraft = cRes.campaigns.find((c) => c.status === "draft");
+            return firstDraft?.id ?? cRes.campaigns[0]?.id ?? null;
+          });
         }
-        setBrevoCampaigns(r.campaigns);
-        setSelectedCampaignId((prev) => {
-          if (prev != null) return prev;
-          // Prefer first draft, else first campaign
-          const firstDraft = r.campaigns.find((c) => c.status === "draft");
-          return firstDraft?.id ?? r.campaigns[0]?.id ?? null;
-        });
+        if (!lRes.ok) setListsError(lRes.error ?? "Failed to load Brevo lists");
+        else {
+          setBrevoLists(lRes.lists);
+          setSelectedListId((prev) => prev ?? lRes.lists[0]?.id ?? null);
+        }
       } catch (e) {
-        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load campaigns");
+        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fetchCampaigns]);
+  }, [fetchCampaigns, fetchLists]);
 
   const id = existing?.id;
 
@@ -202,7 +212,21 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     setBusy("Sending test…");
     setEmailMsg("");
     try {
-      const r = await sendEmail({ data: { postId: id, mode: "test", testEmail } });
+      if (selectedCampaignId == null) {
+        setEmailMsg("Select a Brevo campaign (used as template) first.");
+        setBusy(null);
+        return;
+      }
+      const r = await sendEmail({
+        data: {
+          postId: id,
+          mode: "test",
+          testEmail,
+          target,
+          campaignId: selectedCampaignId,
+          listId: target === "list" ? selectedListId ?? undefined : undefined,
+        },
+      });
       setEmailMsg(`Test sent to ${r.sentTo}`);
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
@@ -220,32 +244,50 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Select a Brevo campaign first.");
       return;
     }
-    setBusy("Checking campaign…");
+    if (target === "list" && selectedListId == null) {
+      setEmailMsg("Select a Brevo list first.");
+      return;
+    }
+    setBusy("Checking…");
     setEmailMsg("");
     try {
-      const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
-      if (!info.ok) {
-        setEmailMsg(`Brevo error: ${info.error}`);
-        setBusy(null);
-        return;
+      let count = 0;
+      let confirmMsg = "";
+      if (target === "campaign") {
+        const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
+        if (!info.ok) {
+          setEmailMsg(`Brevo error: ${info.error}`);
+          setBusy(null);
+          return;
+        }
+        count = info.totalSubscribers ?? 0;
+        const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
+        confirmMsg = `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`;
+      } else {
+        const list = brevoLists.find((l) => l.id === selectedListId);
+        count = list?.totalSubscribers ?? 0;
+        const tpl = brevoCampaigns.find((c) => c.id === selectedCampaignId);
+        confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using "${tpl?.name ?? selectedCampaignId}" as HTML template?\n\nThis creates a NEW Brevo campaign and triggers sendNow.`;
       }
-      const count = info.totalSubscribers ?? 0;
-      const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
-      const ok = window.confirm(
-        `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`,
-      );
+      const ok = window.confirm(confirmMsg);
       if (!ok) {
         setBusy(null);
         return;
       }
       setBusy(`Sending to ${count}…`);
       const r = await sendEmail({
-        data: { postId: id, mode: "broadcast", campaignId: selectedCampaignId },
+        data: {
+          postId: id,
+          mode: "broadcast",
+          target,
+          campaignId: selectedCampaignId,
+          listId: target === "list" ? selectedListId ?? undefined : undefined,
+        },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
-        `Sent campaign to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
+        `Sent to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
@@ -490,7 +532,53 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo campaign
+                Send to
+              </label>
+              <div className="flex gap-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setTarget("campaign")}
+                  className={`flex-1 px-2 py-1.5 rounded border ${target === "campaign" ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background"}`}
+                >
+                  Existing campaign
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTarget("list")}
+                  className={`flex-1 px-2 py-1.5 rounded border ${target === "list" ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background"}`}
+                >
+                  Pick a list
+                </button>
+              </div>
+            </div>
+            {target === "list" && (
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Brevo list
+                </label>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  value={selectedListId ?? ""}
+                  onChange={(e) =>
+                    setSelectedListId(e.target.value ? Number(e.target.value) : null)
+                  }
+                  disabled={!!busy || brevoLists.length === 0}
+                >
+                  {brevoLists.length === 0 && <option value="">Loading…</option>}
+                  {brevoLists.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.name} — {l.totalSubscribers}
+                    </option>
+                  ))}
+                </select>
+                {listsError && (
+                  <p className="text-[11px] text-destructive break-words">{listsError}</p>
+                )}
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                {target === "list" ? "Template campaign (HTML + sender)" : "Brevo campaign"}
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
@@ -511,8 +599,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
                 <p className="text-[11px] text-destructive break-words">{campaignsError}</p>
               )}
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Brevo owns the HTML. We only inject params + subject, then trigger sendNow.
-                Only draft/queued campaigns can actually be re-sent.
+                {target === "list"
+                  ? "We copy this campaign's HTML + sender into a new campaign targeted at the selected list, then sendNow."
+                  : "Brevo owns the HTML. We only inject params + subject, then trigger sendNow. Only draft/queued campaigns can actually be re-sent."}
               </p>
             </div>
             <div className="space-y-1 border border-border rounded p-2 bg-background">
