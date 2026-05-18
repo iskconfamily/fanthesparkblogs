@@ -1262,7 +1262,11 @@ export const studioGenerateBlog = createServerFn({ method: "POST" })
       referenceLayoutImageUrl: data.referenceLayoutImageUrl,
     });
 
-    const blocks = materializeStudioBlocks(ai.blocks, data.images);
+    let blocks = materializeStudioBlocks(ai.blocks, data.images);
+    if (blocks.length === 0) {
+      // AI returned no usable blocks — fall back to splitting source into paragraphs.
+      blocks = markdownToBlocksFallback(data.markdown, data.images);
+    }
     const featuredUrl =
       ai.featured_image_index !== null && data.images[ai.featured_image_index]
         ? data.images[ai.featured_image_index].url
