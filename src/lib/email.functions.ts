@@ -189,7 +189,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     const { data: post, error } = await supabaseAdmin
       .from("blog_posts")
-      .select("id,title,slug,excerpt,featured_image,author")
+      .select("id,title,slug,excerpt,content,featured_image,author")
       .eq("id", data.postId)
       .maybeSingle();
     if (error) throw new Error(error.message);
