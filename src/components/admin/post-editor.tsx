@@ -391,6 +391,54 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
               ))}
             </div>
           )}
+          <div className="border-t border-border pt-4 space-y-3">
+            <h3 className="text-xs uppercase tracking-wide text-muted-foreground">
+              Email announcement
+            </h3>
+            {!id && (
+              <p className="text-[11px] text-muted-foreground">
+                Save the post first to enable email sending.
+              </p>
+            )}
+            {announcementSentAt && (
+              <p className="text-[11px] text-muted-foreground">
+                Last sent {new Date(announcementSentAt).toLocaleString()} to{" "}
+                {announcementCount ?? "?"} recipient
+                {announcementCount === 1 ? "" : "s"}.
+              </p>
+            )}
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Send test to
+              </label>
+              <Input
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={sendTest}
+                disabled={!!busy || !id}
+              >
+                Send test email
+              </Button>
+            </div>
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={sendBroadcast}
+              disabled={!!busy || !id}
+            >
+              {announcementSentAt ? "Resend to subscribers" : "Send to subscribers"}
+            </Button>
+            {emailMsg && (
+              <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
+            )}
+          </div>
         </aside>
       </div>
     </div>
