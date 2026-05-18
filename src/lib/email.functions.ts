@@ -207,6 +207,19 @@ function renderCaption(caption: string | undefined, align: "center" | "left" = "
   return `<span style="display:block;margin-top:8px;font-family:${FONT_DISPLAY};font-style:italic;font-size:14px;color:${MUTED};text-align:${align};">${escapeHtml(caption)}</span>`;
 }
 
+function renderSideFigure(src: string, alt: string, align: "left" | "right", caption?: string): string {
+  const margin = align === "right" ? "0 0 12px 24px" : "0 24px 12px 0";
+  return (
+    `<table role="presentation" align="${align}" cellpadding="0" cellspacing="0" border="0" width="44%" ` +
+      `style="width:44%;max-width:280px;margin:${margin};border-collapse:separate;">` +
+      `<tr><td style="padding:0;">` +
+        `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" width="280" style="display:block;width:100%;max-width:280px;height:auto;border:0;outline:none;text-decoration:none;" />` +
+        renderCaption(caption, "left") +
+      `</td></tr>` +
+    `</table>`
+  );
+}
+
 function renderImageTextTable(src: string, alt: string, text: string, side: "left" | "right", caption?: string): string {
   // Matches site's md:grid-cols-2 gap-8 — 50/50 split.
   const imgCell =
@@ -223,7 +236,7 @@ function renderImageTextTable(src: string, alt: string, text: string, side: "lef
     paragraphs +
     `</td>`;
   const row = side === "left" ? `${imgCell}${textCell}` : `${textCell}${imgCell}`;
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:40px 0;"><tr>${row}</tr></table>`;
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:40px 0;table-layout:fixed;"><tr>${row}</tr></table>`;
 }
 
 function renderGallery(images: GalleryImg[], columns: 2 | 3): string {
@@ -292,13 +305,10 @@ function renderBlocks(blocks: ContentBlock[]): string {
           return `<p style="margin:18px 0;text-align:left;"><img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" style="display:block;max-width:180px;width:100%;height:auto;" />${renderCaption(b.caption, "left")}</p>`;
         }
         if (b.layout === "side-right" || b.layout === "side-left") {
-          // Matches site's w-[44%] max-w-[280px] float.
           const align = b.layout === "side-right" ? "right" : "left";
-          const margin = align === "right" ? "0 0 12px 24px" : "0 24px 12px 0";
-          return `<div style="margin:8px 0;">` +
-            `<img src="${escapeHtml(b.src)}" alt="${escapeHtml(b.alt)}" width="280" align="${align}" style="display:block;width:44%;max-width:280px;height:auto;margin:${margin};" />` +
-            renderCaption(b.caption, "left") +
-            `</div>`;
+          // Use an aligned table instead of a floated image; Gmail handles this
+          // more predictably and it preserves the side placement without clipping.
+          return renderSideFigure(b.src, b.alt, align, b.caption);
         }
         if (b.layout === "inline-small") {
           // Matches site's mx-auto w-[60%].
