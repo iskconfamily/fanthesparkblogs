@@ -22,15 +22,9 @@ export function SiteHeader() {
   const ease = "cubic-bezier(0.4, 0, 0.2, 1)";
   const duration = "380ms";
 
-  const headerHeight = isScrolled ? (isMobile ? 56 : 62) : 124;
-  const logoSize = isScrolled ? (isMobile ? 34 : 40) : 64;
+  const headerHeight = isScrolled ? (isMobile ? 56 : 64) : 124;
+  const logoHeight = isScrolled ? (isMobile ? 32 : 40) : isMobile ? 56 : 72;
 
-  // Approximate offset of the logo from horizontal center when in the
-  // top/expanded state — places it just to the left of the centered title.
-  // Title "Fan The Spark Blogs" at this size measures ~360–400px wide.
-  const titleHalf = isMobile ? 150 : 200;
-  const gap = 16;
-  const expandedLogoLeft = `calc(50% - ${titleHalf + gap + 64 / 2}px)`;
   const scrolledLogoLeft = isMobile ? 20 : 28;
 
   return (
@@ -51,44 +45,23 @@ export function SiteHeader() {
           className="no-underline absolute inset-0 block"
           style={{ borderBottom: "none" }}
         >
-          {/* Single shared logo — translates + scales between states */}
           <img
             src={logoUrl}
             alt="Fan The Spark"
             style={{
               position: "absolute",
               top: "50%",
-              left: isScrolled ? scrolledLogoLeft : expandedLogoLeft,
-              width: logoSize,
-              height: logoSize,
-              transform: "translateY(-50%)",
+              left: isScrolled ? `${scrolledLogoLeft}px` : "50%",
+              height: logoHeight,
+              width: "auto",
+              transform: isScrolled
+                ? "translate(0, -50%)"
+                : "translate(-50%, -50%)",
               objectFit: "contain",
-              transition: `left ${duration} ${ease}, width ${duration} ${ease}, height ${duration} ${ease}`,
-              willChange: "left, width, height",
+              transition: `left ${duration} ${ease}, height ${duration} ${ease}, transform ${duration} ${ease}`,
+              willChange: "left, height, transform",
             }}
           />
-
-          {/* Title — centered at top, fades out on scroll */}
-          <h1
-            className="text-2xl md:text-3xl whitespace-nowrap"
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              fontFamily: "var(--font-serif-display)",
-              fontWeight: 600,
-              fontVariant: "small-caps",
-              letterSpacing: "0.08em",
-              color: "var(--brand-olive)",
-              margin: 0,
-              pointerEvents: isScrolled ? "none" : "auto",
-              opacity: isScrolled ? 0 : 1,
-              transition: `opacity ${isScrolled ? "200ms" : "320ms"} ${ease}`,
-            }}
-          >
-            Fan The Spark Blogs
-          </h1>
         </Link>
       </div>
     </header>
