@@ -78,6 +78,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
           seo_title: seoTitle || null,
           seo_description: seoDescription || null,
           image_prompts: imagePrompts,
+          image_layout: imageLayout,
         },
       });
       setStatus(saved.status);
