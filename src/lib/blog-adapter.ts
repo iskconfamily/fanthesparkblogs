@@ -17,6 +17,8 @@ export type DbBlogPost = {
   seo_title: string | null;
   seo_description: string | null;
   image_prompts: ImagePrompt[];
+  announcement_sent_at?: string | null;
+  announcement_recipient_count?: number | null;
 };
 
 export type ImagePrompt = {
