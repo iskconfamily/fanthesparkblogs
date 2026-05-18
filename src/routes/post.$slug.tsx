@@ -61,8 +61,12 @@ function PostPage() {
     <SiteLayout>
       <article>
         <div
-          className="mb-8 px-6 py-7 md:px-10 md:py-8"
-          style={{ backgroundColor: "#f7efe3", borderRadius: "3px" }}
+          className="mb-8 px-5 py-5 md:px-7 md:py-6"
+          style={{
+            backgroundColor: "#faf2e4",
+            borderRadius: "3px",
+            borderTop: "1px solid rgba(217, 167, 78, 0.35)",
+          }}
         >
           <h1
             className="text-4xl md:text-5xl italic leading-[1.1]"
@@ -71,7 +75,7 @@ function PostPage() {
             {post.title}
           </h1>
           <p
-            className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
+            className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground"
             style={{ fontFamily: "var(--font-meta)" }}
           >
             {formatDate(post.date)}
