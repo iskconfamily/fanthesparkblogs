@@ -185,8 +185,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
         postId: z.string().uuid(),
         mode: z.enum(["test", "broadcast"]),
         testEmail: z.string().email().optional(),
-        target: z.enum(["campaign", "list"]).default("campaign"),
-        campaignId: z.number().int().positive(),
+        templateCampaignId: z.number().int().positive(),
         listId: z.number().int().positive().optional(),
       })
       .parse(i),
@@ -196,9 +195,6 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     if (data.mode === "test" && !data.testEmail) {
       throw new Error("Test email address required");
-    }
-    if (data.target === "list" && !data.listId) {
-      throw new Error("List required when target is list");
     }
 
     const { data: post, error } = await supabaseAdmin
@@ -212,59 +208,54 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     const params = buildParams(post);
     const headers = brevoHeaders();
 
-    // Resolve which campaign to operate on.
-    let campaignId = data.campaignId;
-
-    if (data.target === "list") {
-      // Fetch template campaign (htmlContent + sender) and create a new
-      // campaign targeting the chosen list.
-      const tplRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${data.campaignId}`, {
-        method: "GET",
-        headers,
-      });
-      const tplBody = await tplRes.text();
-      if (!tplRes.ok) {
-        throw new Error(`Brevo fetch template ${tplRes.status}: ${tplBody.slice(0, 300)}`);
-      }
-      const tpl = JSON.parse(tplBody) as {
-        htmlContent?: string;
-        sender?: { name?: string; email?: string };
-        replyTo?: string;
-      };
-      if (!tpl.htmlContent || !tpl.sender?.email) {
-        throw new Error("Template campaign is missing htmlContent or sender");
-      }
-      const createRes = await fetch(`${GATEWAY_URL}/emailCampaigns`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          name: `${post.title} — ${new Date().toISOString()}`,
-          subject: post.title,
-          sender: tpl.sender,
-          replyTo: tpl.replyTo,
-          htmlContent: tpl.htmlContent,
-          recipients: { listIds: [data.listId] },
-          params,
-        }),
-      });
-      const createBody = await createRes.text();
-      if (!createRes.ok) {
-        throw new Error(`Brevo create campaign ${createRes.status}: ${createBody.slice(0, 300)}`);
-      }
-      const created = JSON.parse(createBody) as { id: number };
-      campaignId = created.id;
-    } else {
-      // Inject params + subject into the chosen existing campaign.
-      const putRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}`, {
-        method: "PUT",
-        headers,
-        body: JSON.stringify({ params, subject: post.title }),
-      });
-      if (!putRes.ok) {
-        const b = await putRes.text();
-        throw new Error(`Brevo update campaign ${putRes.status}: ${b.slice(0, 300)}`);
-      }
+    // ALWAYS clone the selected (template) campaign into a fresh draft. Brevo
+    // cannot reliably re-send a campaign whose status is "sent" — sendNow on
+    // a sent campaign silently delivers to ~0 recipients. Creating a new
+    // draft per send guarantees a clean send + clean reporting row.
+    const tplRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${data.templateCampaignId}`, {
+      method: "GET",
+      headers,
+    });
+    const tplBody = await tplRes.text();
+    if (!tplRes.ok) {
+      throw new Error(`Brevo fetch template ${tplRes.status}: ${tplBody.slice(0, 300)}`);
     }
+    const tpl = JSON.parse(tplBody) as {
+      htmlContent?: string;
+      sender?: { name?: string; email?: string };
+      replyTo?: string;
+      recipients?: { listIds?: number[] };
+    };
+    if (!tpl.htmlContent || !tpl.sender?.email) {
+      throw new Error("Template campaign is missing htmlContent or sender");
+    }
+
+    const listIds = data.listId
+      ? [data.listId]
+      : (tpl.recipients?.listIds ?? []);
+    if (listIds.length === 0) {
+      throw new Error("No recipient list — pick a Brevo list or use a template campaign that has one.");
+    }
+
+    const createRes = await fetch(`${GATEWAY_URL}/emailCampaigns`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        name: `${post.title} — ${new Date().toISOString()}`,
+        subject: post.title,
+        sender: tpl.sender,
+        replyTo: tpl.replyTo,
+        htmlContent: tpl.htmlContent,
+        recipients: { listIds },
+        params,
+      }),
+    });
+    const createBody = await createRes.text();
+    if (!createRes.ok) {
+      throw new Error(`Brevo create campaign ${createRes.status}: ${createBody.slice(0, 300)}`);
+    }
+    const created = JSON.parse(createBody) as { id: number };
+    const campaignId = created.id;
 
     // Test or broadcast.
     if (data.mode === "test") {
