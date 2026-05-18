@@ -498,7 +498,18 @@ export const uploadImage = createServerFn({ method: "POST" })
 
 const BlockSchema = z.object({
   id: z.string().min(1).max(100),
-  type: z.enum(["paragraph", "heading", "quote", "image", "divider", "callout"]),
+  type: z.enum([
+    "paragraph",
+    "heading",
+    "quote",
+    "pull-quote",
+    "image",
+    "image-text",
+    "gallery",
+    "divider",
+    "callout",
+    "newsletter-cta",
+  ]),
   text: z.string().max(20000).optional(),
   level: z.number().int().min(2).max(3).optional(),
   cite: z.string().max(500).optional(),
@@ -507,6 +518,18 @@ const BlockSchema = z.object({
   caption: z.string().max(500).optional(),
   layout: z.enum(["hero", "full", "side-right", "side-left", "inline-small"]).optional(),
   tone: z.enum(["note", "warning"]).optional(),
+  imageSide: z.enum(["left", "right"]).optional(),
+  images: z
+    .array(
+      z.object({
+        src: z.string().max(2000),
+        alt: z.string().max(500).optional(),
+        caption: z.string().max(500).optional(),
+      }),
+    )
+    .max(20)
+    .optional(),
+  columns: z.union([z.literal(2), z.literal(3)]).optional(),
 }).passthrough();
 
 export const updatePostBlocks = createServerFn({ method: "POST" })
