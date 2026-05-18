@@ -213,10 +213,14 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Save the post first.");
       return;
     }
+    if (selectedListId == null) {
+      setEmailMsg("Select a Brevo list first.");
+      return;
+    }
     setBusy("Checking list…");
     setEmailMsg("");
     try {
-      const info = await fetchListInfo({});
+      const info = await fetchListInfo({ data: { listId: selectedListId } });
       if (!info.ok) {
         setEmailMsg(`Brevo error: ${info.error}`);
         setBusy(null);
@@ -231,7 +235,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
         return;
       }
       setBusy(`Sending to ${count}…`);
-      const r = await sendEmail({ data: { postId: id, mode: "broadcast" } });
+      const r = await sendEmail({
+        data: { postId: id, mode: "broadcast", listId: selectedListId },
+      });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
