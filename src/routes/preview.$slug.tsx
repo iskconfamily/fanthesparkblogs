@@ -62,13 +62,13 @@ function PreviewPage() {
         <div
           className="mb-3 px-4 py-3 md:px-5 md:py-3.5 max-w-[560px]"
           style={{
-            backgroundColor: "rgba(239, 217, 180, 0.18)",
+            backgroundColor: "var(--brand-title-card-bg)",
             borderRadius: "3px",
           }}
         >
           <h1
             className="text-4xl md:text-5xl italic leading-[1.1]"
-            style={{ fontFamily: "var(--font-serif-display)", color: "#7e6c2a" }}
+            style={{ fontFamily: "var(--font-serif-display)", color: "var(--brand-title-color)" }}
           >
             {post.title}
           </h1>
