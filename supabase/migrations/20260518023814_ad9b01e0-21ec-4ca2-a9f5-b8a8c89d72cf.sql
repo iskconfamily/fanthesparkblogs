@@ -1,0 +1,1 @@
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS image_layout text NOT NULL DEFAULT 'hero' CHECK (image_layout IN ('hero','side','none'));

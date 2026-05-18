@@ -25,6 +25,7 @@ export type Database = {
           excerpt: string | null
           featured_image: string | null
           id: string
+          image_layout: string
           image_prompts: Json
           published_at: string | null
           seo_description: string | null
@@ -45,6 +46,7 @@ export type Database = {
           excerpt?: string | null
           featured_image?: string | null
           id?: string
+          image_layout?: string
           image_prompts?: Json
           published_at?: string | null
           seo_description?: string | null
@@ -65,6 +67,7 @@ export type Database = {
           excerpt?: string | null
           featured_image?: string | null
           id?: string
+          image_layout?: string
           image_prompts?: Json
           published_at?: string | null
           seo_description?: string | null

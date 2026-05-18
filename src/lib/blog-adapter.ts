@@ -17,6 +17,7 @@ export type DbBlogPost = {
   seo_title: string | null;
   seo_description: string | null;
   image_prompts: ImagePrompt[];
+  image_layout?: "hero" | "side" | "none" | null;
   announcement_sent_at?: string | null;
   announcement_recipient_count?: number | null;
 };
@@ -64,7 +65,7 @@ export function dbPostToPost(row: DbBlogPost): Post {
       src: row.featured_image || FALLBACK_IMG,
       alt: row.title,
     },
-    imageLayout: "hero",
+    imageLayout: row.image_layout ?? "hero",
     body: parseContent(row.content),
   };
 }

@@ -85,6 +85,7 @@ const SaveSchema = z.object({
     .array(z.object({ prompt: z.string().max(2000), alt: z.string().max(300).optional(), url: z.string().max(2000).optional() }))
     .max(20)
     .optional(),
+  image_layout: z.enum(["hero", "side", "none"]).optional(),
 });
 
 export const savePost = createServerFn({ method: "POST" })
@@ -106,6 +107,7 @@ export const savePost = createServerFn({ method: "POST" })
       seo_title: data.seo_title || null,
       seo_description: data.seo_description || null,
       image_prompts: data.image_prompts ?? [],
+      image_layout: data.image_layout ?? "hero",
       published_at: data.status === "published" ? now : null,
     };
 

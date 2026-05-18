@@ -36,6 +36,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [seoTitle, setSeoTitle] = useState(existing?.seo_title ?? "");
   const [seoDescription, setSeoDescription] = useState(existing?.seo_description ?? "");
   const [imagePrompts, setImagePrompts] = useState<ImagePrompt[]>(existing?.image_prompts ?? []);
+  const [imageLayout, setImageLayout] = useState<"hero" | "side" | "none">(
+    (existing?.image_layout as "hero" | "side" | "none" | undefined) ?? "hero",
+  );
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -75,6 +78,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
           seo_title: seoTitle || null,
           seo_description: seoDescription || null,
           image_prompts: imagePrompts,
+          image_layout: imageLayout,
         },
       });
       setStatus(saved.status);
@@ -339,6 +343,24 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             {featuredImage && (
               <img src={featuredImage} alt="" className="mt-2 w-full rounded border border-border" />
             )}
+          </div>
+
+          <div>
+            <label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Image layout
+            </label>
+            <select
+              value={imageLayout}
+              onChange={(e) => setImageLayout(e.target.value as "hero" | "side" | "none")}
+              className="mt-1 w-full border border-border rounded bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="hero">Hero — large image after first paragraph</option>
+              <option value="side">Side — small image floated right of text</option>
+              <option value="none">None — no featured image in body</option>
+            </select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Applies to both the home page card and the post page.
+            </p>
           </div>
 
           {imagePrompts.length > 0 && (
