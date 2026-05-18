@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, getBrevoListInfo, listBrevoLists } from "@/lib/email.functions";
+import { sendBlogAnnouncement, getBrevoCampaignInfo, listBrevoCampaigns } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { AiWizard, type AiDraft } from "./ai-wizard";
+
+const SITE_URL_PREVIEW = "https://fanthesparkblogs.lovable.app";
 
 const slugify = (s: string) =>
   s
@@ -22,8 +24,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const upload = useServerFn(uploadImage);
   const genImage = useServerFn(generateBlogImage);
   const sendEmail = useServerFn(sendBlogAnnouncement);
-  const fetchListInfo = useServerFn(getBrevoListInfo);
-  const fetchLists = useServerFn(listBrevoLists);
+  const fetchCampaignInfo = useServerFn(getBrevoCampaignInfo);
+  const fetchCampaigns = useServerFn(listBrevoCampaigns);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
@@ -51,36 +53,37 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [announcementCount, setAnnouncementCount] = useState<number | null>(
     existing?.announcement_recipient_count ?? null,
   );
-  const [brevoLists, setBrevoLists] = useState<
-    Array<{ id: number; name: string; totalSubscribers: number }>
+  const [brevoCampaigns, setBrevoCampaigns] = useState<
+    Array<{ id: number; name: string; status: string; subject: string | null; listIds: number[] }>
   >([]);
-  const [selectedListId, setSelectedListId] = useState<number | null>(null);
-  const [listsError, setListsError] = useState("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
+  const [campaignsError, setCampaignsError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetchLists();
+        const r = await fetchCampaigns();
         if (cancelled) return;
         if (!r.ok) {
-          setListsError(r.error ?? "Failed to load Brevo lists");
+          setCampaignsError(r.error ?? "Failed to load Brevo campaigns");
           return;
         }
-        setBrevoLists(r.lists);
-        setSelectedListId((prev) => {
+        setBrevoCampaigns(r.campaigns);
+        setSelectedCampaignId((prev) => {
           if (prev != null) return prev;
-          if (r.lists.some((l) => l.id === r.defaultListId)) return r.defaultListId;
-          return r.lists[0]?.id ?? null;
+          // Prefer first draft, else first campaign
+          const firstDraft = r.campaigns.find((c) => c.status === "draft");
+          return firstDraft?.id ?? r.campaigns[0]?.id ?? null;
         });
       } catch (e) {
-        if (!cancelled) setListsError(e instanceof Error ? e.message : "Failed to load lists");
+        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load campaigns");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fetchLists]);
+  }, [fetchCampaigns]);
 
   const id = existing?.id;
 
@@ -213,22 +216,23 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Save the post first.");
       return;
     }
-    if (selectedListId == null) {
-      setEmailMsg("Select a Brevo list first.");
+    if (selectedCampaignId == null) {
+      setEmailMsg("Select a Brevo campaign first.");
       return;
     }
-    setBusy("Checking list…");
+    setBusy("Checking campaign…");
     setEmailMsg("");
     try {
-      const info = await fetchListInfo({ data: { listId: selectedListId } });
+      const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
       if (!info.ok) {
         setEmailMsg(`Brevo error: ${info.error}`);
         setBusy(null);
         return;
       }
       const count = info.totalSubscribers ?? 0;
+      const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
       const ok = window.confirm(
-        `Send "${title}" to ${count} subscriber${count === 1 ? "" : "s"} in Brevo list "${info.name ?? info.listId}"?`,
+        `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`,
       );
       if (!ok) {
         setBusy(null);
@@ -236,14 +240,12 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       }
       setBusy(`Sending to ${count}…`);
       const r = await sendEmail({
-        data: { postId: id, mode: "broadcast", listId: selectedListId },
+        data: { postId: id, mode: "broadcast", campaignId: selectedCampaignId },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
-        `Sent to ${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.${
-          r.errors ? ` (${r.errors.length} batch errors)` : ""
-        }`,
+        `Sent campaign to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
@@ -488,34 +490,52 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo list
+                Brevo campaign
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedListId ?? ""}
+                value={selectedCampaignId ?? ""}
                 onChange={(e) =>
-                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
+                  setSelectedCampaignId(e.target.value ? Number(e.target.value) : null)
                 }
-                disabled={!!busy || brevoLists.length === 0}
+                disabled={!!busy || brevoCampaigns.length === 0}
               >
-                {brevoLists.length === 0 && <option value="">Loading…</option>}
-                {brevoLists.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} ({l.totalSubscribers})
+                {brevoCampaigns.length === 0 && <option value="">Loading…</option>}
+                {brevoCampaigns.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} — {c.status}
                   </option>
                 ))}
               </select>
-              {listsError && (
-                <p className="text-[11px] text-destructive break-words">{listsError}</p>
+              {campaignsError && (
+                <p className="text-[11px] text-destructive break-words">{campaignsError}</p>
               )}
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Brevo owns the HTML. We only inject params + subject, then trigger sendNow.
+                Only draft/queued campaigns can actually be re-sent.
+              </p>
+            </div>
+            <div className="space-y-1 border border-border rounded p-2 bg-background">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Params sent to Brevo (use as {`{{ params.X }}`})
+              </p>
+              <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono">
+{`subject        = ${title}
+title          = ${title}
+excerpt        = ${(excerpt || "").slice(0, 80)}${excerpt.length > 80 ? "…" : ""}
+url            = ${SITE_URL_PREVIEW}/post/${previewSlug}
+author         = ${author}
+featured_image = ${featuredImage || "(none)"}
+slug           = ${previewSlug}`}
+              </pre>
             </div>
             <Button
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedListId == null}
+              disabled={!!busy || !id || selectedCampaignId == null}
             >
-              {announcementSentAt ? "Resend to subscribers" : "Send to subscribers"}
+              {announcementSentAt ? "Resend campaign" : "Send campaign"}
             </Button>
             {emailMsg && (
               <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
