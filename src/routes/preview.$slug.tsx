@@ -3,9 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
-import { ArticleBody } from "@/components/article-body";
-import { Byline } from "@/components/byline";
-import { formatDate } from "@/content/queries";
+import { PostArticle } from "@/components/post-article";
 import { supabase } from "@/integrations/supabase/client";
 import { checkIsAdmin, getPreviewPostBySlug } from "@/lib/admin.functions";
 
@@ -59,27 +57,7 @@ function PreviewPage() {
         Draft preview — not visible to the public
       </div>
       <article>
-        <div className="mb-3 max-w-[560px]">
-          <h1
-            className="text-4xl md:text-5xl italic leading-[1.1]"
-            style={{ fontFamily: "var(--font-serif-display)", color: "var(--brand-title-color)" }}
-          >
-            {post.title}
-          </h1>
-          <p
-            className="mt-2.5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
-            style={{ fontFamily: "var(--font-meta)" }}
-          >
-            {formatDate(post.date)}
-          </p>
-        </div>
-        <Byline author={post.author} />
-        {post.featuredImage.src && (
-          <figure className="my-8">
-            <img src={post.featuredImage.src} alt={post.featuredImage.alt} className="w-full" />
-          </figure>
-        )}
-        <ArticleBody blocks={post.body} />
+        <PostArticle post={post} as="h1" titleClassName="text-4xl md:text-5xl" />
       </article>
     </SiteLayout>
   );

@@ -1,28 +1,59 @@
-import type { ArticleBlock } from "@/content/posts";
+import type { PostBlock } from "@/lib/post-blocks";
 
-export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
+function ImageBlock({ b }: { b: Extract<PostBlock, { type: "image" }> }) {
+  const layout = b.layout ?? "hero";
+
+  const cls =
+    layout === "side-right"
+      ? "float-right ml-6 mb-3 w-[44%] max-w-[280px]"
+      : layout === "side-left"
+        ? "float-left mr-6 mb-3 w-[44%] max-w-[280px]"
+        : layout === "inline-small"
+          ? "mx-auto my-8 w-[60%]"
+          : "my-8 w-full"; // hero / full
+
+  const captionAlign = layout === "side-right" || layout === "side-left" ? "text-left" : "text-center";
+
+  return (
+    <figure className={cls}>
+      <img src={b.src} alt={b.alt ?? ""} className="w-full" loading="lazy" />
+      {b.caption && (
+        <figcaption
+          className={`mt-2 text-sm italic text-muted-foreground ${captionAlign}`}
+          style={{ fontFamily: "var(--font-serif-display)" }}
+        >
+          {b.caption}
+        </figcaption>
+      )}
+    </figure>
+  );
+}
+
+export function ArticleBody({ blocks }: { blocks: PostBlock[] }) {
   return (
     <div
       className="prose-literary text-[18px] leading-[1.75]"
       style={{ fontFamily: "var(--font-serif-body)" }}
     >
-      {blocks.map((b, i) => {
-        if (b.type === "p") return <p key={i}>{b.text}</p>;
-        if (b.type === "h2")
+      {blocks.map((b) => {
+        if (b.type === "paragraph") return <p key={b.id}>{b.text}</p>;
+        if (b.type === "heading") {
+          const Tag = (b.level === 3 ? "h3" : "h2") as "h2" | "h3";
           return (
-            <h2
-              key={i}
-              className="mt-12 mb-6 text-3xl italic"
+            <Tag
+              key={b.id}
+              className="mt-12 mb-6 text-3xl italic clear-both"
               style={{ fontFamily: "var(--font-serif-display)" }}
             >
               {b.text}
-            </h2>
+            </Tag>
           );
-        if (b.type === "quote")
+        }
+        if (b.type === "quote") {
           return (
             <blockquote
-              key={i}
-              className="my-10 border-l-2 border-primary pl-6 italic text-2xl leading-[1.5] text-foreground/85"
+              key={b.id}
+              className="my-10 border-l-2 border-primary pl-6 italic text-2xl leading-[1.5] text-foreground/85 clear-both"
               style={{ fontFamily: "var(--font-serif-display)" }}
             >
               <p className="mb-2">"{b.text}"</p>
@@ -36,20 +67,21 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
               )}
             </blockquote>
           );
-        if (b.type === "figure")
+        }
+        if (b.type === "image") return <ImageBlock key={b.id} b={b} />;
+        if (b.type === "divider") {
+          return <hr key={b.id} className="my-12 border-border clear-both" />;
+        }
+        if (b.type === "callout") {
           return (
-            <figure key={i} className="my-10">
-              <img src={b.src} alt={b.alt} className="w-full" />
-              {b.caption && (
-                <figcaption
-                  className="mt-2 text-sm italic text-muted-foreground text-center"
-                  style={{ fontFamily: "var(--font-serif-display)" }}
-                >
-                  {b.caption}
-                </figcaption>
-              )}
-            </figure>
+            <aside
+              key={b.id}
+              className="my-8 p-5 border-l-4 border-primary bg-muted/40 text-base clear-both"
+            >
+              {b.text}
+            </aside>
           );
+        }
         return null;
       })}
     </div>

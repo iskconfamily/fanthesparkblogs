@@ -1,4 +1,5 @@
 import type { Post, ArticleBlock } from "@/content/posts";
+import { parseBlocks, type PostBlock } from "@/lib/post-blocks";
 
 export type DbBlogPost = {
   id: string;
@@ -18,6 +19,7 @@ export type DbBlogPost = {
   seo_description: string | null;
   image_prompts: ImagePrompt[];
   image_layout?: "hero" | "side" | "none" | null;
+  blocks: PostBlock[];
   announcement_sent_at?: string | null;
   announcement_recipient_count?: number | null;
 };
@@ -25,15 +27,11 @@ export type DbBlogPost = {
 export type ImagePrompt = {
   prompt: string;
   alt?: string;
-  url?: string; // populated once generated
+  url?: string;
 };
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1200";
 
-// Parses our markdown-ish content. Supports:
-//  ## heading
-//  > quote
-//  ![alt](url) figure on its own line/block
 function parseContent(content: string | null): ArticleBlock[] {
   if (!content) return [];
   return content
@@ -49,10 +47,19 @@ function parseContent(content: string | null): ArticleBlock[] {
     });
 }
 
+/** Normalize a raw supabase row (where `blocks` is `Json`/unknown) into a typed DbBlogPost. */
+export function normalizeDbPost(raw: Record<string, unknown>): DbBlogPost {
+  return {
+    ...(raw as unknown as DbBlogPost),
+    blocks: parseBlocks(raw.blocks),
+  };
+}
+
 export function dbPostToPost(row: DbBlogPost): Post {
   const date = (row.published_at ?? row.created_at).slice(0, 10);
   const category = row.category ?? "Bhakti Notes";
   const tags = row.tags && row.tags.length ? row.tags : [category];
+  const blocks: PostBlock[] = row.blocks ?? [];
   return {
     slug: row.slug,
     title: row.title,
@@ -67,5 +74,6 @@ export function dbPostToPost(row: DbBlogPost): Post {
     },
     imageLayout: row.image_layout ?? "hero",
     body: parseContent(row.content),
+    blocks: blocks.length ? blocks : undefined,
   };
 }

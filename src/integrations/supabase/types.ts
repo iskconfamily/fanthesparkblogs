@@ -19,6 +19,7 @@ export type Database = {
           announcement_recipient_count: number | null
           announcement_sent_at: string | null
           author: string | null
+          blocks: Json
           category: string | null
           content: string | null
           created_at: string
@@ -40,6 +41,7 @@ export type Database = {
           announcement_recipient_count?: number | null
           announcement_sent_at?: string | null
           author?: string | null
+          blocks?: Json
           category?: string | null
           content?: string | null
           created_at?: string
@@ -61,6 +63,7 @@ export type Database = {
           announcement_recipient_count?: number | null
           announcement_sent_at?: string | null
           author?: string | null
+          blocks?: Json
           category?: string | null
           content?: string | null
           created_at?: string

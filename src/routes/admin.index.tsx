@@ -180,6 +180,9 @@ function AdminList() {
                         >
                           Preview
                         </a>
+                        <Link to="/admin/design/$id" params={{ id: p.id }}>
+                          <Button size="sm">Design with AI</Button>
+                        </Link>
                         <Link to="/admin/edit/$id" params={{ id: p.id }}>
                           <Button variant="outline" size="sm">Edit</Button>
                         </Link>

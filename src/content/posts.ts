@@ -14,6 +14,8 @@ import postServe from "@/assets/post-serve.jpg";
 import postFamilyBusiness from "@/assets/post-family-business.jpg";
 import postFourQuestions from "@/assets/post-four-questions.jpg";
 
+import type { PostBlock } from "@/lib/post-blocks";
+
 export type ArticleBlock =
   | { type: "p"; text: string }
   | { type: "h2"; text: string }
@@ -34,6 +36,12 @@ export type Post = {
   featuredImage: { src: string; alt: string; caption?: string };
   imageLayout?: "hero" | "side" | "none";
   body: ArticleBlock[];
+  /**
+   * Optional rich block document. When present, the renderer uses this
+   * verbatim instead of `body` + `featuredImage` + `imageLayout`. This is
+   * what the AI chat designer edits.
+   */
+  blocks?: PostBlock[];
   relatedSlugs?: string[];
 };
 
