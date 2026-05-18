@@ -216,7 +216,9 @@ function blocksToText(blocks: ContentBlock[]): string {
     .map((b) => {
       if (b.type === "h2") return `\n${b.text}\n${"-".repeat(b.text.length)}`;
       if (b.type === "quote") return `  "${b.text}"${b.cite ? ` — ${b.cite}` : ""}`;
+      if (b.type === "pull-quote") return `\n  "${b.text}"${b.cite ? ` — ${b.cite}` : ""}\n`;
       if (b.type === "figure") return b.alt ? `[image: ${b.alt}]` : "[image]";
+      if (b.type === "image-text") return `${b.alt ? `[image: ${b.alt}]\n` : "[image]\n"}${b.text}`;
       if (b.type === "divider") return "---";
       if (b.type === "callout") return `> ${b.text}`;
       return b.text;
