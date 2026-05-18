@@ -36,6 +36,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [seoTitle, setSeoTitle] = useState(existing?.seo_title ?? "");
   const [seoDescription, setSeoDescription] = useState(existing?.seo_description ?? "");
   const [imagePrompts, setImagePrompts] = useState<ImagePrompt[]>(existing?.image_prompts ?? []);
+  const [imageLayout, setImageLayout] = useState<"hero" | "side" | "none">(
+    (existing?.image_layout as "hero" | "side" | "none" | undefined) ?? "hero",
+  );
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
