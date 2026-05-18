@@ -59,23 +59,23 @@ function PreviewPage() {
         Draft preview — not visible to the public
       </div>
       <article>
-        <h1
-          className="text-4xl md:text-5xl italic leading-[1.1]"
-          style={{ fontFamily: "var(--font-serif-display)", color: "#7e6c2a" }}
-        >
-          {post.title}
-        </h1>
         <div
-          aria-hidden
-          className="mt-5"
-          style={{ width: "112px", height: "2px", backgroundColor: "#f2673a" }}
-        />
-        <p
-          className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
-          style={{ fontFamily: "var(--font-meta)" }}
+          className="mb-8 px-6 py-7 md:px-10 md:py-8"
+          style={{ backgroundColor: "#f7efe3", borderRadius: "3px" }}
         >
-          {formatDate(post.date)}
-        </p>
+          <h1
+            className="text-4xl md:text-5xl italic leading-[1.1]"
+            style={{ fontFamily: "var(--font-serif-display)", color: "#7e6c2a" }}
+          >
+            {post.title}
+          </h1>
+          <p
+            className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
+            style={{ fontFamily: "var(--font-meta)" }}
+          >
+            {formatDate(post.date)}
+          </p>
+        </div>
         <Byline author={post.author} />
         {post.featuredImage.src && (
           <figure className="my-8">
