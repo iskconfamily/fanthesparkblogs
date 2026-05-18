@@ -486,11 +486,34 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
                 Send test email
               </Button>
             </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Brevo list
+              </label>
+              <select
+                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                value={selectedListId ?? ""}
+                onChange={(e) =>
+                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
+                }
+                disabled={!!busy || brevoLists.length === 0}
+              >
+                {brevoLists.length === 0 && <option value="">Loading…</option>}
+                {brevoLists.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name} ({l.totalSubscribers})
+                  </option>
+                ))}
+              </select>
+              {listsError && (
+                <p className="text-[11px] text-destructive break-words">{listsError}</p>
+              )}
+            </div>
             <Button
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id}
+              disabled={!!busy || !id || selectedListId == null}
             >
               {announcementSentAt ? "Resend to subscribers" : "Send to subscribers"}
             </Button>
