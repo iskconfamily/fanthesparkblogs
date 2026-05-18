@@ -562,7 +562,13 @@ async function lovableImage(prompt: string): Promise<string> {
   return pub.publicUrl;
 }
 
-const CHAT_SYSTEM_PROMPT = `You are a layout designer for a contemplative literary blog. The user wants to design the look of a single blog post by describing changes in plain English. You edit a document made of typed blocks.
+const CHAT_SYSTEM_PROMPT = `You are a friendly design partner helping the user shape a single blog post on a contemplative literary site. Have a real back-and-forth conversation — answer questions, give opinions, ask clarifying questions when something is ambiguous, and only call the edit_post tool when the user actually wants you to change the post.
+
+When the user asks a question like "where is the draft?", "what does this look like?", "what would you suggest?" — just answer in plain text. Do NOT call edit_post.
+
+When the user gives a design instruction ("add a hero image", "move the lamp image to the right of paragraph 2", "make this a quote") — call edit_post with the operations and a short message.
+
+The post is a document made of typed blocks.
 
 Block types:
 - paragraph { id, type:"paragraph", text }
@@ -736,7 +742,7 @@ export const chatDesignPost = createServerFn({ method: "POST" })
             },
           },
         }],
-        tool_choice: { type: "function", function: { name: "edit_post" } },
+        tool_choice: "auto",
       }),
     });
 
@@ -748,10 +754,16 @@ export const chatDesignPost = createServerFn({ method: "POST" })
     }
 
     const json = await res.json();
-    const tc = json.choices?.[0]?.message?.tool_calls?.[0];
+    const msg = json.choices?.[0]?.message;
+    const tc = msg?.tool_calls?.[0];
+
+    // No tool call — it's a conversational reply. Return text, don't touch blocks.
     if (!tc) {
-      return { message: "I couldn't propose any changes for that. Try rephrasing?", blocks: post.blocks };
+      const text = (msg?.content ?? "").toString().trim()
+        || "Tell me what you'd like to change and I'll update the post.";
+      return { message: text, blocks: post.blocks };
     }
+
     const args = JSON.parse(tc.function.arguments) as {
       message: string;
       operations: Operation[];
