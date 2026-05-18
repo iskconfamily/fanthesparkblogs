@@ -498,7 +498,7 @@ export const updatePostBlocks = createServerFn({ method: "POST" })
     await assertAdmin(context.userId);
     const { data: updated, error } = await supabaseAdmin
       .from("blog_posts")
-      .update({ blocks: data.blocks as unknown as object })
+      .update({ blocks: data.blocks as unknown as never })
       .eq("id", data.id)
       .select()
       .single();
@@ -738,7 +738,7 @@ export const chatDesignPost = createServerFn({ method: "POST" })
 
     const { error: saveErr } = await supabaseAdmin
       .from("blog_posts")
-      .update({ blocks: newBlocks as unknown as object })
+      .update({ blocks: newBlocks as unknown as never })
       .eq("id", data.id);
     if (saveErr) throw new Error(saveErr.message);
 
