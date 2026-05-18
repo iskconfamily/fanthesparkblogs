@@ -38,13 +38,19 @@ export function PostPreview({ post }: { post: Post }) {
         <Link
           to="/post/$slug"
           params={{ slug: post.slug }}
-          className="text-3xl md:text-4xl italic text-foreground hover:text-primary"
+          className="text-3xl md:text-4xl italic hover:text-primary"
           style={{
             fontFamily: "var(--font-serif-display)",
             fontWeight: 500,
             borderBottom: "none",
-            display: "inline-block",
+            display: "inline",
             lineHeight: 1.15,
+            color: "#7e6c2a",
+            backgroundImage:
+              "linear-gradient(180deg, transparent 0%, transparent 55%, #f2e199 55%, #efd9b4 100%)",
+            padding: "0.05em 0.25em",
+            WebkitBoxDecorationBreak: "clone",
+            boxDecorationBreak: "clone",
           }}
         >
           {post.title}

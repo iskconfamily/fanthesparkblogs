@@ -64,7 +64,18 @@ function PostPage() {
           className="text-4xl md:text-5xl italic leading-[1.1]"
           style={{ fontFamily: "var(--font-serif-display)" }}
         >
-          {post.title}
+          <span
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, transparent 0%, transparent 55%, #f2e199 55%, #efd9b4 100%)",
+              padding: "0.05em 0.25em",
+              WebkitBoxDecorationBreak: "clone",
+              boxDecorationBreak: "clone",
+              color: "#7e6c2a",
+            }}
+          >
+            {post.title}
+          </span>
         </h1>
         <p
           className="mt-5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
