@@ -1,39 +1,28 @@
-## Why you don't see it
+## Goal
 
-The "Design with AI" button only renders for posts saved in the database. All your current blog posts are still static (in `src/content/posts.ts`), so they only show an **Import & edit** button. The new post flow also still routes to the old form editor.
+On the "Our Family Business" post, the cover image currently renders huge. Shrink it to a small (~280px), floated-right thumbnail so the opening paragraphs wrap around it like a book listing.
 
-## Changes
+## Why it's currently big
 
-### 1. Show "Design with AI" on every post row
-In `src/routes/admin.index.tsx`, for static-post rows add a **Design with AI** button that:
-- Imports the post into the database (existing `importOne` flow)
-- Auto-generates a `blocks` document from its existing content + featured image
-- Navigates to `/admin/design/{id}`
+The post already has `imageLayout: "side"` in `src/content/posts.ts`, which the renderer maps to `side-right` (`w-[44%] max-w-[280px]`). So on the public post page it *should* already be small. The screenshot showing a giant image is coming from the database `blocks` document — at some point the AI chat designer (or the import flow) saved a `blocks` array for this post where the cover is a `hero` / `full` layout image. Since `PostArticle` prefers `post.blocks` over the legacy `body` whenever blocks are non-empty, the saved big-hero version is what's served.
 
-### 2. Make "New post" open the chat designer directly
-- `New post` button creates an empty draft (title "Untitled", empty blocks) via a new `createDraftPost` server fn
-- Redirects straight to `/admin/design/{id}` — no form first
-- The old `/admin/new` wizard stays accessible but is no longer the default
+## Change
 
-### 3. Make `/admin/design/{id}` the real workspace
-Reachable from:
-- New post button (auto-creates draft → design)
-- Design with AI button on every row (static or DB)
-- An "Open in AI designer" link from the existing edit form, for posts where someone prefers to start in the form
+One targeted fix in the database for the `our-family-business` row:
 
-### 4. Top-of-admin callout
-Add a short banner: "Design posts visually with AI — click **Design with AI** on any post, or **New post** to start fresh." So the entry point is obvious.
+- Rewrite its `blocks` jsonb so the cover image block has `layout: "side-right"` (and is positioned right after the first paragraph, matching the legacy intent).
+- Leave every other field — title, paragraphs, headings, ordering of text — untouched.
 
-### 5. Small fixes spotted in passing
-- The hydration error on `/` and `/post/...` (newsletter form button vs LastPass extension injection) — wrap the subscribe `<form>` content in a client-only render guard so the server output matches the client.
+No code changes needed; the renderer already handles `side-right` correctly (`float-right ml-6 mb-3 w-[44%] max-w-[280px]`).
+
+## Verification
+
+After the migration:
+1. Reload `/post/our-family-business` and confirm the cover sits to the right of the opening paragraphs at ~280px wide.
+2. Confirm the home-page card for the same post also shows the small floated image (same blocks document is used in both places).
 
 ## Out of scope
-- Removing the old form editor (kept as a fallback)
-- Migrating all static posts automatically — still one-click per post, but now in the same button as design
-- Chat history persistence between sessions
 
-## Files touched
-- `src/routes/admin.index.tsx` — add Design with AI to static rows, change New post behavior, add banner
-- `src/lib/admin.functions.ts` — add `createDraftPost` server fn
-- `src/components/admin/post-editor.tsx` — add "Open in AI designer" link
-- `src/components/site-footer.tsx` (or wherever the subscribe form lives) — fix hydration
+- Adjusting other posts' image sizes.
+- Touching the chat designer prompt or admin UI.
+- Restyling typography / colors on the post page.
