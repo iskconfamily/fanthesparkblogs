@@ -345,6 +345,24 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             )}
           </div>
 
+          <div>
+            <label className="text-xs uppercase tracking-wide text-muted-foreground">
+              Image layout
+            </label>
+            <select
+              value={imageLayout}
+              onChange={(e) => setImageLayout(e.target.value as "hero" | "side" | "none")}
+              className="mt-1 w-full border border-border rounded bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="hero">Hero — large image after first paragraph</option>
+              <option value="side">Side — small image floated right of text</option>
+              <option value="none">None — no featured image in body</option>
+            </select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Applies to both the home page card and the post page.
+            </p>
+          </div>
+
           {imagePrompts.length > 0 && (
             <div className="border-t border-border pt-4 space-y-3">
               <h3 className="text-xs uppercase tracking-wide text-muted-foreground">
