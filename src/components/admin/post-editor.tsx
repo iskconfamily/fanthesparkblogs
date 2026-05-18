@@ -209,25 +209,23 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Enter a test email address.");
       return;
     }
+    if (selectedCampaignId == null) {
+      setEmailMsg("Select a template campaign first.");
+      return;
+    }
     setBusy("Sending test…");
     setEmailMsg("");
     try {
-      if (selectedCampaignId == null) {
-        setEmailMsg("Select a Brevo campaign (used as template) first.");
-        setBusy(null);
-        return;
-      }
       const r = await sendEmail({
         data: {
           postId: id,
           mode: "test",
           testEmail,
-          target,
-          campaignId: selectedCampaignId,
-          listId: target === "list" ? selectedListId ?? undefined : undefined,
+          templateCampaignId: selectedCampaignId,
+          listId: selectedListId ?? undefined,
         },
       });
-      setEmailMsg(`Test sent to ${r.sentTo}`);
+      setEmailMsg(`Test sent to ${r.sentTo} (new draft campaign #${r.campaignId})`);
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
     } finally {
@@ -241,34 +239,20 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       return;
     }
     if (selectedCampaignId == null) {
-      setEmailMsg("Select a Brevo campaign first.");
+      setEmailMsg("Select a template campaign first.");
       return;
     }
-    if (target === "list" && selectedListId == null) {
+    if (selectedListId == null) {
       setEmailMsg("Select a Brevo list first.");
       return;
     }
     setBusy("Checking…");
     setEmailMsg("");
     try {
-      let count = 0;
-      let confirmMsg = "";
-      if (target === "campaign") {
-        const info = await fetchCampaignInfo({ data: { campaignId: selectedCampaignId } });
-        if (!info.ok) {
-          setEmailMsg(`Brevo error: ${info.error}`);
-          setBusy(null);
-          return;
-        }
-        count = info.totalSubscribers ?? 0;
-        const listLabel = info.listNames.length ? info.listNames.join(", ") : info.listIds.join(", ");
-        confirmMsg = `Send "${title}" via campaign "${info.name ?? info.campaignId}" to list "${listLabel}" (${count} subscriber${count === 1 ? "" : "s"})?\n\nThis triggers Brevo sendNow.`;
-      } else {
-        const list = brevoLists.find((l) => l.id === selectedListId);
-        count = list?.totalSubscribers ?? 0;
-        const tpl = brevoCampaigns.find((c) => c.id === selectedCampaignId);
-        confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using "${tpl?.name ?? selectedCampaignId}" as HTML template?\n\nThis creates a NEW Brevo campaign and triggers sendNow.`;
-      }
+      const list = brevoLists.find((l) => l.id === selectedListId);
+      const count = list?.totalSubscribers ?? 0;
+      const tpl = brevoCampaigns.find((c) => c.id === selectedCampaignId);
+      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using "${tpl?.name ?? selectedCampaignId}" as HTML template?\n\nThis creates a NEW Brevo draft campaign and triggers sendNow.`;
       const ok = window.confirm(confirmMsg);
       if (!ok) {
         setBusy(null);
@@ -279,15 +263,14 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
         data: {
           postId: id,
           mode: "broadcast",
-          target,
-          campaignId: selectedCampaignId,
-          listId: target === "list" ? selectedListId ?? undefined : undefined,
+          templateCampaignId: selectedCampaignId,
+          listId: selectedListId,
         },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
       setEmailMsg(
-        `Sent to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"}.`,
+        `Sent to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} (campaign #${r.campaignId}).`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
@@ -295,6 +278,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setBusy(null);
     }
   };
+
 
   const previewSlug = slug || slugify(title);
 
