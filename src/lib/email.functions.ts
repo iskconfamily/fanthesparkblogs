@@ -152,6 +152,31 @@ export const getBrevoCampaignInfo = createServerFn({ method: "POST" })
     };
   });
 
+export const listBrevoLists = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const res = await fetch(
+      `${GATEWAY_URL}/contacts/lists?limit=50&offset=0&sort=desc`,
+      { method: "GET", headers: brevoHeaders() },
+    );
+    const body = await res.text();
+    if (!res.ok) {
+      return { ok: false as const, error: `${res.status}: ${body.slice(0, 200)}`, lists: [] };
+    }
+    const parsed = JSON.parse(body) as {
+      lists?: Array<{ id: number; name: string; totalSubscribers?: number }>;
+    };
+    return {
+      ok: true as const,
+      lists: (parsed.lists ?? []).map((l) => ({
+        id: l.id,
+        name: l.name,
+        totalSubscribers: l.totalSubscribers ?? 0,
+      })),
+    };
+  });
+
 export const sendBlogAnnouncement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
@@ -160,7 +185,9 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
         postId: z.string().uuid(),
         mode: z.enum(["test", "broadcast"]),
         testEmail: z.string().email().optional(),
+        target: z.enum(["campaign", "list"]).default("campaign"),
         campaignId: z.number().int().positive(),
+        listId: z.number().int().positive().optional(),
       })
       .parse(i),
   )
@@ -169,6 +196,9 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     if (data.mode === "test" && !data.testEmail) {
       throw new Error("Test email address required");
+    }
+    if (data.target === "list" && !data.listId) {
+      throw new Error("List required when target is list");
     }
 
     const { data: post, error } = await supabaseAdmin
@@ -182,27 +212,67 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     const params = buildParams(post);
     const headers = brevoHeaders();
 
-    // 1) Inject params + subject into the chosen campaign.
-    const putRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${data.campaignId}`, {
-      method: "PUT",
-      headers,
-      body: JSON.stringify({ params, subject: post.title }),
-    });
-    if (!putRes.ok) {
-      const b = await putRes.text();
-      throw new Error(`Brevo update campaign ${putRes.status}: ${b.slice(0, 300)}`);
+    // Resolve which campaign to operate on.
+    let campaignId = data.campaignId;
+
+    if (data.target === "list") {
+      // Fetch template campaign (htmlContent + sender) and create a new
+      // campaign targeting the chosen list.
+      const tplRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${data.campaignId}`, {
+        method: "GET",
+        headers,
+      });
+      const tplBody = await tplRes.text();
+      if (!tplRes.ok) {
+        throw new Error(`Brevo fetch template ${tplRes.status}: ${tplBody.slice(0, 300)}`);
+      }
+      const tpl = JSON.parse(tplBody) as {
+        htmlContent?: string;
+        sender?: { name?: string; email?: string };
+        replyTo?: string;
+      };
+      if (!tpl.htmlContent || !tpl.sender?.email) {
+        throw new Error("Template campaign is missing htmlContent or sender");
+      }
+      const createRes = await fetch(`${GATEWAY_URL}/emailCampaigns`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          name: `${post.title} — ${new Date().toISOString()}`,
+          subject: post.title,
+          sender: tpl.sender,
+          replyTo: tpl.replyTo,
+          htmlContent: tpl.htmlContent,
+          recipients: { listIds: [data.listId] },
+          params,
+        }),
+      });
+      const createBody = await createRes.text();
+      if (!createRes.ok) {
+        throw new Error(`Brevo create campaign ${createRes.status}: ${createBody.slice(0, 300)}`);
+      }
+      const created = JSON.parse(createBody) as { id: number };
+      campaignId = created.id;
+    } else {
+      // Inject params + subject into the chosen existing campaign.
+      const putRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}`, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify({ params, subject: post.title }),
+      });
+      if (!putRes.ok) {
+        const b = await putRes.text();
+        throw new Error(`Brevo update campaign ${putRes.status}: ${b.slice(0, 300)}`);
+      }
     }
 
-    // 2) Test or broadcast.
+    // Test or broadcast.
     if (data.mode === "test") {
-      const res = await fetch(
-        `${GATEWAY_URL}/emailCampaigns/${data.campaignId}/sendTest`,
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ emailTo: [data.testEmail] }),
-        },
-      );
+      const res = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}/sendTest`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ emailTo: [data.testEmail] }),
+      });
       if (!res.ok) {
         const b = await res.text();
         throw new Error(`Brevo sendTest ${res.status}: ${b.slice(0, 300)}`);
@@ -211,15 +281,16 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
         mode: "test" as const,
         recipientCount: 1,
         sentTo: data.testEmail,
+        campaignId,
         params,
       };
     }
 
     // broadcast — sendNow
-    const res = await fetch(
-      `${GATEWAY_URL}/emailCampaigns/${data.campaignId}/sendNow`,
-      { method: "POST", headers },
-    );
+    const res = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}/sendNow`, {
+      method: "POST",
+      headers,
+    });
     if (!res.ok) {
       const b = await res.text();
       throw new Error(`Brevo sendNow ${res.status}: ${b.slice(0, 300)}`);
@@ -228,10 +299,10 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     // Best-effort recipient count from the campaign's lists.
     let recipientCount = 0;
     try {
-      const infoRes = await fetch(
-        `${GATEWAY_URL}/emailCampaigns/${data.campaignId}`,
-        { method: "GET", headers },
-      );
+      const infoRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}`, {
+        method: "GET",
+        headers,
+      });
       if (infoRes.ok) {
         const info = JSON.parse(await infoRes.text()) as {
           recipients?: { listIds?: number[] };
@@ -261,7 +332,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     return {
       mode: "broadcast" as const,
-      campaignId: data.campaignId,
+      campaignId,
       recipientCount,
       params,
     };
