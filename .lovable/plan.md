@@ -1,28 +1,47 @@
 ## Goal
 
-On the "Our Family Business" post, the cover image currently renders huge. Shrink it to a small (~280px), floated-right thumbnail so the opening paragraphs wrap around it like a book listing.
+Create a new published blog post in the database from the source article:
+`https://fanthespark.com/wisdom/blog/want-to-change-stress-to-serenity-read-this/`
+— "Want to change Stress to Serenity? Read this." by Vaisesika Dasa.
 
-## Why it's currently big
+Generate two original images that fit the article (mind/meditation theme) and place them inline.
 
-The post already has `imageLayout: "side"` in `src/content/posts.ts`, which the renderer maps to `side-right` (`w-[44%] max-w-[280px]`). So on the public post page it *should* already be small. The screenshot showing a giant image is coming from the database `blocks` document — at some point the AI chat designer (or the import flow) saved a `blocks` array for this post where the cover is a `hero` / `full` layout image. Since `PostArticle` prefers `post.blocks` over the legacy `body` whenever blocks are non-empty, the saved big-hero version is what's served.
+## Content
 
-## Change
+- **Title**: Want to change Stress to Serenity? Read this.
+- **Slug**: `want-to-change-stress-to-serenity`
+- **Author**: Vaisesika Dasa
+- **Category**: Bhakti Notes
+- **Tags**: meditation, mantra, stress, mindfulness, yoga sutras
+- **Excerpt**: A disturbed mind brings anxiety. Mantra meditation runs like an antivirus program for the mind — clearing the noise so inner peace can surface.
+- **Body**: The 7 paragraphs from the source article (verbatim, lightly cleaned), with the Epictetus line pulled out as a block quote.
+- **Original date**: November 18, 2018 (preserved in `published_at`)
 
-One targeted fix in the database for the `our-family-business` row:
+## Images (2, AI-generated)
 
-- Rewrite its `blocks` jsonb so the cover image block has `layout: "side-right"` (and is positioned right after the first paragraph, matching the legacy intent).
-- Leave every other field — title, paragraphs, headings, ordering of text — untouched.
+1. **Hero image** (`src/assets/blog-serenity-hero.jpg`, ~1600×900): a meditative figure silhouetted at sunrise with soft golden light, calm water, peaceful mood — used as the featured image at the top.
+2. **Inline image** (`src/assets/blog-serenity-mind.jpg`, ~1200×800): an abstract visual of a calm mind — soft glowing concentric circles / lotus over a serene watercolor background — placed mid-article, floated right (~280px) next to the "vrittis / mind viruses" paragraph, matching the size pattern we just fixed on "Our Family Business".
 
-No code changes needed; the renderer already handles `side-right` correctly (`float-right ml-6 mb-3 w-[44%] max-w-[280px]`).
+Both images are saved as project assets, then uploaded to the `blog-images` storage bucket so the database row references public URLs.
+
+## How it's saved
+
+Single `blog_posts` row inserted with `status = 'published'`, `image_layout = 'hero'`, and a `blocks` jsonb array structured as:
+
+```
+[ paragraph, quote (Epictetus), paragraph, image (side-right), paragraph, ... ]
+```
+
+Renderer already handles `side-right` correctly, so the inline image will float at ~280px with text wrapping.
 
 ## Verification
 
-After the migration:
-1. Reload `/post/our-family-business` and confirm the cover sits to the right of the opening paragraphs at ~280px wide.
-2. Confirm the home-page card for the same post also shows the small floated image (same blocks document is used in both places).
+1. Visit `/post/want-to-change-stress-to-serenity` — hero image at top, body text reads cleanly, inline image floats right around the "vrittis" section.
+2. Home page card shows the new post with the hero thumbnail.
+3. `/admin` lists it as a published DB post (editable / re-designable with AI).
 
 ## Out of scope
 
-- Adjusting other posts' image sizes.
-- Touching the chat designer prompt or admin UI.
-- Restyling typography / colors on the post page.
+- Importing the rest of the fanthespark.com archive.
+- Changing the chat-bot/admin designer behavior (that was the previous question — leaving as-is for now).
+- Restyling the post page.
