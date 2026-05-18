@@ -1,0 +1,26 @@
+/* Style 1 — the original literary aged-paper palette.
+ * Applied by default (:root) and also when html[data-style="style1"].
+ * Future themes (style2, style3, ...) override these vars under their own selector.
+ */
+
+:root,
+html[data-style="style1"] {
+  /* Brand accents (previously hard-coded hexes) */
+  --brand-header-bg: #faf6ee;
+  --brand-title-color: #7e6c2a;
+  --brand-gold: #d9a74e;
+  --brand-title-card-bg: rgba(239, 217, 180, 0.18);
+  --brand-header-border: rgba(217, 167, 78, 0.22);
+  --brand-header-shadow: rgba(126, 108, 42, 0.07);
+
+  /* Header geometry */
+  --header-height-expanded: 124px;
+  --header-height-scrolled: 64px;
+  --header-height-scrolled-mobile: 56px;
+  --logo-height-expanded: 72px;
+  --logo-height-expanded-mobile: 56px;
+  --logo-height-scrolled: 40px;
+  --logo-height-scrolled-mobile: 32px;
+  --header-transition-duration: 380ms;
+  --header-transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
