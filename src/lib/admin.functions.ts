@@ -1183,7 +1183,41 @@ async function callStudioLayoutAi(args: {
                 },
                 blocks: {
                   type: "array",
-                  items: { type: "object" },
+                  minItems: 1,
+                  items: {
+                    type: "object",
+                    properties: {
+                      type: {
+                        type: "string",
+                        enum: [
+                          "paragraph",
+                          "heading",
+                          "quote",
+                          "pull-quote",
+                          "image",
+                          "image-text",
+                          "gallery",
+                          "divider",
+                          "callout",
+                          "newsletter-cta",
+                        ],
+                      },
+                      text: { type: "string" },
+                      level: { type: "integer", enum: [2, 3] },
+                      cite: { type: "string" },
+                      imageIndex: { type: "integer" },
+                      imageIndices: { type: "array", items: { type: "integer" } },
+                      layout: {
+                        type: "string",
+                        enum: ["hero", "full", "side-right", "side-left", "inline-small"],
+                      },
+                      imageSide: { type: "string", enum: ["left", "right"] },
+                      columns: { type: "integer", enum: [2, 3] },
+                      caption: { type: "string" },
+                      tone: { type: "string", enum: ["note", "warning"] },
+                    },
+                    required: ["type"],
+                  },
                 },
               },
               required: [
