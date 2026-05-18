@@ -235,13 +235,16 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     const { data: post, error } = await supabaseAdmin
       .from("blog_posts")
-      .select("id,title,slug,excerpt,featured_image,author")
+      .select("id,title,slug,excerpt,featured_image,author,content,blocks,image_layout")
       .eq("id", data.postId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!post) throw new Error("Post not found");
 
     const params = buildParams(post);
+    if (!params.blog_html || params.blog_html.trim().length === 0) {
+      throw new Error("blog_html is empty — add content/blocks to the post before sending.");
+    }
     const headers = brevoHeaders();
 
     // ALWAYS clone the selected (template) campaign into a fresh draft. Brevo
