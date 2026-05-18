@@ -138,11 +138,30 @@ function AdminList() {
               {importing ? "Importing…" : `Import ${notImported.length} existing blogs`}
             </Button>
           )}
-          <Link to="/admin/new">
-            <Button>New post</Button>
-          </Link>
+          <Button
+            disabled={creating}
+            onClick={async () => {
+              setCreating(true);
+              try {
+                const draft = await createDraft();
+                toast.success("Draft created — design it with AI");
+                await router.navigate({ to: "/admin/design/$id", params: { id: draft.id } });
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : "Could not create draft");
+              } finally {
+                setCreating(false);
+              }
+            }}
+          >
+            {creating ? "Creating…" : "New post (AI designer)"}
+          </Button>
         </div>
       </div>
+
+      <div className="mb-6 p-4 border border-border rounded-md bg-muted/30 text-sm">
+        <strong>Design posts visually with AI.</strong> Click{" "}
+        <em>New post (AI designer)</em> to start fresh, or <em>Design with AI</em> on
+        any post below to lay out images and text exactly where you want.
 
       {isLoading ? (
         <p className="text-muted-foreground">Loading…</p>
