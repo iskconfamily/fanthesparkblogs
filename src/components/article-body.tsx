@@ -3,7 +3,7 @@ import type { ArticleBlock } from "@/content/posts";
 export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
   return (
     <div
-      className="prose-literary text-[19px] leading-[1.8] text-foreground"
+      className="prose-literary text-[18px] leading-[1.75]"
       style={{ fontFamily: "var(--font-serif-body)" }}
     >
       {blocks.map((b, i) => {
