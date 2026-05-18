@@ -35,10 +35,14 @@ export function PostPreview({ post }: { post: Post }) {
   return (
     <article className="border-b border-border pb-16 mb-16 last:border-b-0">
       <div
-        className="mb-8 px-6 py-6 md:px-8 md:py-7"
-        style={{ backgroundColor: "#f7efe3", borderRadius: "3px" }}
+        className="mb-8 px-5 py-4 md:px-6 md:py-5"
+        style={{
+          backgroundColor: "#faf2e4",
+          borderRadius: "3px",
+          borderTop: "1px solid rgba(217, 167, 78, 0.35)",
+        }}
       >
-        <h2 className="mb-3">
+        <h2 className="mb-2">
           <Link
             to="/post/$slug"
             params={{ slug: post.slug }}
