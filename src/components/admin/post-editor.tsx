@@ -64,7 +64,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   >([]);
   const [selectedListId, setSelectedListId] = useState<number | null>(null);
   const [listsError, setListsError] = useState("");
-  const [target, setTarget] = useState<"campaign" | "list">("campaign");
+  
 
   useEffect(() => {
     let cancelled = false;
