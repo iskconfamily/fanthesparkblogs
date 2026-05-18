@@ -470,3 +470,280 @@ export const uploadImage = createServerFn({ method: "POST" })
     const { data: pub } = supabaseAdmin.storage.from("blog-images").getPublicUrl(path);
     return { url: pub.publicUrl };
   });
+
+// ---- Block document: save & AI chat designer ----
+
+const BlockSchema = z.object({
+  id: z.string().min(1).max(100),
+  type: z.enum(["paragraph", "heading", "quote", "image", "divider", "callout"]),
+  text: z.string().max(20000).optional(),
+  level: z.number().int().min(2).max(3).optional(),
+  cite: z.string().max(500).optional(),
+  src: z.string().max(2000).optional(),
+  alt: z.string().max(500).optional(),
+  caption: z.string().max(500).optional(),
+  layout: z.enum(["hero", "full", "side-right", "side-left", "inline-small"]).optional(),
+  tone: z.enum(["note", "warning"]).optional(),
+}).passthrough();
+
+export const updatePostBlocks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      id: z.string().uuid(),
+      blocks: z.array(BlockSchema).max(500),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { data: updated, error } = await supabaseAdmin
+      .from("blog_posts")
+      .update({ blocks: data.blocks as unknown as object })
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return normalizeDbPost(updated as unknown as Record<string, unknown>);
+  });
+
+async function lovableImage(prompt: string): Promise<string> {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash-image",
+      messages: [{
+        role: "user",
+        content: `Generate a 16:9 atmospheric editorial image (no text, no watermarks) for a literary bhakti / wisdom blog. Visual: ${prompt}`,
+      }],
+      modalities: ["image", "text"],
+    }),
+  });
+  if (!res.ok) throw new Error(`Image gen failed: ${res.status}`);
+  const json = await res.json();
+  const dataUrl: string | undefined = json.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  if (!dataUrl) throw new Error("No image returned");
+  const m = dataUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+  if (!m) throw new Error("Bad image format");
+  const contentType = m[1];
+  const ext = contentType.split("/")[1] || "png";
+  const buffer = Buffer.from(m[2], "base64");
+  const path = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabaseAdmin.storage
+    .from("blog-images")
+    .upload(path, buffer, { contentType, upsert: false });
+  if (error) throw new Error(error.message);
+  const { data: pub } = supabaseAdmin.storage.from("blog-images").getPublicUrl(path);
+  return pub.publicUrl;
+}
+
+const CHAT_SYSTEM_PROMPT = `You are a layout designer for a contemplative literary blog. The user wants to design the look of a single blog post by describing changes in plain English. You edit a document made of typed blocks.
+
+Block types:
+- paragraph { id, type:"paragraph", text }
+- heading { id, type:"heading", level:2|3, text }
+- quote { id, type:"quote", text, cite? }
+- image { id, type:"image", src, alt?, caption?, layout: "hero"|"full"|"side-right"|"side-left"|"inline-small" }
+- divider { id, type:"divider" }
+- callout { id, type:"callout", tone:"note"|"warning", text }
+
+Image layouts:
+- "hero" / "full": large image spanning the column width.
+- "side-right" / "side-left": small image (~280px) floated; following paragraphs wrap around it.
+- "inline-small": centered, ~60% width.
+
+You respond by calling the edit_post tool with a list of operations and a short message. Operations:
+- { op:"insert", afterId: string|null, block: <block without id, server assigns> }
+  (afterId: null inserts at the very top.)
+- { op:"update", id: string, patch: { ...fields to change } }
+- { op:"move", id: string, afterId: string|null }
+- { op:"delete", id: string }
+- { op:"generateImage", afterId: string|null, prompt: string, alt?: string, caption?: string, layout?: "hero"|"full"|"side-right"|"side-left"|"inline-small", replaceId?: string }
+  (Server generates the image and either replaces the block with replaceId, or inserts a new image block after afterId.)
+
+Rules:
+- Preserve every word of existing paragraphs/quotes/headings unless the user explicitly asks to change wording.
+- Keep operations minimal: only change what the user asked for.
+- After your changes, the same block document is rendered on the home page card AND on the post detail page — so designing once is enough.
+- Always include a short human "message" explaining what you did (one or two sentences).
+- If the user's instruction is ambiguous (e.g. "add an image"), pick a sensible default and mention it in your message.`;
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+type Operation =
+  | { op: "insert"; afterId: string | null; block: Record<string, unknown> }
+  | { op: "update"; id: string; patch: Record<string, unknown> }
+  | { op: "move"; id: string; afterId: string | null }
+  | { op: "delete"; id: string }
+  | {
+      op: "generateImage";
+      afterId: string | null;
+      prompt: string;
+      alt?: string;
+      caption?: string;
+      layout?: PostBlock extends { type: "image"; layout?: infer L } ? L : never;
+      replaceId?: string;
+    };
+
+function newId(): string {
+  return `b_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function insertAfter(blocks: PostBlock[], afterId: string | null, block: PostBlock): PostBlock[] {
+  if (afterId === null) return [block, ...blocks];
+  const idx = blocks.findIndex((b) => b.id === afterId);
+  if (idx === -1) return [...blocks, block];
+  return [...blocks.slice(0, idx + 1), block, ...blocks.slice(idx + 1)];
+}
+
+async function applyOperations(initial: PostBlock[], ops: Operation[]): Promise<PostBlock[]> {
+  let blocks = [...initial];
+  for (const opRaw of ops.slice(0, 20)) {
+    const op = opRaw as Operation;
+    if (op.op === "insert") {
+      const candidate = parseBlocks([{ ...op.block, id: newId() }])[0];
+      if (candidate) blocks = insertAfter(blocks, op.afterId, candidate);
+    } else if (op.op === "update") {
+      blocks = blocks.map((b) => {
+        if (b.id !== op.id) return b;
+        const merged = { ...b, ...op.patch, id: b.id, type: b.type } as Record<string, unknown>;
+        const parsed = parseBlocks([merged])[0];
+        return parsed ?? b;
+      });
+    } else if (op.op === "move") {
+      const idx = blocks.findIndex((b) => b.id === op.id);
+      if (idx === -1) continue;
+      const [moved] = blocks.splice(idx, 1);
+      blocks = insertAfter(blocks, op.afterId, moved);
+    } else if (op.op === "delete") {
+      blocks = blocks.filter((b) => b.id !== op.id);
+    } else if (op.op === "generateImage") {
+      try {
+        const url = await lovableImage(op.prompt);
+        const newImage = parseBlocks([{
+          id: newId(),
+          type: "image",
+          src: url,
+          alt: op.alt ?? op.prompt.slice(0, 120),
+          caption: op.caption,
+          layout: op.layout ?? "hero",
+        }])[0];
+        if (!newImage) continue;
+        if (op.replaceId) {
+          const idx = blocks.findIndex((b) => b.id === op.replaceId);
+          if (idx !== -1) {
+            blocks = [...blocks.slice(0, idx), { ...newImage, id: blocks[idx].id }, ...blocks.slice(idx + 1)];
+          } else {
+            blocks = insertAfter(blocks, op.afterId, newImage);
+          }
+        } else {
+          blocks = insertAfter(blocks, op.afterId, newImage);
+        }
+      } catch (err) {
+        console.error("generateImage op failed", err);
+      }
+    }
+  }
+  return blocks;
+}
+
+export const chatDesignPost = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z.object({
+      id: z.string().uuid(),
+      messages: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().max(8000),
+      })).max(30),
+      selectedBlockId: z.string().max(100).optional(),
+    }).parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("LOVABLE_API_KEY missing");
+
+    const { data: row, error } = await supabaseAdmin
+      .from("blog_posts")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error || !row) throw new Error("Post not found");
+    const post = normalizeDbPost(row as unknown as Record<string, unknown>);
+
+    const contextSummary = {
+      title: post.title,
+      selectedBlockId: data.selectedBlockId ?? null,
+      blocks: post.blocks,
+    };
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: CHAT_SYSTEM_PROMPT },
+          {
+            role: "system",
+            content: `Current post state (JSON):\n${JSON.stringify(contextSummary).slice(0, 12000)}`,
+          },
+          ...data.messages,
+        ],
+        tools: [{
+          type: "function",
+          function: {
+            name: "edit_post",
+            description: "Apply layout edits to the post and return a short user-facing message.",
+            parameters: {
+              type: "object",
+              properties: {
+                message: { type: "string", description: "Short human-readable summary of the change (1-2 sentences)." },
+                operations: {
+                  type: "array",
+                  description: "Ordered list of operations to apply.",
+                  items: { type: "object" },
+                },
+              },
+              required: ["message", "operations"],
+              additionalProperties: false,
+            },
+          },
+        }],
+        tool_choice: { type: "function", function: { name: "edit_post" } },
+      }),
+    });
+
+    if (res.status === 429) throw new Error("Rate limit — try again shortly.");
+    if (res.status === 402) throw new Error("AI credits exhausted. Add credits in Workspace → Usage.");
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error(`AI gateway error: ${res.status} ${t.slice(0, 200)}`);
+    }
+
+    const json = await res.json();
+    const tc = json.choices?.[0]?.message?.tool_calls?.[0];
+    if (!tc) {
+      return { message: "I couldn't propose any changes for that. Try rephrasing?", blocks: post.blocks };
+    }
+    const args = JSON.parse(tc.function.arguments) as {
+      message: string;
+      operations: Operation[];
+    };
+
+    const newBlocks = await applyOperations(post.blocks, args.operations ?? []);
+
+    const { error: saveErr } = await supabaseAdmin
+      .from("blog_posts")
+      .update({ blocks: newBlocks as unknown as object })
+      .eq("id", data.id);
+    if (saveErr) throw new Error(saveErr.message);
+
+    return {
+      message: args.message ?? "Updated the post.",
+      blocks: newBlocks,
+    };
+  });
