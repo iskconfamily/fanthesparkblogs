@@ -33,9 +33,9 @@ export function BlockChat({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages, busy]);
 
-  const send = async () => {
-    if (!input.trim() || busy) return;
-    const userMsg: ChatMsg = { role: "user", content: input.trim() };
+  const runMessage = async (text: string) => {
+    if (!text.trim() || busy) return;
+    const userMsg: ChatMsg = { role: "user", content: text.trim() };
     const nextMessages = [...messages, userMsg];
     setMessages(nextMessages);
     setInput("");
@@ -46,7 +46,6 @@ export function BlockChat({
         data: {
           id: postId,
           messages: nextMessages
-            // drop the initial system-y assistant greeting from server context
             .filter((_, i) => !(i === 0 && nextMessages[0].role === "assistant"))
             .slice(-20),
           selectedBlockId: selectedBlockId ?? undefined,
@@ -60,6 +59,15 @@ export function BlockChat({
       setBusy(false);
     }
   };
+
+  const send = () => runMessage(input);
+
+  const quickActions: { label: string; prompt: string }[] = [
+    { label: "Tighten layout", prompt: "Tighten the overall layout — improve rhythm, spacing, and the flow between paragraphs and images. Keep all text verbatim." },
+    { label: "Add pull quote", prompt: "Pick the single most powerful sentence in the post and add it as a pull-quote block in a natural spot. Don't alter the source text." },
+    { label: "Rebalance images", prompt: "Re-distribute the existing images across the post so they feel evenly paced. Vary block types (image, image-text, full-width) where appropriate." },
+    { label: "Add newsletter CTA", prompt: "Add a newsletter-cta block near the end of the post, before any closing thought." },
+  ];
 
   return (
     <div className="flex flex-col h-full border border-border rounded-md bg-background">
@@ -93,6 +101,19 @@ export function BlockChat({
         {error && <p className="text-sm text-destructive">{error}</p>}
       </div>
       <div className="border-t border-border p-3 space-y-2">
+        <div className="flex flex-wrap gap-1">
+          {quickActions.map((q) => (
+            <button
+              key={q.label}
+              type="button"
+              onClick={() => runMessage(q.prompt)}
+              disabled={busy}
+              className="text-[11px] px-2 py-1 rounded border border-border bg-muted/40 hover:bg-muted disabled:opacity-50"
+            >
+              {q.label}
+            </button>
+          ))}
+        </div>
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
