@@ -352,7 +352,55 @@ export const generateBlogFromSource = createServerFn({ method: "POST" })
     });
   });
 
-// ---- URL extraction ----
+// ---- URL extraction (preserves hyperlinks as markdown `[text](url)`) ----
+function htmlToMarkdown(html: string): string {
+  // Strip <head>, scripts, styles. Try to extract the article-ish body.
+  let body = html
+    .replace(/<head[\s\S]*?<\/head>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<nav[\s\S]*?<\/nav>/gi, " ")
+    .replace(/<footer[\s\S]*?<\/footer>/gi, " ")
+    .replace(/<aside[\s\S]*?<\/aside>/gi, " ");
+
+  const articleMatch = body.match(/<article[\s\S]*?<\/article>/i);
+  if (articleMatch) body = articleMatch[0];
+
+  // Convert links FIRST (before stripping tags) so URLs are preserved.
+  body = body.replace(
+    /<a[^>]*\bhref=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi,
+    (_m, href: string, inner: string) => {
+      const text = inner.replace(/<[^>]+>/g, "").trim();
+      if (!text) return "";
+      if (!/^https?:\/\//i.test(href) && !href.startsWith("mailto:")) return text;
+      return `[${text}](${href})`;
+    },
+  );
+
+  // Convert paragraphs / headings / breaks to newlines
+  body = body
+    .replace(/<\/(p|div|section|h[1-6]|li|br|tr)>/gi, "\n\n")
+    .replace(/<br\s*\/?>(?!\n)/gi, "\n")
+    .replace(/<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi, (_m, _l, t) => `\n\n## ${t.replace(/<[^>]+>/g, "").trim()}\n\n`);
+
+  // Strip remaining tags, decode entities
+  body = body
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  return body;
+}
+
 export const extractFromUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({ url: z.string().url().max(2000) }).parse(i))
@@ -363,24 +411,11 @@ export const extractFromUrl = createServerFn({ method: "POST" })
     });
     if (!res.ok) throw new Error(`Failed to fetch URL: ${res.status}`);
     const html = await res.text();
-    // Naive but effective text extraction
-    const cleaned = html
-      .replace(/<script[\s\S]*?<\/script>/gi, " ")
-      .replace(/<style[\s\S]*?<\/style>/gi, " ")
-      .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, " ")
-      .trim();
     const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const markdown = htmlToMarkdown(html).slice(0, 60000);
     return {
       title: titleMatch ? titleMatch[1].trim() : null,
-      text: cleaned.slice(0, 40000),
+      text: markdown,
       url: data.url,
     };
   });
