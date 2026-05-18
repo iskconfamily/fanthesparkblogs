@@ -60,9 +60,9 @@ function PreviewPage() {
       </div>
       <article>
         <div
-          className="mb-4 px-5 py-4 md:px-7 md:py-5 max-w-[640px]"
+          className="mb-3 px-4 py-3 md:px-5 md:py-3.5 max-w-[560px]"
           style={{
-            backgroundColor: "#faf2e4",
+            backgroundColor: "rgba(239, 217, 180, 0.18)",
             borderRadius: "3px",
           }}
         >
@@ -73,7 +73,7 @@ function PreviewPage() {
             {post.title}
           </h1>
           <p
-            className="mt-3 text-xs uppercase tracking-[0.18em] text-muted-foreground"
+            className="mt-2.5 text-xs uppercase tracking-[0.18em] text-muted-foreground"
             style={{ fontFamily: "var(--font-meta)" }}
           >
             {formatDate(post.date)}
