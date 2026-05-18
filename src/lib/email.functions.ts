@@ -43,8 +43,44 @@ function escapeHtml(s: string) {
     .replace(/'/g, "&#39;");
 }
 
+// Mirror of src/lib/markdown-inline.tsx for email HTML:
+// supports **bold**, *italic*, and [label](url). Everything is escaped first
+// so user content cannot inject HTML.
+function renderInlineHtml(text: string): string {
+  const linkColor = "#f2673a";
+  // Tokenize before escaping so the markdown syntax survives, then escape
+  // each segment's text payload individually.
+  type Tok =
+    | { kind: "text"; v: string }
+    | { kind: "bold"; v: string }
+    | { kind: "italic"; v: string }
+    | { kind: "link"; label: string; href: string };
+  const tokens: Tok[] = [];
+  const re = /\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/[^\s)]*)\)|\*\*([^*]+)\*\*|\*([^*\n]+)\*/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) tokens.push({ kind: "text", v: text.slice(last, m.index) });
+    if (m[1] && m[2]) tokens.push({ kind: "link", label: m[1], href: m[2] });
+    else if (m[3]) tokens.push({ kind: "bold", v: m[3] });
+    else if (m[4]) tokens.push({ kind: "italic", v: m[4] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) tokens.push({ kind: "text", v: text.slice(last) });
+
+  return tokens
+    .map((t) => {
+      if (t.kind === "text") return escapeHtml(t.v);
+      if (t.kind === "bold") return `<strong>${escapeHtml(t.v)}</strong>`;
+      if (t.kind === "italic") return `<em>${escapeHtml(t.v)}</em>`;
+      // link — href already matched http(s)://… or /… so no javascript: vector
+      return `<a href="${escapeHtml(t.href)}" style="color:${linkColor};text-decoration:underline;">${escapeHtml(t.label)}</a>`;
+    })
+    .join("");
+}
+
 function renderParagraph(text: string) {
-  return `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0 0 20px;">${escapeHtml(text)}</p>`;
+  return `<p style="font-family:${FONT_BODY};font-size:17px;line-height:1.75;color:${BODY_INK};margin:0 0 20px;">${renderInlineHtml(text)}</p>`;
 }
 
 // Site-matching palette (derived from src/styles.css)
