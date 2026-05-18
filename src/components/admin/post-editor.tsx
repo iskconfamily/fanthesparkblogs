@@ -59,32 +59,41 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   >([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
   const [campaignsError, setCampaignsError] = useState("");
+  const [brevoLists, setBrevoLists] = useState<
+    Array<{ id: number; name: string; totalSubscribers: number }>
+  >([]);
+  const [selectedListId, setSelectedListId] = useState<number | null>(null);
+  const [listsError, setListsError] = useState("");
+  const [target, setTarget] = useState<"campaign" | "list">("campaign");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const r = await fetchCampaigns();
+        const [cRes, lRes] = await Promise.all([fetchCampaigns(), fetchLists()]);
         if (cancelled) return;
-        if (!r.ok) {
-          setCampaignsError(r.error ?? "Failed to load Brevo campaigns");
-          return;
+        if (!cRes.ok) setCampaignsError(cRes.error ?? "Failed to load Brevo campaigns");
+        else {
+          setBrevoCampaigns(cRes.campaigns);
+          setSelectedCampaignId((prev) => {
+            if (prev != null) return prev;
+            const firstDraft = cRes.campaigns.find((c) => c.status === "draft");
+            return firstDraft?.id ?? cRes.campaigns[0]?.id ?? null;
+          });
         }
-        setBrevoCampaigns(r.campaigns);
-        setSelectedCampaignId((prev) => {
-          if (prev != null) return prev;
-          // Prefer first draft, else first campaign
-          const firstDraft = r.campaigns.find((c) => c.status === "draft");
-          return firstDraft?.id ?? r.campaigns[0]?.id ?? null;
-        });
+        if (!lRes.ok) setListsError(lRes.error ?? "Failed to load Brevo lists");
+        else {
+          setBrevoLists(lRes.lists);
+          setSelectedListId((prev) => prev ?? lRes.lists[0]?.id ?? null);
+        }
       } catch (e) {
-        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load campaigns");
+        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fetchCampaigns]);
+  }, [fetchCampaigns, fetchLists]);
 
   const id = existing?.id;
 
