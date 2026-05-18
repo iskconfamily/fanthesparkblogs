@@ -1,0 +1,1 @@
+UPDATE public.blog_posts SET image_layout = 'side' WHERE slug = 'the-four-questions';
