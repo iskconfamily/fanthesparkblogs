@@ -226,7 +226,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     if (!post) throw new Error("Post not found");
 
-    const params = buildParams(post);
+    const params = buildParams({ ...post, date: post.published_at ?? post.created_at ?? null });
     if (!params.blog_html || params.blog_html.trim().length === 0) {
       throw new Error("blog_html is empty — add content/blocks to the post before sending.");
     }
