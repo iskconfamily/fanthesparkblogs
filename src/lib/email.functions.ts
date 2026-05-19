@@ -39,6 +39,7 @@ function buildParams(post: {
   content: string | null;
   blocks: unknown;
   image_layout: string | null;
+  date?: string | null;
 }) {
   const blog_html = buildBlogEmailHtml({
     title: post.title,
@@ -47,6 +48,8 @@ function buildParams(post: {
     featured_image: post.featured_image,
     blocks: post.blocks,
     image_layout: post.image_layout,
+    date: post.date ?? null,
+    author: post.author,
   });
   return {
     subject: post.title,
@@ -59,6 +62,7 @@ function buildParams(post: {
     blog_html,
   };
 }
+
 
 export const getBlogEmailHtml = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -216,13 +220,13 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     const { data: post, error } = await supabaseAdmin
       .from("blog_posts")
-      .select("id,title,slug,excerpt,featured_image,author,content,blocks,image_layout")
+      .select("id,title,slug,excerpt,featured_image,author,content,blocks,image_layout,published_at,created_at")
       .eq("id", data.postId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!post) throw new Error("Post not found");
 
-    const params = buildParams(post);
+    const params = buildParams({ ...post, date: post.published_at ?? post.created_at ?? null });
     if (!params.blog_html || params.blog_html.trim().length === 0) {
       throw new Error("blog_html is empty — add content/blocks to the post before sending.");
     }

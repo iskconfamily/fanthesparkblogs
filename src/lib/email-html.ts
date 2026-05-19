@@ -90,10 +90,34 @@ function blockToHtml(b: PostBlock): string {
       return `<div style="${PULL}">${renderInlineHtml(b.text)}${
         b.cite ? `<div style="${CITE_PULL}">— ${esc(b.cite)}</div>` : ""
       }</div>`;
-    case "image":
-      return `<figure style="margin:0;"><img src="${esc(b.src)}" alt="${esc(b.alt ?? "")}" style="${IMG}" />${
+    case "image": {
+      const layout = b.layout ?? "hero";
+      const alt = esc(b.alt ?? "");
+      const src = esc(b.src);
+      const imgFull = `<img src="${src}" alt="${alt}" style="${IMG}" />`;
+      if (layout === "side-right" || layout === "side-left") {
+        const align = layout === "side-right" ? "right" : "left";
+        const margin =
+          layout === "side-right"
+            ? "margin:8px 0 12px 20px;"
+            : "margin:8px 20px 12px 0;";
+        const sideImg = `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
+        const cap = b.caption
+          ? `<div style="${CAPTION_LEFT}">${esc(b.caption)}</div>`
+          : "";
+        return `<table align="${align}" border="0" cellpadding="0" cellspacing="0" width="44%" style="width:44%;max-width:280px;${margin}"><tr><td>${sideImg}${cap}</td></tr></table>`;
+      }
+      if (layout === "inline-small") {
+        const smallImg = `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
+        const cap = b.caption
+          ? `<figcaption style="${CAPTION}">${esc(b.caption)}</figcaption>`
+          : "";
+        return `<figure style="margin:24px auto;width:60%;max-width:380px;">${smallImg}${cap}</figure>`;
+      }
+      return `<figure style="margin:0;">${imgFull}${
         b.caption ? `<figcaption style="${CAPTION}">${esc(b.caption)}</figcaption>` : ""
       }</figure>`;
+    }
     case "image-text": {
       const img = `<img src="${esc(b.src)}" alt="${esc(b.alt ?? "")}" style="${IMG}" />${
         b.caption ? `<div style="${CAPTION_LEFT}">${esc(b.caption)}</div>` : ""
@@ -149,12 +173,43 @@ export type EmailHtmlPost = {
   featured_image: string | null;
   blocks: unknown;
   image_layout?: "hero" | "side" | "none" | string | null;
+  date?: string | null;
+  author?: string | null;
 };
+
+function formatEmailDate(iso: string): string {
+  try {
+    const d = iso.length === 10 ? new Date(iso + "T00:00:00") : new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d
+      .toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+      .toUpperCase();
+  } catch {
+    return "";
+  }
+}
+
+const TITLE = `margin:0 0 6px 0;font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:36px;line-height:1.15;color:${C_FOREGROUND};`;
+const DATE_META = `margin:0 0 18px 0;font-family:${FONT_META};font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:${C_MUTED_FG};`;
+const HR_HEAD = `border:0;border-top:1px solid ${C_BORDER};margin:0 0 12px 0;`;
+const BYLINE = `margin:0 0 28px 0;font-family:${FONT_META};font-weight:600;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:${C_MUTED_FG};`;
 
 /** Build the inner blog content as email-safe HTML. No outer template chrome. */
 export function buildBlogEmailHtml(post: EmailHtmlPost): string {
   const blocks = parseBlocks(post.blocks);
   const parts: string[] = [FONT_IMPORT];
+
+  if (post.title) {
+    parts.push(`<h1 style="${TITLE}">${esc(post.title)}</h1>`);
+  }
+  if (post.date) {
+    const d = formatEmailDate(post.date);
+    if (d) parts.push(`<div style="${DATE_META}">${esc(d)}</div>`);
+  }
+  if (post.author) {
+    parts.push(`<hr style="${HR_HEAD}" />`);
+    parts.push(`<div style="${BYLINE}">By ${esc(post.author)}</div>`);
+  }
 
   if (post.excerpt && post.excerpt.trim()) {
     parts.push(`<p style="${LEAD}">${esc(post.excerpt.trim())}</p>`);
@@ -179,5 +234,9 @@ export function buildBlogEmailHtml(post: EmailHtmlPost): string {
     parts.push(contentToHtml(post.content ?? ""));
   }
 
+  // Clear floats from any side-image layouts.
+  parts.push(`<div style="clear:both;font-size:0;line-height:0;">&nbsp;</div>`);
+
   return parts.filter(Boolean).join("\n");
 }
+
