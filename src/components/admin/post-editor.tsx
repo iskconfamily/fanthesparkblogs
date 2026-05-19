@@ -239,8 +239,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Enter a test email address.");
       return;
     }
-    if (selectedCampaignId == null) {
-      setEmailMsg("Select a template campaign first.");
+    if (selectedTemplateId == null) {
+      setEmailMsg("Select a Brevo template first.");
       return;
     }
     if (!blogHtml || blogHtml.trim().length === 0) {
@@ -255,11 +255,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
           postId: id,
           mode: "test",
           testEmail,
-          templateCampaignId: selectedCampaignId,
-          listId: selectedListId ?? undefined,
+          templateId: selectedTemplateId,
         },
       });
-      setEmailMsg(`Test sent to ${r.sentTo} (new draft campaign #${r.campaignId})`);
+      setEmailMsg(`Test sent to ${r.sentTo} via template #${r.templateId}`);
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
     } finally {
@@ -272,8 +271,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Save the post first.");
       return;
     }
-    if (selectedCampaignId == null) {
-      setEmailMsg("Select a template campaign first.");
+    if (selectedTemplateId == null) {
+      setEmailMsg("Select a Brevo template first.");
       return;
     }
     if (selectedListId == null) {
@@ -289,8 +288,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     try {
       const list = brevoLists.find((l) => l.id === selectedListId);
       const count = list?.totalSubscribers ?? 0;
-      const tpl = brevoCampaigns.find((c) => c.id === selectedCampaignId);
-      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using "${tpl?.name ?? selectedCampaignId}" as HTML template?\n\nThis creates a NEW Brevo draft campaign and triggers sendNow.`;
+      const tpl = brevoTemplates.find((t) => t.id === selectedTemplateId);
+      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using transactional template "${tpl?.name ?? selectedTemplateId}"?\n\nOne transactional email per recipient will be sent via Brevo /smtp/email.`;
       const ok = window.confirm(confirmMsg);
       if (!ok) {
         setBusy(null);
@@ -301,14 +300,16 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
         data: {
           postId: id,
           mode: "broadcast",
-          templateCampaignId: selectedCampaignId,
+          templateId: selectedTemplateId,
           listId: selectedListId,
         },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
+      const failNote =
+        r.failureCount && r.failureCount > 0 ? ` (${r.failureCount} failed)` : "";
       setEmailMsg(
-        `Sent to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} (campaign #${r.campaignId}).`,
+        `Sent to ${r.recipientCount} / ${r.attempted ?? r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} via template #${r.templateId}${failNote}.`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
