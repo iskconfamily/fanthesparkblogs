@@ -261,12 +261,24 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     }
     const tpl = JSON.parse(tplBody) as {
       htmlContent?: string;
-      sender?: { name?: string; email?: string };
+      sender?: { id?: number; name?: string; email?: string };
       replyTo?: string;
       recipients?: { listIds?: number[] };
     };
-    if (!tpl.htmlContent || !tpl.sender?.email) {
+    if (!tpl.htmlContent || !tpl.sender) {
       throw new Error("Template campaign is missing htmlContent or sender");
+    }
+
+    // Brevo rejects payloads containing both sender.id and sender.email/name.
+    // Prefer sender.id when available; otherwise fall back to email/name.
+    const sender =
+      tpl.sender.id != null
+        ? { id: tpl.sender.id }
+        : tpl.sender.email
+          ? { email: tpl.sender.email, ...(tpl.sender.name ? { name: tpl.sender.name } : {}) }
+          : null;
+    if (!sender) {
+      throw new Error("Template campaign sender has no id or email");
     }
 
     const listIds = data.listId
@@ -282,7 +294,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
       body: JSON.stringify({
         name: `${post.title} — ${new Date().toISOString()}`,
         subject: post.title,
-        sender: tpl.sender,
+        sender,
         replyTo: tpl.replyTo,
         htmlContent: tpl.htmlContent,
         recipients: { listIds },
