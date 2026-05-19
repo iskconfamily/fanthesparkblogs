@@ -555,31 +555,31 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Template campaign (HTML + sender)
+                Brevo transactional template
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedCampaignId ?? ""}
+                value={selectedTemplateId ?? ""}
                 onChange={(e) =>
-                  setSelectedCampaignId(e.target.value ? Number(e.target.value) : null)
+                  setSelectedTemplateId(e.target.value ? Number(e.target.value) : null)
                 }
-                disabled={!!busy || brevoCampaigns.length === 0}
+                disabled={!!busy || brevoTemplates.length === 0}
               >
-                {brevoCampaigns.length === 0 && <option value="">Loading…</option>}
-                {selectedCampaignId == null && <option value="">— select —</option>}
-                {brevoCampaigns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} — {c.status}
+                {brevoTemplates.length === 0 && <option value="">Loading…</option>}
+                {selectedTemplateId == null && <option value="">— select —</option>}
+                {brevoTemplates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    #{t.id} {t.name}{t.isActive ? "" : " (inactive)"}
                   </option>
                 ))}
               </select>
-              {campaignsError && (
-                <p className="text-[11px] text-destructive break-words">{campaignsError}</p>
+              {templatesError && (
+                <p className="text-[11px] text-destructive break-words">{templatesError}</p>
               )}
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo list (recipients)
+                Brevo list (recipients for broadcast)
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
@@ -601,9 +601,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
                 <p className="text-[11px] text-destructive break-words">{listsError}</p>
               )}
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Each send creates a NEW Brevo draft campaign (HTML + sender copied from the template, recipients set to this list, params injected), then triggers sendNow. Sent campaigns can never be re-sent — this avoids that.
+                Broadcast fetches all contacts from this list and sends one transactional email per recipient via Brevo /smtp/email with {`{ templateId, to, params }`}. No campaign is created.
               </p>
             </div>
+
 
             <div className="space-y-1 border border-border rounded p-2 bg-background">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
