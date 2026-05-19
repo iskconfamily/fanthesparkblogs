@@ -55,11 +55,11 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [announcementCount, setAnnouncementCount] = useState<number | null>(
     existing?.announcement_recipient_count ?? null,
   );
-  const [brevoCampaigns, setBrevoCampaigns] = useState<
-    Array<{ id: number; name: string; status: string; subject: string | null; listIds: number[] }>
+  const [brevoTemplates, setBrevoTemplates] = useState<
+    Array<{ id: number; name: string; subject: string | null; isActive: boolean }>
   >([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
-  const [campaignsError, setCampaignsError] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [templatesError, setTemplatesError] = useState("");
   const [brevoLists, setBrevoLists] = useState<
     Array<{ id: number; name: string; totalSubscribers: number }>
   >([]);
@@ -74,15 +74,15 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     let cancelled = false;
     (async () => {
       try {
-        const [cRes, lRes] = await Promise.all([fetchCampaigns(), fetchLists()]);
+        const [tRes, lRes] = await Promise.all([fetchTemplates(), fetchLists()]);
         if (cancelled) return;
-        if (!cRes.ok) setCampaignsError(cRes.error ?? "Failed to load Brevo campaigns");
+        if (!tRes.ok) setTemplatesError(tRes.error ?? "Failed to load Brevo templates");
         else {
-          setBrevoCampaigns(cRes.campaigns);
-          setSelectedCampaignId((prev) => {
+          setBrevoTemplates(tRes.templates);
+          setSelectedTemplateId((prev) => {
             if (prev != null) return prev;
-            const firstDraft = cRes.campaigns.find((c) => c.status === "draft");
-            return firstDraft?.id ?? cRes.campaigns[0]?.id ?? null;
+            const firstActive = tRes.templates.find((t) => t.isActive);
+            return firstActive?.id ?? tRes.templates[0]?.id ?? null;
           });
         }
         if (!lRes.ok) setListsError(lRes.error ?? "Failed to load Brevo lists");
@@ -91,13 +91,13 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
           setSelectedListId((prev) => prev ?? lRes.lists[0]?.id ?? null);
         }
       } catch (e) {
-        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load");
+        if (!cancelled) setTemplatesError(e instanceof Error ? e.message : "Failed to load");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fetchCampaigns, fetchLists]);
+  }, [fetchTemplates, fetchLists]);
 
   const id = existing?.id;
 
