@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, listBrevoCampaigns, listBrevoLists, getBlogEmailHtml } from "@/lib/email.functions";
+import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const genImage = useServerFn(generateBlogImage);
   const sendEmail = useServerFn(sendBlogAnnouncement);
   
-  const fetchCampaigns = useServerFn(listBrevoCampaigns);
+  const fetchTemplates = useServerFn(listBrevoTemplates);
   const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
 
@@ -55,11 +55,11 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [announcementCount, setAnnouncementCount] = useState<number | null>(
     existing?.announcement_recipient_count ?? null,
   );
-  const [brevoCampaigns, setBrevoCampaigns] = useState<
-    Array<{ id: number; name: string; status: string; subject: string | null; listIds: number[] }>
+  const [brevoTemplates, setBrevoTemplates] = useState<
+    Array<{ id: number; name: string; subject: string | null; isActive: boolean }>
   >([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<number | null>(null);
-  const [campaignsError, setCampaignsError] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [templatesError, setTemplatesError] = useState("");
   const [brevoLists, setBrevoLists] = useState<
     Array<{ id: number; name: string; totalSubscribers: number }>
   >([]);
@@ -74,15 +74,15 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     let cancelled = false;
     (async () => {
       try {
-        const [cRes, lRes] = await Promise.all([fetchCampaigns(), fetchLists()]);
+        const [tRes, lRes] = await Promise.all([fetchTemplates(), fetchLists()]);
         if (cancelled) return;
-        if (!cRes.ok) setCampaignsError(cRes.error ?? "Failed to load Brevo campaigns");
+        if (!tRes.ok) setTemplatesError(tRes.error ?? "Failed to load Brevo templates");
         else {
-          setBrevoCampaigns(cRes.campaigns);
-          setSelectedCampaignId((prev) => {
+          setBrevoTemplates(tRes.templates);
+          setSelectedTemplateId((prev) => {
             if (prev != null) return prev;
-            const firstDraft = cRes.campaigns.find((c) => c.status === "draft");
-            return firstDraft?.id ?? cRes.campaigns[0]?.id ?? null;
+            const firstActive = tRes.templates.find((t) => t.isActive);
+            return firstActive?.id ?? tRes.templates[0]?.id ?? null;
           });
         }
         if (!lRes.ok) setListsError(lRes.error ?? "Failed to load Brevo lists");
@@ -91,13 +91,13 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
           setSelectedListId((prev) => prev ?? lRes.lists[0]?.id ?? null);
         }
       } catch (e) {
-        if (!cancelled) setCampaignsError(e instanceof Error ? e.message : "Failed to load");
+        if (!cancelled) setTemplatesError(e instanceof Error ? e.message : "Failed to load");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [fetchCampaigns, fetchLists]);
+  }, [fetchTemplates, fetchLists]);
 
   const id = existing?.id;
 
@@ -239,8 +239,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Enter a test email address.");
       return;
     }
-    if (selectedCampaignId == null) {
-      setEmailMsg("Select a template campaign first.");
+    if (selectedTemplateId == null) {
+      setEmailMsg("Select a Brevo template first.");
       return;
     }
     if (!blogHtml || blogHtml.trim().length === 0) {
@@ -255,11 +255,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
           postId: id,
           mode: "test",
           testEmail,
-          templateCampaignId: selectedCampaignId,
-          listId: selectedListId ?? undefined,
+          templateId: selectedTemplateId,
         },
       });
-      setEmailMsg(`Test sent to ${r.sentTo} (new draft campaign #${r.campaignId})`);
+      setEmailMsg(`Test sent to ${r.sentTo} via template #${r.templateId}`);
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
     } finally {
@@ -272,8 +271,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setEmailMsg("Save the post first.");
       return;
     }
-    if (selectedCampaignId == null) {
-      setEmailMsg("Select a template campaign first.");
+    if (selectedTemplateId == null) {
+      setEmailMsg("Select a Brevo template first.");
       return;
     }
     if (selectedListId == null) {
@@ -289,8 +288,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     try {
       const list = brevoLists.find((l) => l.id === selectedListId);
       const count = list?.totalSubscribers ?? 0;
-      const tpl = brevoCampaigns.find((c) => c.id === selectedCampaignId);
-      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using "${tpl?.name ?? selectedCampaignId}" as HTML template?\n\nThis creates a NEW Brevo draft campaign and triggers sendNow.`;
+      const tpl = brevoTemplates.find((t) => t.id === selectedTemplateId);
+      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using transactional template "${tpl?.name ?? selectedTemplateId}"?\n\nOne transactional email per recipient will be sent via Brevo /smtp/email.`;
       const ok = window.confirm(confirmMsg);
       if (!ok) {
         setBusy(null);
@@ -301,14 +300,16 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
         data: {
           postId: id,
           mode: "broadcast",
-          templateCampaignId: selectedCampaignId,
+          templateId: selectedTemplateId,
           listId: selectedListId,
         },
       });
       setAnnouncementSentAt(new Date().toISOString());
       setAnnouncementCount(r.recipientCount);
+      const failNote =
+        r.failureCount && r.failureCount > 0 ? ` (${r.failureCount} failed)` : "";
       setEmailMsg(
-        `Sent to ~${r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} (campaign #${r.campaignId}).`,
+        `Sent to ${r.recipientCount} / ${r.attempted ?? r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} via template #${r.templateId}${failNote}.`,
       );
     } catch (e) {
       setEmailMsg(e instanceof Error ? e.message : "Failed");
@@ -554,31 +555,31 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Template campaign (HTML + sender)
+                Brevo transactional template
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedCampaignId ?? ""}
+                value={selectedTemplateId ?? ""}
                 onChange={(e) =>
-                  setSelectedCampaignId(e.target.value ? Number(e.target.value) : null)
+                  setSelectedTemplateId(e.target.value ? Number(e.target.value) : null)
                 }
-                disabled={!!busy || brevoCampaigns.length === 0}
+                disabled={!!busy || brevoTemplates.length === 0}
               >
-                {brevoCampaigns.length === 0 && <option value="">Loading…</option>}
-                {selectedCampaignId == null && <option value="">— select —</option>}
-                {brevoCampaigns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} — {c.status}
+                {brevoTemplates.length === 0 && <option value="">Loading…</option>}
+                {selectedTemplateId == null && <option value="">— select —</option>}
+                {brevoTemplates.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    #{t.id} {t.name}{t.isActive ? "" : " (inactive)"}
                   </option>
                 ))}
               </select>
-              {campaignsError && (
-                <p className="text-[11px] text-destructive break-words">{campaignsError}</p>
+              {templatesError && (
+                <p className="text-[11px] text-destructive break-words">{templatesError}</p>
               )}
             </div>
             <div className="space-y-1.5">
               <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo list (recipients)
+                Brevo list (recipients for broadcast)
               </label>
               <select
                 className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
@@ -600,9 +601,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
                 <p className="text-[11px] text-destructive break-words">{listsError}</p>
               )}
               <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Each send creates a NEW Brevo draft campaign (HTML + sender copied from the template, recipients set to this list, params injected), then triggers sendNow. Sent campaigns can never be re-sent — this avoids that.
+                Broadcast fetches all contacts from this list and sends one transactional email per recipient via Brevo /smtp/email with {`{ templateId, to, params }`}. No campaign is created.
               </p>
             </div>
+
 
             <div className="space-y-1 border border-border rounded p-2 bg-background">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -636,9 +638,9 @@ blog_html      = ${blogHtml.length} chars`}
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedCampaignId == null || !blogHtml}
+              disabled={!!busy || !id || selectedTemplateId == null || selectedListId == null || !blogHtml}
             >
-              {announcementSentAt ? "Resend campaign" : "Send campaign"}
+              {announcementSentAt ? "Resend broadcast" : "Send broadcast"}
             </Button>
 
             {emailMsg && (

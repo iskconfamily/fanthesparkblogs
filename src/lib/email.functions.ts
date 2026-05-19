@@ -83,108 +83,29 @@ export const getBlogEmailHtml = createServerFn({ method: "POST" })
     return { html, length: html.length };
   });
 
-export const listBrevoCampaigns = createServerFn({ method: "GET" })
+export const listBrevoTemplates = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context.userId);
-    // Fetch draft + queued (re-sendable). Include sent for visibility.
-    const statuses = ["draft", "queued", "sent"];
-    const all: Array<{
-      id: number;
-      name: string;
-      status: string;
-      subject: string | null;
-      listIds: number[];
-    }> = [];
-    for (const status of statuses) {
-      const res = await fetch(
-        `${GATEWAY_URL}/emailCampaigns?type=classic&status=${status}&limit=50&offset=0`,
-        { method: "GET", headers: brevoHeaders() },
-      );
-      const body = await res.text();
-      if (!res.ok) {
-        return {
-          ok: false as const,
-          error: `${res.status}: ${body.slice(0, 200)}`,
-          campaigns: [],
-        };
-      }
-      const parsed = JSON.parse(body) as {
-        campaigns?: Array<{
-          id: number;
-          name: string;
-          status: string;
-          subject?: string;
-          recipients?: { listIds?: number[] };
-        }>;
-      };
-      for (const c of parsed.campaigns ?? []) {
-        all.push({
-          id: c.id,
-          name: c.name,
-          status: c.status,
-          subject: c.subject ?? null,
-          listIds: c.recipients?.listIds ?? [],
-        });
-      }
-    }
-    // Newest first by id
-    all.sort((a, b) => b.id - a.id);
-    return { ok: true as const, campaigns: all };
-  });
-
-export const getBrevoCampaignInfo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((i) =>
-    z.object({ campaignId: z.number().int().positive() }).parse(i),
-  )
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
-    const headers = brevoHeaders();
-    const res = await fetch(`${GATEWAY_URL}/emailCampaigns/${data.campaignId}`, {
-      method: "GET",
-      headers,
-    });
+    const res = await fetch(
+      `${GATEWAY_URL}/smtp/templates?templateStatus=true&limit=100&offset=0&sort=desc`,
+      { method: "GET", headers: brevoHeaders() },
+    );
     const body = await res.text();
     if (!res.ok) {
-      return {
-        ok: false as const,
-        campaignId: data.campaignId,
-        error: `${res.status}: ${body.slice(0, 200)}`,
-      };
+      return { ok: false as const, error: `${res.status}: ${body.slice(0, 200)}`, templates: [] };
     }
     const parsed = JSON.parse(body) as {
-      name?: string;
-      status?: string;
-      subject?: string;
-      recipients?: { listIds?: number[] };
+      templates?: Array<{ id: number; name: string; subject?: string; isActive?: boolean }>;
     };
-    const listIds = parsed.recipients?.listIds ?? [];
-    let totalSubscribers = 0;
-    const listNames: string[] = [];
-    for (const lid of listIds) {
-      const lr = await fetch(`${GATEWAY_URL}/contacts/lists/${lid}`, {
-        method: "GET",
-        headers,
-      });
-      if (lr.ok) {
-        const lp = JSON.parse(await lr.text()) as {
-          name?: string;
-          totalSubscribers?: number;
-        };
-        totalSubscribers += lp.totalSubscribers ?? 0;
-        if (lp.name) listNames.push(lp.name);
-      }
-    }
     return {
       ok: true as const,
-      campaignId: data.campaignId,
-      name: parsed.name ?? null,
-      status: parsed.status ?? null,
-      subject: parsed.subject ?? null,
-      listIds,
-      listNames,
-      totalSubscribers,
+      templates: (parsed.templates ?? []).map((t) => ({
+        id: t.id,
+        name: t.name,
+        subject: t.subject ?? null,
+        isActive: t.isActive ?? false,
+      })),
     };
   });
 
@@ -213,6 +134,63 @@ export const listBrevoLists = createServerFn({ method: "GET" })
     };
   });
 
+async function sendTransactional(
+  headers: Record<string, string>,
+  templateId: number,
+  to: Array<{ email: string; name?: string }>,
+  params: Record<string, unknown>,
+) {
+  const res = await fetch(`${GATEWAY_URL}/smtp/email`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ templateId, to, params }),
+  });
+  const body = await res.text();
+  if (!res.ok) {
+    throw new Error(`Brevo /smtp/email ${res.status}: ${body.slice(0, 300)}`);
+  }
+  return body;
+}
+
+async function fetchAllListContacts(
+  headers: Record<string, string>,
+  listId: number,
+): Promise<Array<{ email: string; name?: string }>> {
+  const out: Array<{ email: string; name?: string }> = [];
+  const limit = 500;
+  let offset = 0;
+  // hard cap to avoid runaway loops
+  for (let page = 0; page < 200; page++) {
+    const res = await fetch(
+      `${GATEWAY_URL}/contacts/lists/${listId}/contacts?limit=${limit}&offset=${offset}&sort=desc`,
+      { method: "GET", headers },
+    );
+    const body = await res.text();
+    if (!res.ok) {
+      throw new Error(`Brevo list contacts ${res.status}: ${body.slice(0, 300)}`);
+    }
+    const parsed = JSON.parse(body) as {
+      contacts?: Array<{
+        email: string;
+        emailBlacklisted?: boolean;
+        attributes?: Record<string, unknown>;
+      }>;
+      count?: number;
+    };
+    const contacts = parsed.contacts ?? [];
+    for (const c of contacts) {
+      if (c.emailBlacklisted) continue;
+      const first = (c.attributes?.FIRSTNAME as string | undefined) ?? "";
+      const last = (c.attributes?.LASTNAME as string | undefined) ?? "";
+      const name = `${first} ${last}`.trim();
+      out.push(name ? { email: c.email, name } : { email: c.email });
+    }
+    if (contacts.length < limit) break;
+    offset += limit;
+  }
+  return out;
+}
+
 export const sendBlogAnnouncement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i) =>
@@ -221,7 +199,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
         postId: z.string().uuid(),
         mode: z.enum(["test", "broadcast"]),
         testEmail: z.string().email().optional(),
-        templateCampaignId: z.number().int().positive(),
+        templateId: z.number().int().positive(),
         listId: z.number().int().positive().optional(),
       })
       .parse(i),
@@ -231,6 +209,9 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
     if (data.mode === "test" && !data.testEmail) {
       throw new Error("Test email address required");
+    }
+    if (data.mode === "broadcast" && !data.listId) {
+      throw new Error("List required for broadcast");
     }
 
     const { data: post, error } = await supabaseAdmin
@@ -247,135 +228,58 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
     }
     const headers = brevoHeaders();
 
-    // ALWAYS clone the selected (template) campaign into a fresh draft. Brevo
-    // cannot reliably re-send a campaign whose status is "sent" — sendNow on
-    // a sent campaign silently delivers to ~0 recipients. Creating a new
-    // draft per send guarantees a clean send + clean reporting row.
-    const tplRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${data.templateCampaignId}`, {
-      method: "GET",
-      headers,
-    });
-    const tplBody = await tplRes.text();
-    if (!tplRes.ok) {
-      throw new Error(`Brevo fetch template ${tplRes.status}: ${tplBody.slice(0, 300)}`);
-    }
-    const tpl = JSON.parse(tplBody) as {
-      htmlContent?: string;
-      sender?: { id?: number; name?: string; email?: string };
-      replyTo?: string;
-      recipients?: { listIds?: number[] };
-    };
-    if (!tpl.htmlContent || !tpl.sender) {
-      throw new Error("Template campaign is missing htmlContent or sender");
-    }
-
-    // Brevo rejects payloads containing both sender.id and sender.email/name.
-    // Prefer sender.id when available; otherwise fall back to email/name.
-    const sender =
-      tpl.sender.id != null
-        ? { id: tpl.sender.id }
-        : tpl.sender.email
-          ? { email: tpl.sender.email, ...(tpl.sender.name ? { name: tpl.sender.name } : {}) }
-          : null;
-    if (!sender) {
-      throw new Error("Template campaign sender has no id or email");
-    }
-
-    const listIds = data.listId
-      ? [data.listId]
-      : (tpl.recipients?.listIds ?? []);
-    if (listIds.length === 0) {
-      throw new Error("No recipient list — pick a Brevo list or use a template campaign that has one.");
-    }
-
-    const createRes = await fetch(`${GATEWAY_URL}/emailCampaigns`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        name: `${post.title} — ${new Date().toISOString()}`,
-        subject: post.title,
-        sender,
-        replyTo: tpl.replyTo,
-        htmlContent: tpl.htmlContent,
-        recipients: { listIds },
-        params,
-      }),
-    });
-    const createBody = await createRes.text();
-    if (!createRes.ok) {
-      throw new Error(`Brevo create campaign ${createRes.status}: ${createBody.slice(0, 300)}`);
-    }
-    const created = JSON.parse(createBody) as { id: number };
-    const campaignId = created.id;
-
-    // Test or broadcast.
     if (data.mode === "test") {
-      const res = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}/sendTest`, {
-        method: "POST",
+      await sendTransactional(
         headers,
-        body: JSON.stringify({ emailTo: [data.testEmail] }),
-      });
-      if (!res.ok) {
-        const b = await res.text();
-        throw new Error(`Brevo sendTest ${res.status}: ${b.slice(0, 300)}`);
-      }
+        data.templateId,
+        [{ email: data.testEmail! }],
+        params,
+      );
       return {
         mode: "test" as const,
+        templateId: data.templateId,
         recipientCount: 1,
-        sentTo: data.testEmail,
-        campaignId,
+        sentTo: data.testEmail!,
         params,
       };
     }
 
-    // broadcast — sendNow
-    const res = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}/sendNow`, {
-      method: "POST",
-      headers,
-    });
-    if (!res.ok) {
-      const b = await res.text();
-      throw new Error(`Brevo sendNow ${res.status}: ${b.slice(0, 300)}`);
+    // broadcast — fetch list contacts and send one transactional per recipient
+    const contacts = await fetchAllListContacts(headers, data.listId!);
+    if (contacts.length === 0) {
+      throw new Error("List has no subscribers");
     }
 
-    // Best-effort recipient count from the campaign's lists.
-    let recipientCount = 0;
-    try {
-      const infoRes = await fetch(`${GATEWAY_URL}/emailCampaigns/${campaignId}`, {
-        method: "GET",
-        headers,
-      });
-      if (infoRes.ok) {
-        const info = JSON.parse(await infoRes.text()) as {
-          recipients?: { listIds?: number[] };
-        };
-        for (const lid of info.recipients?.listIds ?? []) {
-          const lr = await fetch(`${GATEWAY_URL}/contacts/lists/${lid}`, {
-            method: "GET",
-            headers,
-          });
-          if (lr.ok) {
-            const lp = JSON.parse(await lr.text()) as { totalSubscribers?: number };
-            recipientCount += lp.totalSubscribers ?? 0;
-          }
-        }
+    let sent = 0;
+    const failures: Array<{ email: string; error: string }> = [];
+    // Sequential with tiny pacing — Brevo transactional limits are generous
+    for (const c of contacts) {
+      try {
+        await sendTransactional(headers, data.templateId, [c], params);
+        sent++;
+      } catch (e) {
+        failures.push({
+          email: c.email,
+          error: e instanceof Error ? e.message : String(e),
+        });
       }
-    } catch {
-      // ignore — non-fatal
     }
 
     await supabaseAdmin
       .from("blog_posts")
       .update({
         announcement_sent_at: new Date().toISOString(),
-        announcement_recipient_count: recipientCount,
+        announcement_recipient_count: sent,
       })
       .eq("id", data.postId);
 
     return {
       mode: "broadcast" as const,
-      campaignId,
-      recipientCount,
+      templateId: data.templateId,
+      recipientCount: sent,
+      attempted: contacts.length,
+      failures: failures.slice(0, 20),
+      failureCount: failures.length,
       params,
     };
   });
