@@ -1,67 +1,53 @@
 ## Goal
 
-Make `params.blog_html` look like the website's `ArticleBody`, so any Brevo template that drops `{{ params.blog_html }}` inside its own header/footer renders content that matches fanthesparkblogs.lovable.app.
+Close the remaining gap between the website article (screenshot 1) and the Brevo email (screenshot 2). Two concrete differences are visible:
 
-Chrome (logo, header, footer, outer container, background) stays in the Brevo template — `blog_html` remains inner-content-only.
+1. **Missing article header** — site shows *Overnight Success* (italic display), `MAY 18, 2026` (uppercase meta), a divider rule, and `BY VAISESIKA DASA` byline. The email currently starts straight at the featured image.
+2. **Image `layout: "side-right"` is ignored in email** — the path photo with caption "A steady effort over time" floats right of the opening paragraph on the site. In the email it renders full-width above the text. Same for `side-left` and `inline-small`.
 
-## What changes
+Everything else (fonts, colors, paragraph leading, pull-quote, divider, quote) already matches.
 
-Single file: `src/lib/email-html.ts`. Rewrite the inline style constants and a few block renderers so they mirror `src/styles.css` tokens and `src/components/article-body.tsx`.
+## Files touched
 
-No changes to `email.functions.ts`, the editor UI, or the send flow.
+- `src/lib/email-html.ts` — render header + handle image layouts
+- `src/lib/email.functions.ts` — pass `date` and `author` into `buildBlogEmailHtml` (data already loaded from `blog_posts`, only `date` field needs to be added to the select + type)
 
-## Style mapping (CSS variables → inlined email values)
+No changes to the editor UI, send flow, params shape, or on-site components.
 
-Resolve CSS variables/Tailwind to concrete hex + web-safe font stacks (email clients can't read OKLCH or var()):
+## Changes
 
-| Token | Site value | Email inline value |
-|---|---|---|
-| `--font-serif-body` | Libre Baskerville | `"Libre Baskerville", Georgia, "Times New Roman", serif` |
-| `--font-serif-display` | Cormorant Garamond | `"Cormorant Garamond", Georgia, "Times New Roman", serif` |
-| `--font-meta` | Libre Caslon Text | `"Libre Caslon Text", Georgia, serif` |
-| `--background` (paper) | oklch(0.985 0.006 85) | `#fbf8f1` |
-| `--foreground` (olive) | oklch(0.42 0.07 95) | `#7e6c2a` |
-| `--primary` (sandstone) | oklch(0.687 0.176 42) | `#f2673a` |
-| `--muted` | oklch(0.91 0.022 80) | `#e8e1d2` |
-| `--muted-foreground` | oklch(0.45 0.025 55) | `#7a6a55` |
-| `--border` (soft tan) | oklch(0.82 0.03 75) | `#d4c8b0` |
-| Body text color | inherits foreground @ ~85% | `#5e5022` |
+### 1. Article header in blog_html
 
-Body type size/leading from `ArticleBody`: `text-[18px] leading-[1.75]`.
+Prepend, after the `@import` style block and before the lead/excerpt:
 
-## Per-block rewrite (matching `ArticleBody`)
+- Title — `<h1>` with display font, italic, color `#7e6c2a`, ~36px/1.15, weight 500, margin `0 0 6px`. Matches `PostArticle` title styling.
+- Date — meta font, uppercase, `letter-spacing:0.18em`, 12px, color `#7a6a55`, margin `0 0 18px`. Format via `formatDate` from `content/queries.ts` (already used on site).
+- Horizontal rule — `1px solid #d4c8b0`, margin `0 0 12px`.
+- Byline — meta font, uppercase, `letter-spacing:0.28em`, 11px, weight 600, color `#7a6a55`, text `BY {author}`, margin `0 0 28px`.
 
-- **paragraph** — `font:18px/1.75 var(--font-serif-body)`, color `#5e5022`, margin `0 0 18px`.
-- **heading h2/h3** — `var(--font-serif-display)`, italic, h2 `30px/1.25`, h3 `24px/1.3`, color `#7e6c2a`, top margins `48px`/`40px` to match `mt-12`/`mt-10`.
-- **quote** — left border `2px solid #f2673a` (primary), padding-left `24px`, display font italic `24px/1.5`, color `rgba(126,108,42,0.85)`. Cite: meta font, uppercase, `letter-spacing:0.18em`, `12px`, muted.
-- **pull-quote** — centered, max-width `640px`, display font italic, `32px/1.3` (mobile-safe; site uses 3xl/4xl), color `#7e6c2a`. Cite: meta font, uppercase, `letter-spacing:0.22em`, `11px`.
-- **image / image-text / gallery** — keep current `display:block;width:100%`. Caption uses display font italic `13px`, color `#7a6a55`, center under hero, left under side-by-side.
-- **divider** — `border-top:1px solid #d4c8b0`, margin `48px 0`.
-- **callout** — `border-left:4px solid #f2673a`, background `#f4ede0` (slight muted paper), body font `16px/1.65`, color `#5e5022`.
-- **newsletter-cta** — keep skipped in email.
-- **excerpt lead** (already prepended) — display font italic `20px/1.55`, color `#7e6c2a`.
-- **featured image** — unchanged behavior.
+Header is only emitted when the field exists; date falls back to nothing if missing.
 
-## Inline links
+### 2. Image layout support
 
-Inline `<a>` color switches from current `#8a5a2b` to `#f2673a` (primary), with `text-decoration:underline`. Bold/em unchanged.
+In `blockToHtml` for `type === "image"`, branch on `b.layout`:
 
-## Optional Google Font import for clients that allow it
+- `side-right` / `side-left` — wrap with an email-safe two-column structure: a single `<table align="right|left" width="44%" style="max-width:280px;margin:0 0 12px 16px">` (or `margin:0 16px 12px 0` for left). Inside: `<img>` + optional `<figcaption>` (left-aligned). This is the most reliable way to get text wrapping in Gmail/Apple Mail — pure CSS `float` is stripped by Gmail; `align` on a table is honored.
+- `inline-small` — center, `width:60%; max-width:380px; margin:24px auto;`, caption centered.
+- `hero` / `full` / unset — current full-width behavior (unchanged).
 
-Prepend a single `<link>`-equivalent `<style>` block at the top of `blog_html` that `@import`s the three Google fonts (Cormorant Garamond, Libre Baskerville, Libre Caslon Text). Gmail strips it but Apple Mail / many web clients honor it — when stripped, the Georgia/Times fallback in each stack keeps the literary feel. This is the only way to actually load the site's webfonts in email.
+Featured image keeps its current full-width hero treatment.
 
-```text
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;1,400&display=swap');
-</style>
-```
+### 3. Wire date/author through
 
-## Out of scope
+In `email.functions.ts`:
+- Extend the select to include `date` (already on the table — already used elsewhere).
+- Extend `EmailHtmlPost` and `buildBlogEmailHtml` calls with `date` and `author`.
 
-- No header/footer/outer wrapper in `blog_html` (your Brevo template owns chrome).
-- No changes to the params object shape, send flow, template/list selection, or debug panel.
-- No on-site visual changes.
+## Caveats
+
+- Outlook (Windows desktop) ignores `align` on tables for true text wrap — the side image will appear stacked above the paragraph there. Gmail web/iOS, Apple Mail, and Outlook.com handle it correctly, which covers the bulk of recipients.
+- No change to the Brevo template — chrome still belongs to the template (`{{ params.blog_html }}` stays inner-content-only).
 
 ## Verification
 
-After the edit, open the editor's existing blog_html preview panel — confirm the first 300 chars include the new font stacks and primary `#f2673a` accents. Send a test email to confirm rendering parity in Gmail and Apple Mail.
+Send a test of the *Overnight Success* post and confirm in Gmail: title + date + divider + byline appear, the path photo floats right of the opening paragraph with its caption beneath, and everything else (lead excerpt, pull-quote, body) is unchanged.
