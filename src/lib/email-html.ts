@@ -90,10 +90,34 @@ function blockToHtml(b: PostBlock): string {
       return `<div style="${PULL}">${renderInlineHtml(b.text)}${
         b.cite ? `<div style="${CITE_PULL}">— ${esc(b.cite)}</div>` : ""
       }</div>`;
-    case "image":
-      return `<figure style="margin:0;"><img src="${esc(b.src)}" alt="${esc(b.alt ?? "")}" style="${IMG}" />${
+    case "image": {
+      const layout = b.layout ?? "hero";
+      const alt = esc(b.alt ?? "");
+      const src = esc(b.src);
+      const imgFull = `<img src="${src}" alt="${alt}" style="${IMG}" />`;
+      if (layout === "side-right" || layout === "side-left") {
+        const align = layout === "side-right" ? "right" : "left";
+        const margin =
+          layout === "side-right"
+            ? "margin:8px 0 12px 20px;"
+            : "margin:8px 20px 12px 0;";
+        const sideImg = `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
+        const cap = b.caption
+          ? `<div style="${CAPTION_LEFT}">${esc(b.caption)}</div>`
+          : "";
+        return `<table align="${align}" border="0" cellpadding="0" cellspacing="0" width="44%" style="width:44%;max-width:280px;${margin}"><tr><td>${sideImg}${cap}</td></tr></table>`;
+      }
+      if (layout === "inline-small") {
+        const smallImg = `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
+        const cap = b.caption
+          ? `<figcaption style="${CAPTION}">${esc(b.caption)}</figcaption>`
+          : "";
+        return `<figure style="margin:24px auto;width:60%;max-width:380px;">${smallImg}${cap}</figure>`;
+      }
+      return `<figure style="margin:0;">${imgFull}${
         b.caption ? `<figcaption style="${CAPTION}">${esc(b.caption)}</figcaption>` : ""
       }</figure>`;
+    }
     case "image-text": {
       const img = `<img src="${esc(b.src)}" alt="${esc(b.alt ?? "")}" style="${IMG}" />${
         b.caption ? `<div style="${CAPTION_LEFT}">${esc(b.caption)}</div>` : ""
