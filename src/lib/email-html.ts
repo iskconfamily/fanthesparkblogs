@@ -179,7 +179,9 @@ export type EmailHtmlPost = {
 
 function formatEmailDate(iso: string): string {
   try {
-    return new Date(iso + "T00:00:00")
+    const d = iso.length === 10 ? new Date(iso + "T00:00:00") : new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    return d
       .toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
       .toUpperCase();
   } catch {
