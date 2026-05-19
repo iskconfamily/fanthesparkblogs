@@ -25,7 +25,7 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const genImage = useServerFn(generateBlogImage);
   const sendEmail = useServerFn(sendBlogAnnouncement);
   
-  const fetchCampaigns = useServerFn(listBrevoCampaigns);
+  const fetchTemplates = useServerFn(listBrevoTemplates);
   const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
 
