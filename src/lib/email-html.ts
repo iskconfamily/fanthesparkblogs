@@ -94,6 +94,14 @@ function blockToHtml(b: PostBlock): string {
       const layout = b.layout ?? "hero";
       const alt = esc(b.alt ?? "");
       const src = esc(b.src);
+
+      // Mirror ArticleBody: signature images are always capped at 180px.
+      const isSignature =
+        /\/signature/i.test(b.src) || /^signature/i.test(b.alt ?? "");
+      if (isSignature) {
+        return `<figure style="margin:24px 0;width:180px;max-width:180px;"><img src="${src}" alt="${alt}" style="display:block;width:auto;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" /></figure>`;
+      }
+
       const imgFull = `<img src="${src}" alt="${alt}" style="${IMG}" />`;
       if (layout === "side-right" || layout === "side-left") {
         const align = layout === "side-right" ? "right" : "left";
@@ -101,20 +109,20 @@ function blockToHtml(b: PostBlock): string {
           layout === "side-right"
             ? "margin:8px 0 12px 20px;"
             : "margin:8px 20px 12px 0;";
-        const sideImg = `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
+        const sideImg = `<img src="${src}" alt="${alt}" style="display:block;width:auto;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
         const cap = b.caption
           ? `<div style="${CAPTION_LEFT}">${esc(b.caption)}</div>`
           : "";
         return `<table align="${align}" border="0" cellpadding="0" cellspacing="0" width="44%" style="width:44%;max-width:280px;${margin}"><tr><td>${sideImg}${cap}</td></tr></table>`;
       }
       if (layout === "inline-small") {
-        const smallImg = `<img src="${src}" alt="${alt}" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;" />`;
+        const smallImg = `<img src="${src}" alt="${alt}" style="display:block;width:auto;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;margin:0 auto;" />`;
         const cap = b.caption
           ? `<figcaption style="${CAPTION}">${esc(b.caption)}</figcaption>`
           : "";
-        return `<figure style="margin:24px auto;width:60%;max-width:380px;">${smallImg}${cap}</figure>`;
+        return `<figure style="margin:24px auto;max-width:380px;text-align:center;">${smallImg}${cap}</figure>`;
       }
-      return `<figure style="margin:0;">${imgFull}${
+      return `<figure style="margin:0;text-align:center;">${imgFull}${
         b.caption ? `<figcaption style="${CAPTION}">${esc(b.caption)}</figcaption>` : ""
       }</figure>`;
     }
