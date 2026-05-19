@@ -39,6 +39,7 @@ function buildParams(post: {
   content: string | null;
   blocks: unknown;
   image_layout: string | null;
+  date?: string | null;
 }) {
   const blog_html = buildBlogEmailHtml({
     title: post.title,
@@ -47,6 +48,8 @@ function buildParams(post: {
     featured_image: post.featured_image,
     blocks: post.blocks,
     image_layout: post.image_layout,
+    date: post.date ?? null,
+    author: post.author,
   });
   return {
     subject: post.title,
@@ -59,6 +62,7 @@ function buildParams(post: {
     blog_html,
   };
 }
+
 
 export const getBlogEmailHtml = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
