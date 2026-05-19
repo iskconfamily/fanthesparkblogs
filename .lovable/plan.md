@@ -1,98 +1,67 @@
 ## Goal
 
-Replace the current "fetch list contacts + SMTP-blast with HTML" flow with Brevo's **Email Campaigns** API. The admin picks an existing Brevo campaign (designed in Brevo with `{{ params.X }}` placeholders), and Lovable only sends the **params** (title, subject, url, excerpt, author, image, slug) + triggers `sendNow`. The campaign's own list + HTML stay the source of truth.
+Make `params.blog_html` look like the website's `ArticleBody`, so any Brevo template that drops `{{ params.blog_html }}` inside its own header/footer renders content that matches fanthesparkblogs.lovable.app.
 
-The current list-blast path is replaced (per your earlier "campaigns instead of list" wording). The "Send test" button stays but is rebuilt on the campaign API too (`/emailCampaigns/{id}/sendTest`).
+Chrome (logo, header, footer, outer container, background) stays in the Brevo template — `blog_html` remains inner-content-only.
 
-## What changes for the admin
+## What changes
 
-In the post editor's "Email announcement" section:
+Single file: `src/lib/email-html.ts`. Rewrite the inline style constants and a few block renderers so they mirror `src/styles.css` tokens and `src/components/article-body.tsx`.
 
-- The "Brevo list" dropdown is replaced by a **Brevo campaign** dropdown listing draft (and optionally sent/scheduled) campaigns: `Name — status — list "X"`.
-- A small read-only **"Params being sent"** preview shows the key/value pairs that will be merged: `subject`, `title`, `excerpt`, `url`, `author`, `featured_image`, `slug`.
-- "Send test email" — sends the chosen campaign to the typed test address.
-- "Send to subscribers" — calls `sendNow` on the campaign.
+No changes to `email.functions.ts`, the editor UI, or the send flow.
 
-## Technical changes
+## Style mapping (CSS variables → inlined email values)
 
-### `src/lib/email.functions.ts`
+Resolve CSS variables/Tailwind to concrete hex + web-safe font stacks (email clients can't read OKLCH or var()):
 
-Remove the SMTP-loop send path. Replace with three campaign-backed server fns. All keep `requireSupabaseAuth` + `assertAdmin`.
-
-1. **`listBrevoCampaigns`** (replaces `listBrevoLists`)
-   - `GET ${GATEWAY_URL}/emailCampaigns?type=classic&status=draft&limit=50` (status filter optional, default `draft,sent,queued`).
-   - Returns `{ ok, campaigns: [{ id, name, status, subject, listIds }] }`.
-
-2. **`getBrevoCampaignInfo(campaignId)`** (replaces `getBrevoListInfo`)
-   - `GET /emailCampaigns/{id}` — used to confirm before send and surface recipient count by reading the campaign's `recipients.listIds` then `GET /contacts/lists/{listId}` for `totalSubscribers`.
-
-3. **`sendBlogAnnouncement`** — keep the name + input shape but redo the handler:
-   - Input: `{ postId, mode: "test"|"broadcast", testEmail?, campaignId: number }` (replaces `listId`).
-   - Build `params` from the post:
-     ```ts
-     const params = {
-       subject: post.title,
-       title: post.title,
-       excerpt: post.excerpt ?? "",
-       url: `${SITE_URL}/post/${post.slug}`,
-       author: post.author ?? "",
-       featured_image: post.featured_image ?? "",
-       slug: post.slug,
-     };
-     ```
-   - Update the campaign with these params + subject so `{{ params.subject }}` resolves and the actual Subject line is set:
-     `PUT /emailCampaigns/{campaignId}` body `{ params, subject: post.title }`.
-   - Then:
-     - `mode = "test"` → `POST /emailCampaigns/{id}/sendTest` body `{ emailTo: [testEmail] }`.
-     - `mode = "broadcast"` → `POST /emailCampaigns/{id}/sendNow` (empty body).
-   - On broadcast success, write `announcement_sent_at` + best-effort `announcement_recipient_count` (from list totalSubscribers) back to `blog_posts`.
-   - Drop all `htmlContent`/`textContent`/`bcc`/SMTP loop code — Brevo renders from its own design.
-
-Delete: `buildEmail`, `renderBlocks`, `renderInlineHtml`, `renderImg`, `renderSideFigure`, `renderImageTextTable`, `renderGallery`, `renderNewsletterCta`, `renderCaption`, `renderParagraph`, `escapeHtml`, `jsonBlocksToEmail`, `parseContentForEmail`, `parseGalleryForEmail`, `blocksToText`, all `FONT_*`/color constants, `ContentBlock`/`GalleryImg`/`FigureLayout` types. Keep `SENDER_EMAIL`/`SENDER_NAME`/`SITE_URL` only if still used; otherwise prune. Keep `assertAdmin`, `brevoHeaders`, `GATEWAY_URL`.
-
-### `src/components/admin/post-editor.tsx`
-
-- Rename state: `brevoLists` → `brevoCampaigns`, `selectedListId` → `selectedCampaignId`, `listsError` → `campaignsError`.
-- Replace the `<select>` options with campaigns: `{c.name} — {c.status}`.
-- Replace `fetchListInfo` call with `fetchCampaignInfo`; confirm dialog reads "Send '{title}' via campaign '{campaign.name}' to list '{listName}' ({count} subscribers)?".
-- Pass `campaignId` (not `listId`) to `sendEmail`.
-- Add a small static "Params" preview block under the dropdown:
-  ```
-  subject = {title}
-  title   = {title}
-  excerpt = {excerpt|truncated}
-  url     = https://…/post/{slug}
-  author  = {author}
-  featured_image = {featuredImage}
-  slug    = {slug}
-  ```
-  So the admin knows what `{{ params.X }}` will resolve to in Brevo.
-
-### Default param set sent to Brevo
-
-Since you didn't pin a list, I'm shipping these — say "also add X" and I'll extend:
-
-| param key | source | template usage example |
+| Token | Site value | Email inline value |
 |---|---|---|
-| `subject` | `post.title` | `{{ params.subject }}` (also written to campaign's Subject field) |
-| `title` | `post.title` | `<h1>{{ params.title }}</h1>` |
-| `excerpt` | `post.excerpt` | `<p>{{ params.excerpt }}</p>` |
-| `url` | `${SITE_URL}/post/${post.slug}` | `<a href="{{ params.url }}">Read on site</a>` |
-| `author` | `post.author` | `by {{ params.author }}` |
-| `featured_image` | `post.featured_image` | `<img src="{{ params.featured_image }}">` |
-| `slug` | `post.slug` | tracking / custom links |
+| `--font-serif-body` | Libre Baskerville | `"Libre Baskerville", Georgia, "Times New Roman", serif` |
+| `--font-serif-display` | Cormorant Garamond | `"Cormorant Garamond", Georgia, "Times New Roman", serif` |
+| `--font-meta` | Libre Caslon Text | `"Libre Caslon Text", Georgia, serif` |
+| `--background` (paper) | oklch(0.985 0.006 85) | `#fbf8f1` |
+| `--foreground` (olive) | oklch(0.42 0.07 95) | `#7e6c2a` |
+| `--primary` (sandstone) | oklch(0.687 0.176 42) | `#f2673a` |
+| `--muted` | oklch(0.91 0.022 80) | `#e8e1d2` |
+| `--muted-foreground` | oklch(0.45 0.025 55) | `#7a6a55` |
+| `--border` (soft tan) | oklch(0.82 0.03 75) | `#d4c8b0` |
+| Body text color | inherits foreground @ ~85% | `#5e5022` |
 
-### Verification
+Body type size/leading from `ArticleBody`: `text-[18px] leading-[1.75]`.
 
-1. Type-check passes; preview loads.
-2. Dropdown lists draft campaigns from Brevo (`/emailCampaigns?status=draft`).
-3. "Send test" hits `PUT /emailCampaigns/{id}` then `POST /emailCampaigns/{id}/sendTest` — test arrives with placeholders resolved.
-4. "Send to subscribers" hits `sendNow` and Brevo dashboard shows the campaign moving from draft → queued/sent.
-5. `blog_posts.announcement_sent_at` updates.
+## Per-block rewrite (matching `ArticleBody`)
 
-## Notes / decisions for you
+- **paragraph** — `font:18px/1.75 var(--font-serif-body)`, color `#5e5022`, margin `0 0 18px`.
+- **heading h2/h3** — `var(--font-serif-display)`, italic, h2 `30px/1.25`, h3 `24px/1.3`, color `#7e6c2a`, top margins `48px`/`40px` to match `mt-12`/`mt-10`.
+- **quote** — left border `2px solid #f2673a` (primary), padding-left `24px`, display font italic `24px/1.5`, color `rgba(126,108,42,0.85)`. Cite: meta font, uppercase, `letter-spacing:0.18em`, `12px`, muted.
+- **pull-quote** — centered, max-width `640px`, display font italic, `32px/1.3` (mobile-safe; site uses 3xl/4xl), color `#7e6c2a`. Cite: meta font, uppercase, `letter-spacing:0.22em`, `11px`.
+- **image / image-text / gallery** — keep current `display:block;width:100%`. Caption uses display font italic `13px`, color `#7a6a55`, center under hero, left under side-by-side.
+- **divider** — `border-top:1px solid #d4c8b0`, margin `48px 0`.
+- **callout** — `border-left:4px solid #f2673a`, background `#f4ede0` (slight muted paper), body font `16px/1.65`, color `#5e5022`.
+- **newsletter-cta** — keep skipped in email.
+- **excerpt lead** (already prepended) — display font italic `20px/1.55`, color `#7e6c2a`.
+- **featured image** — unchanged behavior.
 
-- **One-shot vs reuse:** Same draft campaign can be reused per post — each send overwrites `params` + `subject` before triggering. If you'd rather **clone** the campaign each time (so each post becomes its own row in Brevo Campaigns reporting), say so and I'll switch the broadcast path to `POST /emailCampaigns` (clone draft → set params → sendNow).
-- **Sent campaigns can't be re-sent** in Brevo. The dropdown will filter to `status=draft` (and `queued`) by default. Want sent campaigns visible too (e.g. for reference)? Tell me.
-- **Params you want renamed** (e.g. `SUBJECT` uppercase, or `post_url` instead of `url`)? Default is lowercase snake. Easy to change.
-- No DB changes.
+## Inline links
+
+Inline `<a>` color switches from current `#8a5a2b` to `#f2673a` (primary), with `text-decoration:underline`. Bold/em unchanged.
+
+## Optional Google Font import for clients that allow it
+
+Prepend a single `<link>`-equivalent `<style>` block at the top of `blog_html` that `@import`s the three Google fonts (Cormorant Garamond, Libre Baskerville, Libre Caslon Text). Gmail strips it but Apple Mail / many web clients honor it — when stripped, the Georgia/Times fallback in each stack keeps the literary feel. This is the only way to actually load the site's webfonts in email.
+
+```text
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;1,400&display=swap');
+</style>
+```
+
+## Out of scope
+
+- No header/footer/outer wrapper in `blog_html` (your Brevo template owns chrome).
+- No changes to the params object shape, send flow, template/list selection, or debug panel.
+- No on-site visual changes.
+
+## Verification
+
+After the edit, open the editor's existing blog_html preview panel — confirm the first 300 chars include the new font stacks and primary `#f2673a` accents. Send a test email to confirm rendering parity in Gmail and Apple Mail.
