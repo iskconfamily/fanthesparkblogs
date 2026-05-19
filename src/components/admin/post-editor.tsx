@@ -638,9 +638,9 @@ blog_html      = ${blogHtml.length} chars`}
               size="sm"
               className="w-full"
               onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedCampaignId == null || !blogHtml}
+              disabled={!!busy || !id || selectedTemplateId == null || selectedListId == null || !blogHtml}
             >
-              {announcementSentAt ? "Resend campaign" : "Send campaign"}
+              {announcementSentAt ? "Resend broadcast" : "Send broadcast"}
             </Button>
 
             {emailMsg && (
