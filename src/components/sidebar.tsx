@@ -179,8 +179,9 @@ export function Sidebar() {
             </li>
             <li>
               <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
+                href="/rss.xml"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 no-underline"
                 style={{ borderBottom: "none" }}
               >
