@@ -1,22 +1,24 @@
-## Goal
+## Add RSS feed
 
-Add a sign-off to the "Fresh and Easy" draft blog post: Vaisesika Dasa's signature image, followed by his name.
+Add a real RSS 2.0 feed at `/rss.xml` and wire the sidebar's RSS icon to it.
 
-## Change
+### What gets built
 
-Append two blocks to the end of `blocks` JSON on the `blog_posts` row where `slug = 'fresh-and-easy'`:
+1. **New server route** `src/routes/rss[.]xml.ts`
+   - File name uses the `[.]` escape so the route resolves to `/rss.xml`.
+   - `GET` handler builds an RSS 2.0 XML document:
+     - Channel: title "Fan The Spark", site link, description, language `en-us`, `lastBuildDate`.
+     - Items: merged list of published DB posts (`getPublishedDbPosts`) + static posts (`getAllPosts`), de-duped by slug, sorted by date desc, capped at 50.
+     - Each `<item>`: `title`, `link` (absolute URL to `/post/{slug}`), `guid` (same), `pubDate` (RFC-822), `category`, `description` (excerpt, XML-escaped, CDATA-wrapped).
+   - Returns `Response` with `Content-Type: application/rss+xml; charset=utf-8` and a short `Cache-Control` (e.g. `public, max-age=600`).
+   - Absolute base URL derived from request host via `getRequestHost()` so it works on preview, published, and custom domains.
 
-1. **Image block** — signature
-   - `src`: `https://ghifedcfmauydlmexrxc.supabase.co/storage/v1/object/public/blog-images/signature-vaisesika.png`
-   - `alt`: `signature`
-   - `layout`: `hero` (the renderer auto-detects `/signature` and `signature*` alt → caps at 180px on both site and email, per the existing `ArticleBody` and `email-html.ts` rules)
+2. **Sidebar link** (`src/components/sidebar.tsx`)
+   - Replace the placeholder `href="#"` RSS link with `href="/rss.xml"` (plain `<a>`, opens in new tab).
 
-2. **Paragraph block** — `Vaisesika Dasa`
+3. **Discovery tag** (`src/routes/__root.tsx`)
+   - Add `<link rel="alternate" type="application/rss+xml" title="Fan The Spark RSS" href="/rss.xml" />` so browsers/readers auto-detect it.
 
-Done via a single `UPDATE blog_posts SET blocks = blocks || '[...]'::jsonb WHERE slug='fresh-and-easy'` migration.
-
-## Out of scope
-
-- No renderer or email template changes (signature sizing already handled generically).
-- No changes to other posts.
-- Post stays a draft.
+### Out of scope
+- No per-tag feeds (e.g. `/tag/bhakti-notes/rss.xml`) — can be added later if you want.
+- No full HTML content in items, just the excerpt (keeps the feed light and avoids rendering the block model to HTML).
