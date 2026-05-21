@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SurpriseRouteImport } from './routes/surprise'
+import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -28,6 +29,11 @@ import { Route as AdminDesignIdRouteImport } from './routes/admin.design.$id'
 const SurpriseRoute = SurpriseRouteImport.update({
   id: '/surprise',
   path: '/surprise',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RssDotxmlRoute = RssDotxmlRouteImport.update({
+  id: '/rss.xml',
+  path: '/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NewsletterRoute = NewsletterRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
   '/newsletter': typeof NewsletterRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
   '/newsletter': typeof NewsletterRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
   '/newsletter': typeof NewsletterRoute
+  '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/archive'
     | '/newsletter'
+    | '/rss.xml'
     | '/surprise'
     | '/admin/login'
     | '/admin/new'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/archive'
     | '/newsletter'
+    | '/rss.xml'
     | '/surprise'
     | '/admin/login'
     | '/admin/new'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/archive'
     | '/newsletter'
+    | '/rss.xml'
     | '/surprise'
     | '/admin/login'
     | '/admin/new'
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ArchiveRoute: typeof ArchiveRoute
   NewsletterRoute: typeof NewsletterRoute
+  RssDotxmlRoute: typeof RssDotxmlRoute
   SurpriseRoute: typeof SurpriseRoute
   PostSlugRoute: typeof PostSlugRoute
   PreviewSlugRoute: typeof PreviewSlugRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/surprise'
       fullPath: '/surprise'
       preLoaderRoute: typeof SurpriseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rss.xml': {
+      id: '/rss.xml'
+      path: '/rss.xml'
+      fullPath: '/rss.xml'
+      preLoaderRoute: typeof RssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/newsletter': {
@@ -353,6 +373,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ArchiveRoute: ArchiveRoute,
   NewsletterRoute: NewsletterRoute,
+  RssDotxmlRoute: RssDotxmlRoute,
   SurpriseRoute: SurpriseRoute,
   PostSlugRoute: PostSlugRoute,
   PreviewSlugRoute: PreviewSlugRoute,
