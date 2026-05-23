@@ -461,7 +461,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
               <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono">
 {`subject_line  = ${title}
 preview_text  = ${title}
-from_name     = ${author || "Fan The Spark"}
+from_name     = Fan The Spark
+from_email    = newsletter@fanthespark.com
 reply_to      = newsletter@fanthespark.com
 template_id   = 10000067
 audience_id   = a97040f5e0
@@ -488,6 +489,10 @@ blog_html     = ${blogHtml.length} chars`}
               <p className="text-[10px] text-muted-foreground leading-relaxed">
                 Uses template <code>#10000067</code> (audience <code>a97040f5e0</code>). The post's
                 rendered HTML is injected into the <code>mc:edit="blog_html"</code> region.
+              </p>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                If Gmail still shows <code>via gmail.mcsv.net</code> or sends tests to spam, that means
+                Mailchimp is still using an unauthenticated sender on the audience/account side.
               </p>
 
               <div className="space-y-1.5">
