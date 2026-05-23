@@ -138,7 +138,7 @@ function MyStoryPage() {
       </section>
 
       {/* LEAD */}
-      <Prose>
+      <Prose tight="bottom">
         <Dots />
         <Para>
           When I was a child, I was deeply curious about the mystery of life. Trying to wrap my mind
@@ -149,7 +149,7 @@ function MyStoryPage() {
 
       {/* YOUTUBE — wider container */}
       <section style={{ backgroundColor: "var(--background)" }}>
-        <div className="mx-auto max-w-[960px] px-6 pb-12">
+        <div className="mx-auto max-w-[960px] px-6 pt-2 pb-6 sm:pt-4 sm:pb-10">
           <div
             style={{
               position: "relative",
@@ -174,7 +174,8 @@ function MyStoryPage() {
       </section>
 
       {/* BODY — first half + pull quote */}
-      <Prose>
+      <Prose tight="top">
+
         <Para>
           I remember looking up at the night sky, asking my big brother, “What’s on the other
           side?” He couldn’t say but I wanted to know more than anything. By the time I was in high
