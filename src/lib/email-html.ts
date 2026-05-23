@@ -282,11 +282,9 @@ export function buildFullBlogEmailHtml(
     }
   `;
 
-  const brandStyle = `font-family:${FONT_DISPLAY};font-weight:500;font-size:34px;letter-spacing:0.22em;color:${C_FOREGROUND};text-decoration:none;text-transform:uppercase;line-height:1;vertical-align:middle;`;
-  const taglineStyle = `font-family:${FONT_META};font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:${C_MUTED_FG};margin-top:14px;text-align:center;`;
   const ctaStyle = `display:inline-block;padding:14px 28px;background:${C_PRIMARY};color:#ffffff;font-family:${FONT_META};font-size:11px;letter-spacing:0.28em;text-transform:uppercase;text-decoration:none;border-radius:2px;`;
-  const shareLabel = `font-family:${FONT_META};font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:${C_MUTED_FG};margin:0 0 14px 0;text-align:center;`;
-  const shareLink = `display:inline-block;padding:10px 18px;margin:0 4px;background:#ffffff;border:1px solid ${C_BORDER};color:${C_FOREGROUND};font-family:${FONT_META};font-size:11px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;border-radius:2px;`;
+  const shareLabel = `font-family:${FONT_META};font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:${C_MUTED_FG};margin:0 0 10px 0;text-align:center;`;
+  const shareLink = `font-family:${FONT_META};font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${C_FOREGROUND};text-decoration:none;`;
   const footerText = `font-family:${FONT_META};font-size:11px;letter-spacing:0.12em;line-height:1.7;color:${C_MUTED_FG};text-align:center;`;
   const footerLink = `color:${C_MUTED_FG};text-decoration:underline;`;
 
