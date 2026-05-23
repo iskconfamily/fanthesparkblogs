@@ -73,10 +73,18 @@ function Para({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Prose({ children }: { children: React.ReactNode }) {
+function Prose({
+  children,
+  tight,
+}: {
+  children: React.ReactNode;
+  tight?: "top" | "bottom" | "both";
+}) {
+  const pt = tight === "top" || tight === "both" ? "pt-4 sm:pt-8" : "pt-10 sm:pt-12";
+  const pb = tight === "bottom" || tight === "both" ? "pb-4 sm:pb-8" : "pb-10 sm:pb-12";
   return (
     <section style={{ backgroundColor: "var(--background)" }}>
-      <div className="mx-auto max-w-[720px] px-6 py-12">{children}</div>
+      <div className={`mx-auto max-w-[720px] px-6 ${pt} ${pb}`}>{children}</div>
     </section>
   );
 }
