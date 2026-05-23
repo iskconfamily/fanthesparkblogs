@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import dotsUrl from "@/assets/my-story/dots.png";
 import heroForest from "@/assets/my-story/vaisesika-meditation.png";
-import prabhupadaWithDevotees from "@/assets/my-story/prabhupada-with-devotees.jpg";
+import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg";
 
 export const Route = createFileRoute("/my-story")({
   head: () => ({
@@ -272,16 +272,16 @@ function MyStoryPage() {
         </Para>
       </Prose>
 
-      {/* FULL-BLEED PRABHUPADA PHOTO */}
+      {/* FULL-BLEED VAISESIKA ARCHWAY PHOTO */}
       <section className="w-full">
         <img
-          src={prabhupadaWithDevotees}
-          alt="Srila Prabhupada with devotees"
+          src={vaisesikaArchway}
+          alt="Vaisesika Dasa in pranam pose beneath an ornate temple archway"
           className="block w-full h-auto"
           style={{
             maxHeight: "88vh",
             objectFit: "cover",
-            objectPosition: "center 35%",
+            objectPosition: "center 40%",
           }}
         />
       </section>
