@@ -23,15 +23,41 @@ type NavItem = {
 const NAV: NavItem[] = [
   {
     label: "My Journey",
-    to: "/my-story",
-    children: [{ label: "My Story", to: "/my-story" }],
+    to: "/my-journey",
+    children: [
+      { label: "My Story", to: "/my-journey/my-story" },
+      { label: "My Guru", to: "/my-journey/my-guru" },
+    ],
   },
   {
     label: "Wisdom",
-    to: "/",
-    children: [{ label: "Blog", to: "/" }],
+    to: "/wisdom",
+    children: [
+      { label: "Blog", to: "/wisdom/blog" },
+      { label: "Videos", to: "/wisdom/videos" },
+      { label: "Audio Playlists", to: "/wisdom/audio-playlists" },
+    ],
   },
-  { label: "Blog", to: "/" },
+  {
+    label: "Next Steps",
+    to: "/next-steps",
+    children: [
+      { label: "Ask", to: "/next-steps/ask" },
+      { label: "Small Groups", to: "/next-steps/small-groups" },
+      { label: "Spiritual Retreat", to: "/next-steps/spiritual-retreat" },
+    ],
+  },
+  { label: "Events", to: "/events" },
+  {
+    label: "Serve",
+    to: "/serve",
+    children: [
+      { label: "Volunteer", to: "/serve/volunteer" },
+      { label: "Give", to: "/serve/give" },
+      { label: "Transformational Stories", to: "/serve/transformational-stories" },
+    ],
+  },
+  { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
 
