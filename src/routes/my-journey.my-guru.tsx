@@ -104,7 +104,7 @@ function MyGuruPage() {
                   textShadow: "0 1px 8px rgba(0,0,0,0.55)",
                 }}
               >
-                His Divine Grace A. C. Bhaktivedanta Swami Prabhupada · 1896–1977
+                His Divine Grace A. C. Bhaktivedanta Swami Prabhupada
               </p>
             </div>
           </div>

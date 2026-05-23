@@ -42,17 +42,17 @@ const heroImageStyles = `
     .my-story-hero-image {
       aspect-ratio: auto;
       height: auto;
-      max-height: min(70vh, 760px);
+      max-height: min(78vh, 820px);
       object-fit: cover;
-      object-position: center 18%;
+      object-position: center top;
     }
   }
 
   @media (min-width: 1800px) and (min-aspect-ratio: 2 / 1) {
     .my-story-hero-image {
-      max-height: 74vh;
+      max-height: 80vh;
       object-fit: cover;
-      object-position: center 24%;
+      object-position: center top;
     }
   }
 `;
