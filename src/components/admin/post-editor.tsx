@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml, listMandrillTemplates, sendBlogAnnouncementMailchimp } from "@/lib/email.functions";
+import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml, sendMailchimpCampaignTest, sendMailchimpCampaignLive } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +28,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const fetchTemplates = useServerFn(listBrevoTemplates);
   const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
-  const fetchMcTemplates = useServerFn(listMandrillTemplates);
-  const sendMailchimp = useServerFn(sendBlogAnnouncementMailchimp);
+  const sendMcTest = useServerFn(sendMailchimpCampaignTest);
+  const sendMcLive = useServerFn(sendMailchimpCampaignLive);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
@@ -69,14 +69,9 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [listsError, setListsError] = useState("");
   const [blogHtml, setBlogHtml] = useState<string>("");
   const [blogHtmlError, setBlogHtmlError] = useState<string>("");
-  const [mcTemplates, setMcTemplates] = useState<
-    Array<{ slug: string; name: string; subject: string | null; publishName: string | null }>
-  >([]);
-  const [mcTemplatesError, setMcTemplatesError] = useState("");
-  const [selectedMcSlug, setSelectedMcSlug] = useState<string>("");
-  const [mcRecipients, setMcRecipients] = useState("");
-  const [mcTrackingTag, setMcTrackingTag] = useState("");
+  const [mcTestEmail, setMcTestEmail] = useState("");
   const [mcMsg, setMcMsg] = useState("");
+  const [mcConfirmLive, setMcConfirmLive] = useState(false);
 
   
 
@@ -109,26 +104,6 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     };
   }, [fetchTemplates, fetchLists]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetchMcTemplates();
-        if (cancelled) return;
-        if (!r.ok) {
-          setMcTemplatesError(r.error ?? "Failed to load Mailchimp templates");
-        } else {
-          setMcTemplates(r.templates);
-          setSelectedMcSlug((prev) => prev || r.templates[0]?.slug || "");
-        }
-      } catch (e) {
-        if (!cancelled) setMcTemplatesError(e instanceof Error ? e.message : "Failed to load");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchMcTemplates]);
 
   const id = existing?.id;
 
@@ -349,38 +324,55 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     }
   };
 
-  const sendMailchimpTest = async () => {
+  const sendMailchimpTestEmail = async () => {
     if (!id) {
       setMcMsg("Save the post first.");
       return;
     }
-    if (!selectedMcSlug) {
-      setMcMsg("Select a Mailchimp template first.");
-      return;
-    }
-    if (!mcRecipients.trim()) {
-      setMcMsg("Enter at least one recipient email.");
+    if (!mcTestEmail.trim()) {
+      setMcMsg("Enter a test email address.");
       return;
     }
     if (!blogHtml || blogHtml.trim().length === 0) {
       setMcMsg("blog_html is empty — add content to the post before sending.");
       return;
     }
-    setBusy("Sending via Mailchimp…");
+    setBusy("Sending Mailchimp test…");
     setMcMsg("");
     try {
-      const r = await sendMailchimp({
-        data: {
-          postId: id,
-          templateSlug: selectedMcSlug,
-          recipients: mcRecipients,
-          trackingTag: mcTrackingTag.trim() || undefined,
-        },
+      const r = await sendMcTest({
+        data: { postId: id, testEmail: mcTestEmail.trim() },
       });
-      const summary = r.results
-        .map((x) => `${x.email}: ${x.status}${x.rejectReason ? ` (${x.rejectReason})` : ""}`)
-        .join(" • ");
-      setMcMsg(`Sent ${r.recipientCount} via "${r.templateSlug}" — ${summary}`);
+      setMcMsg(`✅ Test sent to ${r.testEmail} (campaign ${r.campaignId}).`);
+    } catch (e) {
+      setMcMsg(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const sendMailchimpToAudience = async () => {
+    if (!id) {
+      setMcMsg("Save the post first.");
+      return;
+    }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setMcMsg("blog_html is empty — add content to the post before sending.");
+      return;
+    }
+    if (!mcConfirmLive) {
+      const ok = window.confirm(
+        "Send this blog post as a live campaign to ALL subscribers in your Mailchimp audience? This cannot be undone.",
+      );
+      if (!ok) return;
+      setMcConfirmLive(true);
+    }
+    setBusy("Sending live Mailchimp campaign…");
+    setMcMsg("");
+    try {
+      const r = await sendMcLive({ data: { postId: id, confirm: true } });
+      setMcMsg(`🚀 Live campaign sent (id ${r.campaignId}) to audience ${r.audienceId}.`);
+      setAnnouncementSentAt(new Date().toISOString());
     } catch (e) {
       setMcMsg(e instanceof Error ? e.message : "Failed");
     } finally {
@@ -721,66 +713,56 @@ blog_html      = ${blogHtml.length} chars`}
 
             <div className="mt-6 pt-4 border-t border-border space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide">
-                Mailchimp Transactional (test)
+                Mailchimp Campaign
               </p>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Uses template <code>#10000067</code> (audience <code>a97040f5e0</code>). The post's
+                rendered HTML is injected into the <code>mc:edit="blog_html"</code> region.
+              </p>
+
               <div className="space-y-1.5">
                 <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Mailchimp template
+                  Send test email
                 </label>
-                <select
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  value={selectedMcSlug}
-                  onChange={(e) => setSelectedMcSlug(e.target.value)}
-                  disabled={!!busy || mcTemplates.length === 0}
+                <Input
+                  type="email"
+                  value={mcTestEmail}
+                  onChange={(e) => setMcTestEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={sendMailchimpTestEmail}
+                  disabled={!!busy || !id || !mcTestEmail.trim() || !blogHtml}
                 >
-                  {mcTemplates.length === 0 && <option value="">Loading…</option>}
-                  {!selectedMcSlug && <option value="">— select —</option>}
-                  {mcTemplates.map((t) => (
-                    <option key={t.slug} value={t.slug}>
-                      {t.name} ({t.slug})
-                    </option>
-                  ))}
-                </select>
-                {mcTemplatesError && (
-                  <p className="text-[11px] text-destructive break-words">{mcTemplatesError}</p>
-                )}
+                  Send test email
+                </Button>
+              </div>
+
+              <div className="pt-2 border-t border-border space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Live broadcast
+                </label>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={sendMailchimpToAudience}
+                  disabled={!!busy || !id || !blogHtml}
+                >
+                  🚀 Send to all subscribers
+                </Button>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  blog_html is injected into the template's <code>mc:edit="blog_html"</code> editable region.
+                  Triggers a live Mailchimp campaign to your entire audience. You'll be asked to confirm.
                 </p>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Recipients (comma-separated, max 25)
-                </label>
-                <Input
-                  value={mcRecipients}
-                  onChange={(e) => setMcRecipients(e.target.value)}
-                  placeholder="you@example.com, another@example.com"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Tracking tag (optional)
-                </label>
-                <Input
-                  value={mcTrackingTag}
-                  onChange={(e) => setMcTrackingTag(e.target.value)}
-                  placeholder="e.g. preview-batch-1"
-                />
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full"
-                onClick={sendMailchimpTest}
-                disabled={!!busy || !id || !selectedMcSlug || !mcRecipients.trim() || !blogHtml}
-              >
-                Send Mailchimp test
-              </Button>
+
               {mcMsg && (
                 <p className="text-[11px] text-muted-foreground break-words">{mcMsg}</p>
               )}
             </div>
+
           </div>
         </aside>
       </div>

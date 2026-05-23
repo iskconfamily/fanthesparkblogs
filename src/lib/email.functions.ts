@@ -429,3 +429,139 @@ export const sendBlogAnnouncementMailchimp = createServerFn({ method: "POST" })
       })),
     };
   });
+
+// ============================================================
+// Mailchimp Marketing (Campaigns)
+// ============================================================
+
+const MC_AUDIENCE_ID = "a97040f5e0";
+const MC_TEMPLATE_ID = 10000067;
+const MC_FROM_NAME = "Fan The Spark";
+const MC_REPLY_TO = "newsletter@fanthespark.com";
+
+function getMailchimpKeyAndDc() {
+  const key = process.env.MAILCHIMP_API_KEY;
+  if (!key) throw new Error("MAILCHIMP_API_KEY missing");
+  const dc = key.split("-")[1];
+  if (!dc) throw new Error("MAILCHIMP_API_KEY is missing the -dc suffix (e.g. ...-us21)");
+  return { key, dc };
+}
+
+async function mcCall(path: string, init: { method: string; body?: unknown }) {
+  const { key, dc } = getMailchimpKeyAndDc();
+  const url = `https://${dc}.api.mailchimp.com/3.0${path}`;
+  const res = await fetch(url, {
+    method: init.method,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${btoa(`anystring:${key}`)}`,
+    },
+    body: init.body ? JSON.stringify(init.body) : undefined,
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Mailchimp ${init.method} ${path} ${res.status}: ${text.slice(0, 400)}`);
+  }
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Mailchimp ${path}: invalid JSON: ${text.slice(0, 200)}`);
+  }
+}
+
+async function createAndPrepareCampaign(post: {
+  id: string;
+  title: string;
+  author: string | null;
+}, blogHtml: string) {
+  const created = (await mcCall("/campaigns", {
+    method: "POST",
+    body: {
+      type: "regular",
+      recipients: { list_id: MC_AUDIENCE_ID },
+      settings: {
+        subject_line: post.title,
+        preview_text: post.title,
+        title: `Blog: ${post.title} [${post.id.slice(0, 8)}]`,
+        from_name: post.author || MC_FROM_NAME,
+        reply_to: MC_REPLY_TO,
+      },
+    },
+  })) as { id: string };
+
+  await mcCall(`/campaigns/${created.id}/content`, {
+    method: "PUT",
+    body: {
+      template: {
+        id: MC_TEMPLATE_ID,
+        sections: { blog_html: blogHtml },
+      },
+    },
+  });
+
+  return created.id;
+}
+
+async function loadPostAndHtml(postId: string) {
+  const { data: post, error } = await supabaseAdmin
+    .from("blog_posts")
+    .select("id,title,slug,excerpt,featured_image,author,content,blocks,image_layout,published_at,created_at")
+    .eq("id", postId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!post) throw new Error("Post not found");
+
+  const params = buildParams({ ...post, date: post.published_at ?? post.created_at ?? null });
+  if (!params.blog_html || params.blog_html.trim().length === 0) {
+    throw new Error("blog_html is empty — add content/blocks to the post before sending.");
+  }
+  return { post, blogHtml: params.blog_html };
+}
+
+export const sendMailchimpCampaignTest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        postId: z.string().uuid(),
+        testEmail: z.string().email(),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { post, blogHtml } = await loadPostAndHtml(data.postId);
+    const campaignId = await createAndPrepareCampaign(post, blogHtml);
+    await mcCall(`/campaigns/${campaignId}/actions/test`, {
+      method: "POST",
+      body: { test_emails: [data.testEmail], send_type: "html" },
+    });
+    return { campaignId, testEmail: data.testEmail };
+  });
+
+export const sendMailchimpCampaignLive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i) =>
+    z
+      .object({
+        postId: z.string().uuid(),
+        confirm: z.literal(true),
+      })
+      .parse(i),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { post, blogHtml } = await loadPostAndHtml(data.postId);
+    const campaignId = await createAndPrepareCampaign(post, blogHtml);
+    await mcCall(`/campaigns/${campaignId}/actions/send`, { method: "POST" });
+
+    await supabaseAdmin
+      .from("blog_posts")
+      .update({
+        announcement_sent_at: new Date().toISOString(),
+      })
+      .eq("id", data.postId);
+
+    return { campaignId, audienceId: MC_AUDIENCE_ID };
+  });
