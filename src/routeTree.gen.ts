@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SurpriseRouteImport } from './routes/surprise'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
+import { Route as MyStoryRouteImport } from './routes/my-story'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -39,6 +41,16 @@ const RssDotxmlRoute = RssDotxmlRouteImport.update({
 const NewsletterRoute = NewsletterRouteImport.update({
   id: '/newsletter',
   path: '/newsletter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyStoryRoute = MyStoryRouteImport.update({
+  id: '/my-story',
+  path: '/my-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArchiveRoute = ArchiveRouteImport.update({
@@ -112,6 +124,8 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
+  '/contact': typeof ContactRoute
+  '/my-story': typeof MyStoryRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
@@ -129,6 +143,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
+  '/contact': typeof ContactRoute
+  '/my-story': typeof MyStoryRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
@@ -148,6 +164,8 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
+  '/contact': typeof ContactRoute
+  '/my-story': typeof MyStoryRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
@@ -168,6 +186,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/archive'
+    | '/contact'
+    | '/my-story'
     | '/newsletter'
     | '/rss.xml'
     | '/surprise'
@@ -185,6 +205,8 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/archive'
+    | '/contact'
+    | '/my-story'
     | '/newsletter'
     | '/rss.xml'
     | '/surprise'
@@ -203,6 +225,8 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/archive'
+    | '/contact'
+    | '/my-story'
     | '/newsletter'
     | '/rss.xml'
     | '/surprise'
@@ -222,6 +246,8 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   ArchiveRoute: typeof ArchiveRoute
+  ContactRoute: typeof ContactRoute
+  MyStoryRoute: typeof MyStoryRoute
   NewsletterRoute: typeof NewsletterRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SurpriseRoute: typeof SurpriseRoute
@@ -251,6 +277,20 @@ declare module '@tanstack/react-router' {
       path: '/newsletter'
       fullPath: '/newsletter'
       preLoaderRoute: typeof NewsletterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-story': {
+      id: '/my-story'
+      path: '/my-story'
+      fullPath: '/my-story'
+      preLoaderRoute: typeof MyStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/archive': {
@@ -372,6 +412,8 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   ArchiveRoute: ArchiveRoute,
+  ContactRoute: ContactRoute,
+  MyStoryRoute: MyStoryRoute,
   NewsletterRoute: NewsletterRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SurpriseRoute: SurpriseRoute,
@@ -382,3 +424,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
