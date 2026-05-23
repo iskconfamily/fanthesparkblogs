@@ -152,23 +152,34 @@ export function SiteHeaderWeb() {
                     border: "1px solid var(--brand-header-border)",
                   }}
                 >
-                  {item.children.map((child) => (
-                    <DropdownMenuItem key={child.label} asChild>
-                      <Link
-                        to={child.to}
-                        className="cursor-pointer uppercase"
-                        style={{
-                          fontFamily: "var(--font-meta)",
-                          fontSize: 12,
-                          letterSpacing: "0.16em",
-                          color: "var(--brand-title-color)",
-                          borderBottom: "none",
-                        }}
-                      >
-                        {child.label}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
+                  {item.children.map((child) => {
+                    const linkStyle = {
+                      fontFamily: "var(--font-meta)",
+                      fontSize: 12,
+                      letterSpacing: "0.16em",
+                      color: "var(--brand-title-color)",
+                      borderBottom: "none",
+                    } as const;
+                    return (
+                      <DropdownMenuItem key={child.label} asChild>
+                        {child.external ? (
+                          <a
+                            href={child.to}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cursor-pointer uppercase"
+                            style={linkStyle}
+                          >
+                            {child.label}
+                          </a>
+                        ) : (
+                          <Link to={child.to} className="cursor-pointer uppercase" style={linkStyle}>
+                            {child.label}
+                          </Link>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
