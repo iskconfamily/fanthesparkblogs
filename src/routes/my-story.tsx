@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import dotsUrl from "@/assets/my-story/dots.png";
 import heroForest from "@/assets/my-story/vaisesika-meditation.png";
-import templeNamaste from "@/assets/my-story/temple-namaste.jpg";
+import templeNamaste from "@/assets/my-story/vaisesika-portico.png";
 
 export const Route = createFileRoute("/my-story")({
   head: () => ({
@@ -60,26 +60,28 @@ function Prose({ children }: { children: React.ReactNode }) {
 function MyStoryPage() {
   return (
     <SiteLayoutWeb>
-      {/* HERO — full-bleed forest photo with title overlay */}
+      {/* HERO — full-bleed photo with title overlay */}
       <section
         className="relative w-full"
         style={{
           height: "clamp(420px, 72vh, 720px)",
           backgroundImage: `url(${heroForest})`,
           backgroundSize: "cover",
-          backgroundPosition: "left center",
+          backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
+          backgroundColor: "#1a1a0d",
         }}
       >
-        {/* Warm gradient overlay — heavier on left for text legibility, covers the baked-in 'MY STORY' on right */}
+        {/* Darken left side for text legibility; leave right side natural so the photo's light doesn't fight a fade overlay */}
         <div
           aria-hidden="true"
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(90deg, color-mix(in oklab, #2a1f0a 55%, transparent) 0%, color-mix(in oklab, #2a1f0a 30%, transparent) 45%, color-mix(in oklab, var(--background) 88%, transparent) 78%, var(--background) 100%)",
+              "linear-gradient(90deg, rgba(10, 8, 4, 0.72) 0%, rgba(10, 8, 4, 0.45) 35%, rgba(10, 8, 4, 0.15) 65%, rgba(10, 8, 4, 0) 90%)",
           }}
         />
+
         <div className="relative mx-auto h-full max-w-[1200px] px-6 flex items-center">
           <div className="max-w-[560px]">
             <p
