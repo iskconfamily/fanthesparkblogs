@@ -219,9 +219,8 @@ export function buildBlogEmailHtml(post: EmailHtmlPost): string {
     parts.push(`<div style="${BYLINE}">By ${esc(post.author)}</div>`);
   }
 
-  if (post.excerpt && post.excerpt.trim()) {
-    parts.push(`<p style="${LEAD}">${esc(post.excerpt.trim())}</p>`);
-  }
+
+
 
   if (blocks.length > 0) {
     const hasFeaturedInBlocks =
