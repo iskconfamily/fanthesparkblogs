@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HubPage } from "@/components/placeholder-page";
 
-export const Route = createFileRoute("/serve")({
+export const Route = createFileRoute("/serve/")({
   head: () => ({
     meta: [
       { title: "Serve — Fan The Spark" },

@@ -1,74 +1,39 @@
+# Fix: hub pages eating their child routes
 
-# Site restructure — scaffold all routes
+## Problem
 
-Build out the full information architecture as placeholder pages so the nav and URLs are live. Real content per section comes in follow-up turns.
+In TanStack Router's flat-route convention, a file like `my-journey.tsx` that has sibling children (`my-journey.my-guru.tsx`, `my-journey.my-story.tsx`) is treated as a **layout route** for the entire `/my-journey/*` subtree. Layout routes MUST render `<Outlet />` for children to appear.
 
-## New route files (all under `src/routes/`)
+Our current hub files (`my-journey.tsx`, `wisdom.tsx`, `next-steps.tsx`, `serve.tsx`) render `<HubPage>` with no `<Outlet />`. Result: visiting `/my-journey/my-guru` matches the child route, but the parent paints the My Journey hub and the child has no slot — so the user sees the hub everywhere under `/my-journey/*`. The fully-designed My Guru and My Story pages are hidden.
 
-Flat dot-separated naming (TanStack convention):
+## Fix
 
-```
-my-journey.tsx                          → /my-journey (index w/ links to 2 children)
-my-journey.my-story.tsx                 → /my-journey/my-story (move existing content here)
-my-journey.my-guru.tsx                  → /my-journey/my-guru  (move existing content here)
+Convert each hub from a layout route into a plain index route by renaming:
 
-wisdom.tsx                              → /wisdom (hub index)
-wisdom.blog.tsx                         → /wisdom/blog (lists published posts, reuses index logic)
-wisdom.blog.$slug.tsx                   → /wisdom/blog/:slug (reuses post.$slug logic)
-wisdom.videos.tsx                       → /wisdom/videos
-wisdom.audio-playlists.tsx              → /wisdom/audio-playlists
+- `src/routes/my-journey.tsx` → `src/routes/my-journey.index.tsx`
+- `src/routes/wisdom.tsx` → `src/routes/wisdom.index.tsx`
+- `src/routes/next-steps.tsx` → `src/routes/next-steps.index.tsx`
+- `src/routes/serve.tsx` → `src/routes/serve.index.tsx`
 
-next-steps.tsx                          → /next-steps (hub index)
-next-steps.ask.tsx                      → /next-steps/ask
-next-steps.small-groups.tsx             → /next-steps/small-groups
-next-steps.spiritual-retreat.tsx        → /next-steps/spiritual-retreat
+Inside each renamed file, update the route declaration:
 
-events.tsx                              → /events
-
-serve.tsx                               → /serve (hub index)
-serve.volunteer.tsx                     → /serve/volunteer
-serve.give.tsx                          → /serve/give
-serve.transformational-stories.tsx      → /serve/transformational-stories
+```ts
+createFileRoute("/my-journey/")({ ... })   // was "/my-journey"
+createFileRoute("/wisdom/")({ ... })
+createFileRoute("/next-steps/")({ ... })
+createFileRoute("/serve/")({ ... })
 ```
 
-## Existing routes — what changes
+No component changes — the HubPage content stays exactly as-is. Now `/my-journey` renders only the hub; `/my-journey/my-guru` and `/my-journey/my-story` render their own dedicated pages (the fully-designed Guru / Story pages that already exist).
 
-- **Delete** `src/routes/my-story.tsx` and `src/routes/my-guru.tsx` (content moves to `my-journey.my-story.tsx` / `my-journey.my-guru.tsx` verbatim — same components, same images, same ContactSection wiring).
-- **Keep** `src/routes/post.$slug.tsx` exactly as-is. Existing posts continue working at `/post/:slug`.
-- **`/wisdom/blog`** becomes the new canonical blog landing. `wisdom.blog.$slug.tsx` proxies to the same loader/component as `/post/:slug` so both URLs render the same essay (canonical stays `/post/:slug` for now to avoid SEO churn).
-- **Keep** `/archive`, `/about`, `/newsletter`, `/contact`, `/surprise`, `/admin*`, `/rss.xml` untouched.
+`wisdom.blog.tsx` + `wisdom.blog.$slug.tsx` are unaffected (no `wisdom.blog.index.tsx` needed — the slug list is at `/wisdom/blog` and that file already declares `/wisdom/blog`).
 
-## Placeholder page shape
+## Out of scope
 
-Each new placeholder uses `SiteLayoutWeb`, sets per-route `head()` (title, description, og:title, og:description), and renders a hero + short copy + `ContactSection` at the foot with a sensible `defaultCategory`. Hub indexes (`/my-journey`, `/wisdom`, `/next-steps`, `/serve`) render a simple card grid linking to their children using the shared `editorial` components for visual consistency with `/my-story`.
+- No changes to the hub designs, child page designs, headers, contact section, or navigation.
+- The "Failed to load /src/routes/my-story.tsx" runtime warning is stale HMR; it will clear on the next clean build once `routeTree.gen.ts` regenerates from the renames.
+- LastPass-related hydration warning is a browser extension artifact, not our code.
 
-No new images generated yet — placeholders use type-only hero bands. Real imagery comes when each section gets its content pass.
+## Verification
 
-## Header nav update
-
-Update `src/components/site-header-web.tsx` to the new top-level IA:
-
-```
-My Journey  ·  Wisdom  ·  Next Steps  ·  Events  ·  Serve  ·  About  ·  Contact
-```
-
-Each top-level link goes to its hub index. Dropdowns are out of scope for this pass — mobile menu lists all hubs and their children as a flat indented list.
-
-## SEO
-
-- Per-route `head()` on every new file with route-specific title + description + og:title + og:description.
-- `<link rel="canonical">` on leaf routes only (not hubs, not __root).
-- Update `src/routes/sitemap[.]xml.ts` if present (or skip if not) to include every new public route.
-
-## Out of scope (explicit)
-
-- No redirects from old `/my-story` and `/my-guru` (user chose "just replace them" — old URLs will 404).
-- No real content for `/wisdom/videos`, `/audio-playlists`, `/events`, `/serve/*`, `/next-steps/*` yet. Placeholder copy only.
-- No header dropdown menus, no breadcrumbs component, no design system changes.
-- No imagery generation for new sections.
-
-## Technical notes
-
-- TanStack auto-regenerates `routeTree.gen.ts` — don't hand-edit.
-- The shared `ContactSection` already accepts `defaultCategory`, so each placeholder passes a contextual value (e.g. `"Volunteer"` on `/serve/volunteer`, `"Small Groups"` on `/next-steps/small-groups`). Existing `category` enum in the form may need new options — will add to the dropdown in `src/components/contact-section.tsx` to cover the new sections.
-- `/wisdom/blog` index reuses `getPublishedDbPosts` + `mergePosts` logic from `src/routes/index.tsx` (extracted into a small helper to avoid duplication).
+After rename, the auto-generated `src/routeTree.gen.ts` will recreate the entries with the hubs as index routes rather than layout routes. Visit `/my-journey/my-guru` → renders the Srila Prabhupada page. Visit `/my-journey` → renders the hub with two cards.
