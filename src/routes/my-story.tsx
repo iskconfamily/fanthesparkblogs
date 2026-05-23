@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import dotsUrl from "@/assets/my-story/dots.png";
-import heroForest from "@/assets/my-story/hero-forest.jpg";
+import heroForest from "@/assets/my-story/vaisesika-meditation.png";
 import templeNamaste from "@/assets/my-story/temple-namaste.jpg";
 
 export const Route = createFileRoute("/my-story")({
