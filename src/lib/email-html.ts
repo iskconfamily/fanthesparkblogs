@@ -317,11 +317,13 @@ ${body}
       </td></tr>
       <tr><td align="center" class="px" style="padding:8px 48px 40px 48px;border-top:1px solid ${C_BORDER};">
         <p style="${shareLabel}">Share this story</p>
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center"><tr>
-          <td><a href="${fbShare}" style="${shareLink}">Facebook</a></td>
-          <td><a href="${waShare}" style="${shareLink}">WhatsApp</a></td>
-          <td><a href="${mailShare}" style="${shareLink}">Email</a></td>
-        </tr></table>
+        <p style="margin:0;text-align:center;">
+          <a href="${fbShare}" style="${shareLink}">Facebook</a>
+          <span style="color:${C_BORDER};margin:1px 10px;">&middot;</span>
+          <a href="${waShare}" style="${shareLink}">WhatsApp</a>
+          <span style="color:${C_BORDER};margin:1px 10px;">&middot;</span>
+          <a href="${mailShare}" style="${shareLink}">Email</a>
+        </p>
       </td></tr>
       <tr><td class="px" style="padding:28px 48px 36px 48px;border-top:1px solid ${C_BORDER};background:${BG_OUTER};">
         <div style="${footerText}">
