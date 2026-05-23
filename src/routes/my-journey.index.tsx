@@ -3,7 +3,7 @@ import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots } from "@/components/editorial";
 import storyImage from "@/assets/my-story/vaisesika-meditation.png";
-import guruImage from "@/assets/my-guru/prabhupada-portrait.jpg";
+import guruImage from "@/assets/my-guru/prabhupada-hero.png";
 
 export const Route = createFileRoute("/my-journey/")({
   head: () => ({
@@ -83,13 +83,14 @@ function JourneyTile({ to, image, imageAlt, title, teaser, cta }: TileProps) {
         className="mb-5"
         style={{
           fontFamily: "var(--font-serif-body)",
+          fontStyle: "italic",
           fontSize: 17,
           lineHeight: 1.6,
           color: "var(--muted-foreground)",
           maxWidth: 420,
         }}
       >
-        {teaser}
+        “{teaser}”
       </p>
       <span
         style={{
@@ -172,15 +173,15 @@ function MyJourneyHub() {
               image={storyImage}
               imageAlt="Vaisesika Dasa in meditation in a forest clearing"
               title="My Story"
-              teaser="The questions, search, and moments that shaped a life of bhakti."
+              teaser="When I was a child, I was deeply curious about the mystery of life."
               cta="Read My Story"
             />
             <JourneyTile
               to="/my-journey/my-guru"
               image={guruImage}
-              imageAlt="Portrait of His Divine Grace A.C. Bhaktivedanta Swami Prabhupada"
+              imageAlt="Srila Prabhupada seated in a forest, garlanded with marigolds"
               title="My Guru"
-              teaser="The teacher, shelter, and legacy at the heart of this journey."
+              teaser="The world's pre-eminent exponent of the teachings and practices of Bhakti-yoga to the Western world."
               cta="Learn About My Guru"
             />
           </div>
