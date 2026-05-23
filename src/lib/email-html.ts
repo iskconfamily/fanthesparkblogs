@@ -305,19 +305,12 @@ ${FONT_IMPORT}
 <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" style="background:${BG_OUTER};">
   <tr><td align="center" style="padding:32px 12px;">
     <table role="presentation" class="container" width="640" border="0" cellpadding="0" cellspacing="0" style="width:640px;max-width:100%;background:${BG_CARD};">
-      <tr><td align="center" class="px" style="padding:40px 48px 28px 48px;border-bottom:1px solid ${C_BORDER};">
-        <a href="${esc(opts.siteUrl)}" style="text-decoration:none;color:${C_FOREGROUND};">
-          <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center"><tr>
-            <td valign="middle" style="padding-right:18px;">
-              <img src="${logoUrl}" alt="Fan The Spark" class="brand-logo" width="64" height="64" style="display:block;width:64px;height:64px;border:0;" />
-            </td>
-            <td valign="middle">
-              <span class="brand" style="${brandStyle}">Fan The Spark</span>
-            </td>
-          </tr></table>
+      <tr><td align="center" class="px" style="padding:28px 48px 24px 48px;border-bottom:1px solid ${C_BORDER};">
+        <a href="${esc(opts.siteUrl)}" style="text-decoration:none;color:${C_FOREGROUND};display:inline-block;">
+          <img src="${logoUrl}" alt="Fan The Spark" class="brand-logo" height="72" style="display:block;height:72px;width:auto;border:0;margin:0 auto;" />
         </a>
-        <div style="${taglineStyle}">Stories · Reflections · Sparks</div>
       </td></tr>
+
       <tr><td class="px" style="padding:40px 48px 24px 48px;">
 ${body}
       </td></tr>
