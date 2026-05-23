@@ -67,9 +67,9 @@ function MyStoryPage() {
           alt="Vaisesika Dasa in meditation in a forest clearing"
           className="block w-full h-auto"
           style={{
-            maxHeight: "92vh",
+            maxHeight: "78vh",
             objectFit: "cover",
-            objectPosition: "center 28%",
+            objectPosition: "center 25%",
           }}
         />
 
