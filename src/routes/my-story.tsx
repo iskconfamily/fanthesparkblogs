@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
-import dotsUrl from "@/assets/my-story/dots.png";
+import { Dots, Para, Prose } from "@/components/editorial";
 import heroForest from "@/assets/my-story/vaisesika-meditation.png";
 import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg";
 
@@ -56,45 +56,6 @@ const heroImageStyles = `
   }
 `;
 
-function Dots() {
-  return (
-    <div className="flex justify-center my-6 sm:my-10">
-      <img src={dotsUrl} alt="" aria-hidden="true" style={{ height: 14, width: "auto", opacity: 0.85 }} />
-    </div>
-  );
-}
-
-function Para({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="mb-7"
-      style={{
-        fontFamily: "var(--font-serif-body)",
-        fontSize: 19,
-        lineHeight: 1.85,
-        color: "var(--foreground)",
-      }}
-    >
-      {children}
-    </p>
-  );
-}
-
-function Prose({
-  children,
-  tight,
-}: {
-  children: React.ReactNode;
-  tight?: "top" | "bottom" | "both";
-}) {
-  const pt = tight === "top" || tight === "both" ? "pt-4 sm:pt-8" : "pt-4 sm:pt-10";
-  const pb = tight === "bottom" || tight === "both" ? "pb-4 sm:pb-8" : "pb-10 sm:pb-12";
-  return (
-    <section style={{ backgroundColor: "var(--background)" }}>
-      <div className={`mx-auto max-w-[720px] px-6 ${pt} ${pb}`}>{children}</div>
-    </section>
-  );
-}
 
 function MyStoryPage() {
   return (
