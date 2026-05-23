@@ -29,6 +29,7 @@ import { Route as WisdomAudioPlaylistsRouteImport } from './routes/wisdom.audio-
 import { Route as TagSlugRouteImport } from './routes/tag.$slug'
 import { Route as ServeVolunteerRouteImport } from './routes/serve.volunteer'
 import { Route as ServeTransformationalStoriesRouteImport } from './routes/serve.transformational-stories'
+import { Route as ServeServantLeadersRouteImport } from './routes/serve.servant-leaders'
 import { Route as ServeGiveRouteImport } from './routes/serve.give'
 import { Route as PreviewSlugRouteImport } from './routes/preview.$slug'
 import { Route as PostSlugRouteImport } from './routes/post.$slug'
@@ -146,6 +147,11 @@ const ServeTransformationalStoriesRoute =
     path: '/serve/transformational-stories',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ServeServantLeadersRoute = ServeServantLeadersRouteImport.update({
+  id: '/serve/servant-leaders',
+  path: '/serve/servant-leaders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ServeGiveRoute = ServeGiveRouteImport.update({
   id: '/serve/give',
   path: '/serve/give',
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/post/$slug': typeof PostSlugRoute
   '/preview/$slug': typeof PreviewSlugRoute
   '/serve/give': typeof ServeGiveRoute
+  '/serve/servant-leaders': typeof ServeServantLeadersRoute
   '/serve/transformational-stories': typeof ServeTransformationalStoriesRoute
   '/serve/volunteer': typeof ServeVolunteerRoute
   '/tag/$slug': typeof TagSlugRoute
@@ -281,6 +288,7 @@ export interface FileRoutesByTo {
   '/post/$slug': typeof PostSlugRoute
   '/preview/$slug': typeof PreviewSlugRoute
   '/serve/give': typeof ServeGiveRoute
+  '/serve/servant-leaders': typeof ServeServantLeadersRoute
   '/serve/transformational-stories': typeof ServeTransformationalStoriesRoute
   '/serve/volunteer': typeof ServeVolunteerRoute
   '/tag/$slug': typeof TagSlugRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/post/$slug': typeof PostSlugRoute
   '/preview/$slug': typeof PreviewSlugRoute
   '/serve/give': typeof ServeGiveRoute
+  '/serve/servant-leaders': typeof ServeServantLeadersRoute
   '/serve/transformational-stories': typeof ServeTransformationalStoriesRoute
   '/serve/volunteer': typeof ServeVolunteerRoute
   '/tag/$slug': typeof TagSlugRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/post/$slug'
     | '/preview/$slug'
     | '/serve/give'
+    | '/serve/servant-leaders'
     | '/serve/transformational-stories'
     | '/serve/volunteer'
     | '/tag/$slug'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/post/$slug'
     | '/preview/$slug'
     | '/serve/give'
+    | '/serve/servant-leaders'
     | '/serve/transformational-stories'
     | '/serve/volunteer'
     | '/tag/$slug'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/post/$slug'
     | '/preview/$slug'
     | '/serve/give'
+    | '/serve/servant-leaders'
     | '/serve/transformational-stories'
     | '/serve/volunteer'
     | '/tag/$slug'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   PostSlugRoute: typeof PostSlugRoute
   PreviewSlugRoute: typeof PreviewSlugRoute
   ServeGiveRoute: typeof ServeGiveRoute
+  ServeServantLeadersRoute: typeof ServeServantLeadersRoute
   ServeTransformationalStoriesRoute: typeof ServeTransformationalStoriesRoute
   ServeVolunteerRoute: typeof ServeVolunteerRoute
   TagSlugRoute: typeof TagSlugRoute
@@ -618,6 +631,13 @@ declare module '@tanstack/react-router' {
       path: '/serve/transformational-stories'
       fullPath: '/serve/transformational-stories'
       preLoaderRoute: typeof ServeTransformationalStoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/serve/servant-leaders': {
+      id: '/serve/servant-leaders'
+      path: '/serve/servant-leaders'
+      fullPath: '/serve/servant-leaders'
+      preLoaderRoute: typeof ServeServantLeadersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/serve/give': {
@@ -779,6 +799,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostSlugRoute: PostSlugRoute,
   PreviewSlugRoute: PreviewSlugRoute,
   ServeGiveRoute: ServeGiveRoute,
+  ServeServantLeadersRoute: ServeServantLeadersRoute,
   ServeTransformationalStoriesRoute: ServeTransformationalStoriesRoute,
   ServeVolunteerRoute: ServeVolunteerRoute,
   TagSlugRoute: TagSlugRoute,
