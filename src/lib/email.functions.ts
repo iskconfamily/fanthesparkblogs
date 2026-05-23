@@ -293,7 +293,6 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 // ============================================================
 
 const MC_AUDIENCE_ID = "a97040f5e0";
-const MC_TEMPLATE_ID = 10000071;
 const MC_FROM_NAME = "Fan The Spark";
 const MC_REPLY_TO = "newsletter@fanthespark.com";
 
@@ -328,41 +327,10 @@ async function mcCall(path: string, init: { method: string; body?: unknown }) {
   }
 }
 
-async function getMailchimpTemplateSectionKey(templateId: number) {
-  const template = (await mcCall(`/templates/${templateId}`, {
-    method: "GET",
-  })) as {
-    id?: number;
-    name?: string;
-    drag_and_drop?: boolean;
-  };
-
-  const content = (await mcCall(`/templates/${templateId}/default-content`, {
-    method: "GET",
-  })) as { sections?: Record<string, string> };
-
-  const sectionKeys = Object.keys(content.sections ?? {});
-
-  if (template.drag_and_drop) {
-    throw new Error(
-      `Mailchimp template ${templateId} (${template.name ?? "unnamed"}) is a Drag & Drop template. Campaign content sections only work with a Classic template whose default-content exposes sections like blog_html.`,
-    );
-  }
-
-  if (sectionKeys.includes("blog_html")) return "blog_html";
-
-  throw new Error(
-    `Mailchimp template ${templateId} does not expose the required blog_html editable section. Available sections: ${sectionKeys.join(", ") || "none"}`,
-  );
-}
-
-async function createAndPrepareCampaign(post: {
-  id: string;
-  title: string;
-  author: string | null;
-}, blogHtml: string) {
-  const sectionKey = await getMailchimpTemplateSectionKey(MC_TEMPLATE_ID);
-
+async function createAndPrepareCampaign(
+  post: { id: string; title: string; author: string | null },
+  fullHtml: string,
+) {
   const created = (await mcCall("/campaigns", {
     method: "POST",
     body: {
@@ -374,18 +342,14 @@ async function createAndPrepareCampaign(post: {
         title: `Blog: ${post.title} [${post.id.slice(0, 8)}]`,
         from_name: post.author || MC_FROM_NAME,
         reply_to: MC_REPLY_TO,
+        to_name: "*|FNAME|*",
       },
     },
   })) as { id: string };
 
   await mcCall(`/campaigns/${created.id}/content`, {
     method: "PUT",
-    body: {
-      template: {
-        id: MC_TEMPLATE_ID,
-        sections: { [sectionKey]: blogHtml },
-      },
-    },
+    body: { html: fullHtml },
   });
 
   return created.id;
@@ -400,12 +364,37 @@ async function loadPostAndHtml(postId: string) {
   if (error) throw new Error(error.message);
   if (!post) throw new Error("Post not found");
 
-  const params = buildParams({ ...post, date: post.published_at ?? post.created_at ?? null });
-  if (!params.blog_html || params.blog_html.trim().length === 0) {
-    throw new Error("blog_html is empty — add content/blocks to the post before sending.");
+  const date = post.published_at ?? post.created_at ?? null;
+  const bodyHtml = buildBlogEmailHtml({
+    title: post.title,
+    excerpt: post.excerpt,
+    content: post.content,
+    featured_image: post.featured_image,
+    blocks: post.blocks,
+    image_layout: post.image_layout,
+    date,
+    author: post.author,
+  });
+  if (!bodyHtml || bodyHtml.trim().length === 0) {
+    throw new Error("Email body is empty — add content/blocks to the post before sending.");
   }
-  return { post, blogHtml: params.blog_html };
+  const fullHtml = buildFullBlogEmailHtml(
+    {
+      title: post.title,
+      excerpt: post.excerpt,
+      content: post.content,
+      featured_image: post.featured_image,
+      blocks: post.blocks,
+      image_layout: post.image_layout,
+      date,
+      author: post.author,
+      slug: post.slug,
+    },
+    { siteUrl: SITE_URL },
+  );
+  return { post, fullHtml };
 }
+
 
 export const sendMailchimpCampaignTest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
