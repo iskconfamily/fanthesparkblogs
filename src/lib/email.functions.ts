@@ -408,8 +408,8 @@ export const sendMailchimpCampaignTest = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
-    const { post, blogHtml } = await loadPostAndHtml(data.postId);
-    const campaignId = await createAndPrepareCampaign(post, blogHtml);
+    const { post, fullHtml } = await loadPostAndHtml(data.postId);
+    const campaignId = await createAndPrepareCampaign(post, fullHtml);
     await mcCall(`/campaigns/${campaignId}/actions/test`, {
       method: "POST",
       body: { test_emails: [data.testEmail], send_type: "html" },
