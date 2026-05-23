@@ -35,7 +35,7 @@ const NAV: NavItem[] = [
   { label: "Contact", to: "/contact" },
 ];
 
-export function SiteHeaderMarketing() {
+export function SiteHeaderWeb() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 

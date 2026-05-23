@@ -1,10 +1,10 @@
-import { SiteHeaderMarketing } from "./site-header-marketing";
+import { SiteHeaderWeb } from "./site-header-web";
 import { SiteFooter } from "./site-footer";
 
-export function SiteLayoutMarketing({ children }: { children: React.ReactNode }) {
+export function SiteLayoutWeb({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeaderMarketing />
+      <SiteHeaderWeb />
       <main>{children}</main>
       <SiteFooter />
     </div>
