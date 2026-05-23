@@ -1,26 +1,29 @@
-## Wisdom section restructure
+## Build out Next Steps & Serve (hubs + sub-pages)
 
-### Hub page (`/wisdom`) — 5 cards
-Update `src/routes/wisdom.index.tsx` so the hub shows: **Lord**, **Blog**, **Videos**, **Audio Playlists**, **iTunes Podcast**. Drop the Spiritual Fitness card. Videos and iTunes cards open in a new tab (external links via `<a>` instead of `<Link>`). The `HubPage` component currently only renders internal `Link`s — I'll extend `HubLink` to accept an optional `external: true` flag and render an `<a target="_blank" rel="noopener">` in that case.
+Content ported verbatim from fanthespark.com (no editorial first-person additions). Design is mine; images pulled from source where they earn their place.
 
-### Header dropdown
-Update `NAV` in `src/components/site-header-web.tsx`. The Wisdom submenu becomes: Lord, Blog, Videos (external → YouTube), Audio Playlists, iTunes Podcast (external). Extend the dropdown child type with an optional `external` URL and render `<a>` instead of `<Link>` for those entries.
+### Header menu (`src/components/site-header-web.tsx`)
+- **Next Steps**: Ask Vaisesika Dasa · Small Groups Near You · Spiritual Retreat · Other Projects *(new)*
+- **Serve**: Servant Leaders *(new, first)* · Give · Volunteer · Transformational Stories
 
-### New page: `/wisdom/lord`
-New file `src/routes/wisdom.lord.tsx`. Build a real long-form editorial page using the existing `PlaceholderPage`-style hero + `Prose`/`Para`/`Dots` components. Port the full text from `https://fanthespark.com/wisdom/lord/` ("The History and Philosophy of Sri Caitanya Mahaprabhu"), broken into ~6–10 paragraphs. Eyebrow: "Wisdom", title: "Lord Chaitanya".
+### Hub pages (4 cards each, matching menu)
+- `src/routes/next-steps.index.tsx`
+- `src/routes/serve.index.tsx`
 
-### New page: `/wisdom/audio-playlists`
-Replace the current placeholder `src/routes/wisdom.audio-playlists.tsx` with a real page that embeds 8 SoundCloud playlists from the source site. Each section gets a heading + a responsive SoundCloud iframe (`https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/{ID}&color=...&auto_play=false&show_artwork=true`). Playlist IDs (order from source): Latest Tracks (user 192337999), Bhakti Pulse, Happy Japa, Teamwork, Podcasts 2019, 2018, 2017, 2016 (214511317) — IDs pulled: 678249312, 678249039, 414360620, 304842150, 303452492, 303437955, 214511317. I'll verify ID→title mapping by re-fetching the source during build.
+### Sub-pages — content ported from source
+| Route file | Source URL |
+|---|---|
+| `next-steps.ask.tsx` | `/next-steps/ask-vaisesika-dasa/` |
+| `next-steps.small-groups.tsx` | `/next-steps/small-groups-near-you/` |
+| `next-steps.spiritual-retreat.tsx` | `/next-steps/spiritual-retreat/` |
+| `next-steps.other-projects.tsx` *(new)* | `/next-steps/other-projects/` |
+| `serve.servant-leaders.tsx` *(new)* | `/serve/servant-leaders/` — portrait grid |
+| `serve.volunteer.tsx` | `/serve/volunteer/` |
+| `serve.give.tsx` | `/serve/give/` |
+| `serve.transformational-stories.tsx` | `/serve/transformational-stories/` — story cards w/ photos |
 
-### External link targets
-- Videos card + menu item → `https://www.youtube.com/c/FanTheSpark`
-- iTunes Podcast card + menu item → **TBD**: you didn't provide the URL. I'll wire it as `#` with a `TODO` comment and ask you for it after build, OR use `https://podcasts.apple.com/us/podcast/fan-the-spark/id1153081672` if that's the correct one — please confirm.
-
-### Files touched
-- `src/routes/wisdom.index.tsx` (edit cards)
-- `src/components/site-header-web.tsx` (edit NAV)
-- `src/components/placeholder-page.tsx` (extend `HubLink` to support external)
-- `src/routes/wisdom.lord.tsx` (new)
-- `src/routes/wisdom.audio-playlists.tsx` (rewrite)
-
-No DB or backend changes.
+### Approach
+- Each page: hero band (eyebrow + title from source), body copy in `<Para>` blocks preserving line breaks/italics/quotes, contextual layout (portrait grid, story cards, or prose), shared `ContactSection` at bottom.
+- Images: hot-link from `fanthespark.com/wp-content/uploads/...` where meaningful (portraits, story photos, supporting visuals). Skip where source has none.
+- Each route sets its own `head()` meta (title, description, og:title, og:description).
+- Slugs preserved so existing links don't break.
