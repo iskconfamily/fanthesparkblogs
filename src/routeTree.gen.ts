@@ -13,6 +13,7 @@ import { Route as SurpriseRouteImport } from './routes/surprise'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
 import { Route as MyStoryRouteImport } from './routes/my-story'
+import { Route as MyGuruRouteImport } from './routes/my-guru'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -46,6 +47,11 @@ const NewsletterRoute = NewsletterRouteImport.update({
 const MyStoryRoute = MyStoryRouteImport.update({
   id: '/my-story',
   path: '/my-story',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyGuruRoute = MyGuruRouteImport.update({
+  id: '/my-guru',
+  path: '/my-guru',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
+  '/my-guru': typeof MyGuruRoute
   '/my-story': typeof MyStoryRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
+  '/my-guru': typeof MyGuruRoute
   '/my-story': typeof MyStoryRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
+  '/my-guru': typeof MyGuruRoute
   '/my-story': typeof MyStoryRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/archive'
     | '/contact'
+    | '/my-guru'
     | '/my-story'
     | '/newsletter'
     | '/rss.xml'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/archive'
     | '/contact'
+    | '/my-guru'
     | '/my-story'
     | '/newsletter'
     | '/rss.xml'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/archive'
     | '/contact'
+    | '/my-guru'
     | '/my-story'
     | '/newsletter'
     | '/rss.xml'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   ArchiveRoute: typeof ArchiveRoute
   ContactRoute: typeof ContactRoute
+  MyGuruRoute: typeof MyGuruRoute
   MyStoryRoute: typeof MyStoryRoute
   NewsletterRoute: typeof NewsletterRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       path: '/my-story'
       fullPath: '/my-story'
       preLoaderRoute: typeof MyStoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-guru': {
+      id: '/my-guru'
+      path: '/my-guru'
+      fullPath: '/my-guru'
+      preLoaderRoute: typeof MyGuruRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -413,6 +433,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   ArchiveRoute: ArchiveRoute,
   ContactRoute: ContactRoute,
+  MyGuruRoute: MyGuruRoute,
   MyStoryRoute: MyStoryRoute,
   NewsletterRoute: NewsletterRoute,
   RssDotxmlRoute: RssDotxmlRoute,
