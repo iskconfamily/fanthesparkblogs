@@ -1,29 +1,21 @@
-## Build out Next Steps & Serve (hubs + sub-pages)
+## Three small fixes
 
-Content ported verbatim from fanthespark.com (no editorial first-person additions). Design is mine; images pulled from source where they earn their place.
+### 1. My Guru hero — remove "1896–1977"
+File: `src/routes/my-journey.my-guru.tsx` (line ~107)
+- Change the hero subline from `His Divine Grace A. C. Bhaktivedanta Swami Prabhupada · 1896–1977` to just `His Divine Grace A. C. Bhaktivedanta Swami Prabhupada`.
+- Leave the dates in body prose (lines 117, 134, 299) and meta description untouched — those are biographical context, not the hero.
 
-### Header menu (`src/components/site-header-web.tsx`)
-- **Next Steps**: Ask Vaisesika Dasa · Small Groups Near You · Spiritual Retreat · Other Projects *(new)*
-- **Serve**: Servant Leaders *(new, first)* · Give · Volunteer · Transformational Stories
+### 2. My Story hero — top of image still cropping on laptop
+File: `src/routes/my-journey.my-story.tsx` (the `heroImageStyles` block)
+- Current desktop rule uses `object-position: center 18%` with `object-fit: cover` and a `max-height: min(70vh, 760px)` cap, which clips the top of the photo on laptop-height viewports.
+- Fix: anchor the image to the top so the head is never cropped. Switch the `@media (min-width: 1024px)` rule to `object-position: center top` and reduce the cap (e.g. `max-height: min(78vh, 820px)`) so it scales rather than clips. Same adjustment in the ultrawide rule (use `center top` instead of `center 24%`).
+- No layout / overlay changes — the bottom title overlay stays as-is.
 
-### Hub pages (4 cards each, matching menu)
-- `src/routes/next-steps.index.tsx`
-- `src/routes/serve.index.tsx`
+### 3. Home page — remove Upcoming Events block
+File: `src/routes/index.tsx`
+- Remove the `UpcomingEventsBlock` render (line ~54) and the component definition (line ~62+).
+- Remove the now-unused imports: `EventCard`, `getUpcomingEvents`, `EventRow`, and the `useServerFn` / `useQuery` wiring for events.
+- Drop `events` from the loader's `Promise.all` so the home page only loads posts.
+- Events remain available at `/events` and in the header nav — only the home-page block is removed.
 
-### Sub-pages — content ported from source
-| Route file | Source URL |
-|---|---|
-| `next-steps.ask.tsx` | `/next-steps/ask-vaisesika-dasa/` |
-| `next-steps.small-groups.tsx` | `/next-steps/small-groups-near-you/` |
-| `next-steps.spiritual-retreat.tsx` | `/next-steps/spiritual-retreat/` |
-| `next-steps.other-projects.tsx` *(new)* | `/next-steps/other-projects/` |
-| `serve.servant-leaders.tsx` *(new)* | `/serve/servant-leaders/` — portrait grid |
-| `serve.volunteer.tsx` | `/serve/volunteer/` |
-| `serve.give.tsx` | `/serve/give/` |
-| `serve.transformational-stories.tsx` | `/serve/transformational-stories/` — story cards w/ photos |
-
-### Approach
-- Each page: hero band (eyebrow + title from source), body copy in `<Para>` blocks preserving line breaks/italics/quotes, contextual layout (portrait grid, story cards, or prose), shared `ContactSection` at bottom.
-- Images: hot-link from `fanthespark.com/wp-content/uploads/...` where meaningful (portraits, story photos, supporting visuals). Skip where source has none.
-- Each route sets its own `head()` meta (title, description, og:title, og:description).
-- Slugs preserved so existing links don't break.
+No backend, schema, or route changes.
