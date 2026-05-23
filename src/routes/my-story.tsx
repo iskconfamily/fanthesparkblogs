@@ -32,19 +32,19 @@ const heroImageStyles = `
     height: auto;
   }
 
-  @media (min-width: 1280px) and (min-height: 820px) {
+  @media (min-width: 1024px) {
     .my-story-hero-image {
-      max-height: min(70vh, 760px);
+      max-height: min(66vh, 680px);
       object-fit: cover;
-      object-position: center 18%;
+      object-position: 38% 20%;
     }
   }
 
   @media (min-width: 1800px) and (min-aspect-ratio: 2 / 1) {
     .my-story-hero-image {
-      max-height: 74vh;
+      max-height: 72vh;
       object-fit: cover;
-      object-position: center 24%;
+      object-position: 36% 22%;
     }
   }
 `;
