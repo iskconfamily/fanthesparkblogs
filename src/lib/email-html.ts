@@ -330,8 +330,8 @@ ${body}
           You're receiving this because you subscribed to Fan The Spark.<br/>
           <a href="*|UNSUB|*" style="${footerLink}">Unsubscribe</a> &nbsp;·&nbsp;
           <a href="*|UPDATE_PROFILE|*" style="${footerLink}">Update preferences</a>
-          <div style="margin-top:14px;">*|LIST:ADDRESSLINE|*</div>
-          <div style="margin-top:6px;">&copy; *|CURRENT_YEAR|* Fan The Spark</div>
+          <div style="margin-top:14px;">Fan The Spark &middot; San Francisco, CA &middot; USA</div>
+          <div style="margin-top:6px;">&copy; *|CURRENT_YEAR|* Fan The Spark. All rights reserved.</div>
         </div>
       </td></tr>
     </table>
