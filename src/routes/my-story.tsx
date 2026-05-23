@@ -29,17 +29,17 @@ const heroImageStyles = `
   .my-story-hero-image {
     display: block;
     width: 100%;
-    height: 78vh;
-    min-height: 520px;
-    max-height: 760px;
+    aspect-ratio: 4 / 5;
+    height: auto;
+    max-height: 560px;
     object-fit: cover;
-    object-position: 50% 30%;
+    object-position: 52% 32%;
   }
 
   @media (min-width: 1024px) {
     .my-story-hero-image {
+      aspect-ratio: auto;
       height: auto;
-      min-height: 0;
       max-height: min(70vh, 760px);
       object-fit: cover;
       object-position: center 18%;
@@ -57,7 +57,7 @@ const heroImageStyles = `
 
 function Dots() {
   return (
-    <div className="flex justify-center my-10">
+    <div className="flex justify-center my-6 sm:my-10">
       <img src={dotsUrl} alt="" aria-hidden="true" style={{ height: 14, width: "auto", opacity: 0.85 }} />
     </div>
   );
@@ -86,7 +86,7 @@ function Prose({
   children: React.ReactNode;
   tight?: "top" | "bottom" | "both";
 }) {
-  const pt = tight === "top" || tight === "both" ? "pt-4 sm:pt-8" : "pt-6 sm:pt-12";
+  const pt = tight === "top" || tight === "both" ? "pt-4 sm:pt-8" : "pt-4 sm:pt-10";
   const pb = tight === "bottom" || tight === "both" ? "pb-4 sm:pb-8" : "pb-10 sm:pb-12";
   return (
     <section style={{ backgroundColor: "var(--background)" }}>
