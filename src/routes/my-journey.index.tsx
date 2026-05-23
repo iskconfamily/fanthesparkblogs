@@ -3,7 +3,7 @@ import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots } from "@/components/editorial";
 import storyImage from "@/assets/my-story/vaisesika-meditation.png";
-import guruImage from "@/assets/my-guru/prabhupada-portrait.jpg";
+import guruImage from "@/assets/my-guru/prabhupada-hero.png";
 
 export const Route = createFileRoute("/my-journey/")({
   head: () => ({
