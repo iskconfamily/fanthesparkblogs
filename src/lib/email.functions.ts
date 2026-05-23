@@ -294,6 +294,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 
 const MC_AUDIENCE_ID = "a97040f5e0";
 const MC_FROM_NAME = "Fan The Spark";
+const MC_FROM_EMAIL = "newsletter@fanthespark.com";
 const MC_REPLY_TO = "newsletter@fanthespark.com";
 
 function getMailchimpKeyAndDc() {
@@ -327,22 +328,36 @@ async function mcCall(path: string, init: { method: string; body?: unknown }) {
   }
 }
 
+async function ensureMailchimpAudienceDefaults() {
+  await mcCall(`/lists/${MC_AUDIENCE_ID}`, {
+    method: "PATCH",
+    body: {
+      campaign_defaults: {
+        from_name: MC_FROM_NAME,
+        from_email: MC_FROM_EMAIL,
+      },
+    },
+  });
+}
+
 async function createAndPrepareCampaign(
   post: { id: string; title: string; author: string | null },
   fullHtml: string,
 ) {
+  await ensureMailchimpAudienceDefaults();
+
+  const campaignSubject = (post.title || "Fan The Spark").trim();
   const created = (await mcCall("/campaigns", {
     method: "POST",
     body: {
       type: "regular",
       recipients: { list_id: MC_AUDIENCE_ID },
       settings: {
-        subject_line: post.title,
-        preview_text: post.title,
-        title: `Blog: ${post.title} [${post.id.slice(0, 8)}]`,
+        subject_line: campaignSubject,
+        preview_text: campaignSubject,
+        title: `Blog: ${campaignSubject} [${post.id.slice(0, 8)}]`,
         from_name: MC_FROM_NAME,
         reply_to: MC_REPLY_TO,
-        to_name: "*|IF:FNAME|**|FNAME|**|ELSE:|*Friend*|END:IF|*",
       },
     },
   })) as { id: string };
