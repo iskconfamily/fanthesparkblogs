@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import dotsUrl from "@/assets/my-story/dots.png";
+import heroForest from "@/assets/my-story/hero-forest.jpg";
+import templeNamaste from "@/assets/my-story/temple-namaste.jpg";
 
 export const Route = createFileRoute("/my-story")({
   head: () => ({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/my-story")({
         content:
           "From childhood questions about the mystery of life to a lifetime of bhakti-yoga practice — the personal journey of Vaisesika Dasa.",
       },
+      { property: "og:image", content: heroForest },
     ],
   }),
   component: MyStoryPage,
@@ -47,77 +49,106 @@ function Para({ children }: { children: React.ReactNode }) {
   );
 }
 
+function Prose({ children }: { children: React.ReactNode }) {
+  return (
+    <section style={{ backgroundColor: "var(--background)" }}>
+      <div className="mx-auto max-w-[720px] px-6 py-12">{children}</div>
+    </section>
+  );
+}
+
 function MyStoryPage() {
   return (
     <SiteLayoutWeb>
-      <article className="mx-auto max-w-[720px] px-6 pt-16 pb-24">
-        {/* Eyebrow */}
-        <p
-          className="text-center mb-4"
+      {/* HERO — full-bleed forest photo with title overlay */}
+      <section
+        className="relative w-full"
+        style={{
+          height: "clamp(420px, 72vh, 720px)",
+          backgroundImage: `url(${heroForest})`,
+          backgroundSize: "cover",
+          backgroundPosition: "left center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        {/* Warm gradient overlay — heavier on left for text legibility, covers the baked-in 'MY STORY' on right */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
           style={{
-            fontFamily: "var(--font-meta)",
-            fontSize: 11,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "var(--brand-gold)",
+            background:
+              "linear-gradient(90deg, color-mix(in oklab, #2a1f0a 55%, transparent) 0%, color-mix(in oklab, #2a1f0a 30%, transparent) 45%, color-mix(in oklab, var(--background) 88%, transparent) 78%, var(--background) 100%)",
           }}
-        >
-          My Journey
-        </p>
+        />
+        <div className="relative mx-auto h-full max-w-[1200px] px-6 flex items-center">
+          <div className="max-w-[560px]">
+            <p
+              className="mb-4"
+              style={{
+                fontFamily: "var(--font-meta)",
+                fontSize: 12,
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+                color: "#fef9e9",
+              }}
+            >
+              My Journey
+            </p>
+            <h1
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontSize: "clamp(56px, 9vw, 104px)",
+                fontStyle: "italic",
+                fontWeight: 500,
+                lineHeight: 1.02,
+                color: "#fffaf0",
+                textShadow: "0 2px 24px rgba(0,0,0,0.35)",
+              }}
+            >
+              My Story
+            </h1>
+          </div>
+        </div>
+      </section>
 
-        {/* Title */}
-        <h1
-          className="text-center mb-2"
-          style={{
-            fontFamily: "var(--font-serif-display)",
-            fontSize: "clamp(48px, 7vw, 72px)",
-            fontStyle: "italic",
-            fontWeight: 500,
-            lineHeight: 1.05,
-            color: "var(--brand-title-color)",
-          }}
-        >
-          My Story
-        </h1>
-
+      {/* LEAD */}
+      <Prose>
         <Dots />
-
-        {/* Lead paragraph */}
         <Para>
           When I was a child, I was deeply curious about the mystery of life. Trying to wrap my mind
           around it, I would sometimes ask my parents about the reasons for death. They thought that
           because I was so young, I shouldn’t worry about it. But, I did.
         </Para>
+      </Prose>
 
-        {/* YouTube embed — responsive 16:9 */}
-        <div
-          className="my-12"
-          style={{
-            position: "relative",
-            width: "100%",
-            paddingBottom: "56.25%",
-            overflow: "hidden",
-            borderRadius: 4,
-            border: "1px solid var(--brand-header-border, var(--border))",
-            backgroundColor: "var(--brand-header-bg, var(--muted))",
-          }}
-        >
-          <iframe
-            src="https://www.youtube.com/embed/vF_A_TcAgtM"
-            title="My Journey — My Story || Vaisesika Dasa"
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
+      {/* YOUTUBE — wider container */}
+      <section style={{ backgroundColor: "var(--background)" }}>
+        <div className="mx-auto max-w-[960px] px-6 pb-12">
+          <div
             style={{
-              position: "absolute",
-              inset: 0,
+              position: "relative",
               width: "100%",
-              height: "100%",
-              border: 0,
+              paddingBottom: "56.25%",
+              overflow: "hidden",
+              borderRadius: 4,
+              border: "1px solid var(--brand-header-border, var(--border))",
+              backgroundColor: "var(--brand-header-bg, var(--muted))",
             }}
-          />
+          >
+            <iframe
+              src="https://www.youtube.com/embed/vF_A_TcAgtM"
+              title="My Journey — My Story || Vaisesika Dasa"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+            />
+          </div>
         </div>
+      </section>
 
+      {/* BODY — first half + pull quote */}
+      <Prose>
         <Para>
           I remember looking up at the night sky, asking my big brother, “What’s on the other
           side?” He couldn’t say but I wanted to know more than anything. By the time I was in high
@@ -125,7 +156,6 @@ function MyStoryPage() {
           they didn’t lead me to answer my two most burning questions:
         </Para>
 
-        {/* Pull quote */}
         <blockquote
           className="my-12 mx-auto text-center"
           style={{
@@ -207,7 +237,23 @@ function MyStoryPage() {
           of my guru’s writings and with my parents’ support, I became a monk at sixteen. For the
           next 13 years, my spiritual practice grew deeper and richer.
         </Para>
+      </Prose>
 
+      {/* FULL-BLEED TEMPLE PHOTO */}
+      <section
+        className="w-full"
+        style={{
+          height: "clamp(380px, 64vh, 640px)",
+          backgroundImage: `url(${templeNamaste})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+        aria-label="Vaisesika Dasa in prayer at a temple"
+      />
+
+      {/* CLOSING PROSE + CTA */}
+      <Prose>
         <Para>
           In 1986, friends introduced me to Nirakula Dasi – a fellow disciple of my guru, Srila
           Prabhupada. She had a pure heart and a radiant, beautiful smile. We felt an immediate
@@ -237,7 +283,6 @@ function MyStoryPage() {
 
         <Dots />
 
-        {/* CTA */}
         <div className="text-center mt-10">
           <Link
             to="/contact"
@@ -255,7 +300,7 @@ function MyStoryPage() {
             Share your story
           </Link>
         </div>
-      </article>
+      </Prose>
     </SiteLayoutWeb>
   );
 }

@@ -1,39 +1,49 @@
-## Naming
+## Decision
 
-Rename the non-blog layout to **web layout**, blog stays **blog layout**.
+- **Layout pattern (web layout, all non-blog pages):** Option C — full-width sections, prose constrained to ~720px inside.
+- **Photos:** Yes, both uploaded images work well — they bookend the narrative (opening calm/meditation, closing devotion).
 
-- `src/components/site-layout-marketing.tsx` → `src/components/site-layout-web.tsx`
-- `src/components/site-header-marketing.tsx` → `src/components/site-header-web.tsx`
-- Update imports in `src/routes/contact.tsx`, `src/routes/my-story.tsx`
+## Photo placement on /my-story
 
-Blog layout, blog routes, blog admin, blog DB — untouched.
+- **`image-78.png` (forest, meditative, "MY STORY" already overlaid on right):**
+  Full-bleed **hero section** at the top of the page. Title "My Story" rendered by us (not from image) over the left side of the photo with a soft warm gradient overlay so text stays legible. Eyebrow "My Journey" above. Crop the image to ~60vh on desktop, ~50vh on mobile. We'll mask/hide the right side that already has "MY STORY" baked in by using `object-position: left` and our overlay covering that area — or crop it cleanly.
+  - Save to: `src/assets/my-story/hero-forest.jpg`
 
-## Build /my-story
+- **`image-79.png` (white robes, temple pillars, namaste):**
+  Full-bleed section near the **end** of the narrative, just before the closing CTA. Acts as a visual breath after the long read. Caption/eyebrow underneath optional.
+  - Save to: `src/assets/my-story/temple-namaste.jpg`
 
-Source: https://fanthespark.com/my-journey/my-story/
+## Page structure (Option C applied)
 
-Included:
-1. **Full narrative text** (~10 paragraphs) — verbatim from source
-2. **Decorative `dots.png`** divider — downloaded to `src/assets/my-story/dots.png`
-3. **YouTube embed** — yes, `vF_A_TcAgtM` ("My Journey - My Story"), responsive 16:9 iframe placed between the lead and the body, matching the source page's position
-4. **Pull-quote** on "What is the purpose of life?"
-5. **Closing CTA** → `/contact`
+```
+<SiteLayoutWeb>
+  <section> ← full-bleed hero with forest photo + title overlay
+  <section> ← cream background band, prose 720px: lead paragraph
+  <section> ← full-bleed YouTube embed in a 960px container
+  <section> ← cream background band, prose 720px: body + pull-quote + more body
+  <section> ← full-bleed temple photo
+  <section> ← prose 720px: final 2 paragraphs + dots + CTA
+</SiteLayoutWeb>
+```
 
-Structure inside web layout:
-- Eyebrow "My Journey"
-- H1 "My Story"
-- Lead paragraph
-- Dots divider
-- YouTube embed (responsive)
-- Body paragraphs + pull-quote
-- CTA to /contact
+Each `<section>` controls its own background and inner max-width. Header/footer untouched.
 
-Uses existing tokens: `--font-serif-display`, `--font-serif-body`, `--font-meta`, `--brand-gold`. No new colors.
+## Files
+
+- `src/routes/my-story.tsx` — restructure into full-bleed sections; keep all existing copy verbatim
+- `src/assets/my-story/hero-forest.jpg` — copy from `user-uploads://image-78.png`
+- `src/assets/my-story/temple-namaste.jpg` — copy from `user-uploads://image-79.png`
+
+## Pattern for future web-layout pages (Contact, About, etc.)
+
+Same recipe: page = stack of full-width `<section>` elements, each with its own inner `max-w-[720px]` (prose) or `max-w-[1200px]` (wider blocks like image grids or two-column). I'll apply this to `/contact` in a follow-up if you want.
 
 ## Not touched
 
-Blog index, blog post pages, blog admin/editor, blog DB, RSS, tag pages, sidebar, `site-layout.tsx`, `site-header.tsx`, `/contact` content.
+Blog (`SiteLayout`, sidebar, post pages, RSS, admin), header, footer, design tokens, DB.
 
-## Open
+## Note on the forest image
 
-No portrait/hero photo exists on the source page — using clean typographic hero. Send a photo later if you want one swapped in.
+The uploaded crop already has "MY STORY" + dots typeset into the photo on the right. Two options — I'll default to **(a)** unless you say otherwise:
+- **(a)** Use the image as background, crop/position so the baked-in text falls off-canvas or is covered by our overlay, and render our own title on the left in brand typography. Consistent with the rest of the site.
+- **(b)** Use the image as-is with the baked-in text visible. Faster but the typography won't match brand fonts and the text isn't selectable/SEO-readable.
