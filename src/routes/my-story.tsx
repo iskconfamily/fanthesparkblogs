@@ -33,7 +33,7 @@ const heroImageStyles = `
     height: auto;
     max-height: 560px;
     object-fit: cover;
-    object-position: 52% 32%;
+    object-position: 62% 50%;
   }
 
   @media (min-width: 1024px) {

@@ -1,24 +1,15 @@
+## Adjust mobile hero crop on /my-story
 
-Scope: `src/routes/my-story.tsx` only. No desktop, blog, or image-asset changes.
+The subject's lap/hands are getting clipped at the bottom of the mobile hero. Shift the crop down so more of the lower body is visible.
 
-### 1. Mobile hero — 4:5 portrait crop
+### Change
 
-In `heroImageStyles`, mobile default rule becomes:
-```
-aspect-ratio: 4 / 5;
-height: auto;
-max-height: 560px;
-object-fit: cover;
-object-position: 52% 32%;
-```
-Effect on 390px phone: ~488px tall (between prod ~220px and current preview ~660px). Subject centered on head/torso. Title overlay stays inside image bottom-left.
+In `src/routes/my-story.tsx`, update the mobile `heroImageStyles`:
 
-Desktop `min-width: 1024px` and `1800px` rules unchanged.
+- `object-position: 62% 32%` → `object-position: 62% 50%`
 
-### 2. Tighten gap between hero and intro paragraph
+Y% goes from 32% (image pulled up, showing more sky/top) to 50% (centered vertically, showing the full seated pose). X% stays at 62% so horizontal framing is unchanged.
 
-- Lead `Prose tight="bottom"` block: `pt-4 sm:pt-10` (less top padding on mobile).
-- `<Dots />`: change `my-10` → `my-6 sm:my-10`.
+Desktop rules (`min-width: 1024px` and `1800px`) stay untouched.
 
-### Files
-- `src/routes/my-story.tsx`
+No other files affected.
