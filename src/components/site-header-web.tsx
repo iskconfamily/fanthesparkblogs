@@ -46,9 +46,10 @@ const NAV: NavItem[] = [
     label: "Next Steps",
     to: "/next-steps",
     children: [
-      { label: "Ask", to: "/next-steps/ask" },
-      { label: "Small Groups", to: "/next-steps/small-groups" },
+      { label: "Ask Vaisesika Dasa", to: "/next-steps/ask" },
+      { label: "Small Groups Near You", to: "/next-steps/small-groups" },
       { label: "Spiritual Retreat", to: "/next-steps/spiritual-retreat" },
+      { label: "Other Projects", to: "/next-steps/other-projects" },
     ],
   },
   { label: "Events", to: "/events" },
@@ -56,8 +57,9 @@ const NAV: NavItem[] = [
     label: "Serve",
     to: "/serve",
     children: [
-      { label: "Volunteer", to: "/serve/volunteer" },
+      { label: "Servant Leaders", to: "/serve/servant-leaders" },
       { label: "Give", to: "/serve/give" },
+      { label: "Volunteer", to: "/serve/volunteer" },
       { label: "Transformational Stories", to: "/serve/transformational-stories" },
     ],
   },
