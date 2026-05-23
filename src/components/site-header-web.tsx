@@ -289,6 +289,22 @@ export function SiteHeaderWeb() {
                   </Link>
                 );
               })}
+              <a
+                href={LOGIN_LINK.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileOpen(false)}
+                className="uppercase no-underline"
+                style={{
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 14,
+                  letterSpacing: "0.18em",
+                  color: "var(--brand-title-color)",
+                  borderBottom: "none",
+                }}
+              >
+                {LOGIN_LINK.label}
+              </a>
             </nav>
           </SheetContent>
         </Sheet>
