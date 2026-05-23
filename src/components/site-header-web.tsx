@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/sheet";
 import logoUrl from "@/assets/fts-logo-stamp.png";
 
+type NavChild = { label: string; to: string; external?: boolean };
+
 type NavItem = {
   label: string;
   to: string;
-  children?: { label: string; to: string }[];
+  children?: NavChild[];
 };
 
 const NAV: NavItem[] = [
@@ -33,9 +35,11 @@ const NAV: NavItem[] = [
     label: "Wisdom",
     to: "/wisdom",
     children: [
+      { label: "Lord Chaitanya", to: "/wisdom/lord" },
       { label: "Blog", to: "/wisdom/blog" },
-      { label: "Videos", to: "/wisdom/videos" },
+      { label: "Videos", to: "https://www.youtube.com/c/FanTheSpark", external: true },
       { label: "Audio Playlists", to: "/wisdom/audio-playlists" },
+      { label: "iTunes Podcast", to: "https://podcasts.apple.com/us/podcast/fan-the-spark/id1153081672", external: true },
     ],
   },
   {
