@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml, sendMailchimpCampaignTest, sendMailchimpCampaignLive } from "@/lib/email.functions";
+import { getBlogEmailHtml, sendMailchimpCampaignTest, sendMailchimpCampaignLive } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,6 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const save = useServerFn(savePost);
   const upload = useServerFn(uploadImage);
   const genImage = useServerFn(generateBlogImage);
-  const sendEmail = useServerFn(sendBlogAnnouncement);
-  
-  const fetchTemplates = useServerFn(listBrevoTemplates);
-  const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
   const sendMcTest = useServerFn(sendMailchimpCampaignTest);
   const sendMcLive = useServerFn(sendMailchimpCampaignLive);
@@ -49,60 +45,13 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [testEmail, setTestEmail] = useState("");
-  const [emailMsg, setEmailMsg] = useState("");
   const [announcementSentAt, setAnnouncementSentAt] = useState<string | null>(
     existing?.announcement_sent_at ?? null,
   );
-  const [announcementCount, setAnnouncementCount] = useState<number | null>(
-    existing?.announcement_recipient_count ?? null,
-  );
-  const [brevoTemplates, setBrevoTemplates] = useState<
-    Array<{ id: number; name: string; subject: string | null; isActive: boolean }>
-  >([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
-  const [templatesError, setTemplatesError] = useState("");
-  const [brevoLists, setBrevoLists] = useState<
-    Array<{ id: number; name: string; totalSubscribers: number }>
-  >([]);
-  const [selectedListId, setSelectedListId] = useState<number | null>(null);
-  const [listsError, setListsError] = useState("");
   const [blogHtml, setBlogHtml] = useState<string>("");
   const [blogHtmlError, setBlogHtmlError] = useState<string>("");
   const [mcTestEmail, setMcTestEmail] = useState("");
   const [mcMsg, setMcMsg] = useState("");
-  const [mcConfirmLive, setMcConfirmLive] = useState(false);
-
-  
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [tRes, lRes] = await Promise.all([fetchTemplates(), fetchLists()]);
-        if (cancelled) return;
-        if (!tRes.ok) setTemplatesError(tRes.error ?? "Failed to load Brevo templates");
-        else {
-          setBrevoTemplates(tRes.templates);
-          setSelectedTemplateId((prev) => {
-            if (prev != null) return prev;
-            const firstActive = tRes.templates.find((t) => t.isActive);
-            return firstActive?.id ?? tRes.templates[0]?.id ?? null;
-          });
-        }
-        if (!lRes.ok) setListsError(lRes.error ?? "Failed to load Brevo lists");
-        else {
-          setBrevoLists(lRes.lists);
-          setSelectedListId((prev) => prev ?? lRes.lists[0]?.id ?? null);
-        }
-      } catch (e) {
-        if (!cancelled) setTemplatesError(e instanceof Error ? e.message : "Failed to load");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchTemplates, fetchLists]);
 
 
   const id = existing?.id;
@@ -236,94 +185,6 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     if (url) setFeaturedImage(url);
   };
 
-  const sendTest = async () => {
-    if (!id) {
-      setEmailMsg("Save the post first.");
-      return;
-    }
-    if (!testEmail) {
-      setEmailMsg("Enter a test email address.");
-      return;
-    }
-    if (selectedTemplateId == null) {
-      setEmailMsg("Select a Brevo template first.");
-      return;
-    }
-    if (!blogHtml || blogHtml.trim().length === 0) {
-      setEmailMsg("blog_html is empty — add content to the post before sending.");
-      return;
-    }
-    setBusy("Sending test…");
-    setEmailMsg("");
-    try {
-      const r = await sendEmail({
-        data: {
-          postId: id,
-          mode: "test",
-          testEmail,
-          templateId: selectedTemplateId,
-        },
-      });
-      setEmailMsg(`Test sent to ${r.sentTo} via template #${r.templateId}`);
-    } catch (e) {
-      setEmailMsg(e instanceof Error ? e.message : "Failed");
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const sendBroadcast = async () => {
-    if (!id) {
-      setEmailMsg("Save the post first.");
-      return;
-    }
-    if (selectedTemplateId == null) {
-      setEmailMsg("Select a Brevo template first.");
-      return;
-    }
-    if (selectedListId == null) {
-      setEmailMsg("Select a Brevo list first.");
-      return;
-    }
-    if (!blogHtml || blogHtml.trim().length === 0) {
-      setEmailMsg("blog_html is empty — add content to the post before sending.");
-      return;
-    }
-    setBusy("Checking…");
-    setEmailMsg("");
-    try {
-      const list = brevoLists.find((l) => l.id === selectedListId);
-      const count = list?.totalSubscribers ?? 0;
-      const tpl = brevoTemplates.find((t) => t.id === selectedTemplateId);
-      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using transactional template "${tpl?.name ?? selectedTemplateId}"?\n\nOne transactional email per recipient will be sent via Brevo /smtp/email.`;
-      const ok = window.confirm(confirmMsg);
-      if (!ok) {
-        setBusy(null);
-        return;
-      }
-      setBusy(`Sending to ${count}…`);
-      const r = await sendEmail({
-        data: {
-          postId: id,
-          mode: "broadcast",
-          templateId: selectedTemplateId,
-          listId: selectedListId,
-        },
-      });
-      setAnnouncementSentAt(new Date().toISOString());
-      setAnnouncementCount(r.recipientCount);
-      const failNote =
-        r.failureCount && r.failureCount > 0 ? ` (${r.failureCount} failed)` : "";
-      setEmailMsg(
-        `Sent to ${r.recipientCount} / ${r.attempted ?? r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} via template #${r.templateId}${failNote}.`,
-      );
-    } catch (e) {
-      setEmailMsg(e instanceof Error ? e.message : "Failed");
-    } finally {
-      setBusy(null);
-    }
-  };
-
   const sendMailchimpTestEmail = async () => {
     if (!id) {
       setMcMsg("Save the post first.");
@@ -360,13 +221,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setMcMsg("blog_html is empty — add content to the post before sending.");
       return;
     }
-    if (!mcConfirmLive) {
-      const ok = window.confirm(
-        "Send this blog post as a live campaign to ALL subscribers in your Mailchimp audience? This cannot be undone.",
-      );
-      if (!ok) return;
-      setMcConfirmLive(true);
-    }
+    const ok = window.confirm(
+      "Send this blog post as a live campaign to ALL subscribers in your Mailchimp audience? This cannot be undone.",
+    );
+    if (!ok) return;
     setBusy("Sending live Mailchimp campaign…");
     setMcMsg("");
     try {
@@ -592,97 +450,22 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             )}
             {announcementSentAt && (
               <p className="text-[11px] text-muted-foreground">
-                Last sent {new Date(announcementSentAt).toLocaleString()} to{" "}
-                {announcementCount ?? "?"} recipient
-                {announcementCount === 1 ? "" : "s"}.
+                Last campaign sent {new Date(announcementSentAt).toLocaleString()}.
               </p>
             )}
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Send test to
-              </label>
-              <Input
-                type="email"
-                value={testEmail}
-                onChange={(e) => setTestEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full"
-                onClick={sendTest}
-                disabled={!!busy || !id}
-              >
-                Send test email
-              </Button>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo transactional template
-              </label>
-              <select
-                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedTemplateId ?? ""}
-                onChange={(e) =>
-                  setSelectedTemplateId(e.target.value ? Number(e.target.value) : null)
-                }
-                disabled={!!busy || brevoTemplates.length === 0}
-              >
-                {brevoTemplates.length === 0 && <option value="">Loading…</option>}
-                {selectedTemplateId == null && <option value="">— select —</option>}
-                {brevoTemplates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    #{t.id} {t.name}{t.isActive ? "" : " (inactive)"}
-                  </option>
-                ))}
-              </select>
-              {templatesError && (
-                <p className="text-[11px] text-destructive break-words">{templatesError}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo list (recipients for broadcast)
-              </label>
-              <select
-                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedListId ?? ""}
-                onChange={(e) =>
-                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
-                }
-                disabled={!!busy || brevoLists.length === 0}
-              >
-                {brevoLists.length === 0 && <option value="">Loading…</option>}
-                {selectedListId == null && <option value="">— select —</option>}
-                {brevoLists.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} — {l.totalSubscribers}
-                  </option>
-                ))}
-              </select>
-              {listsError && (
-                <p className="text-[11px] text-destructive break-words">{listsError}</p>
-              )}
-              <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Broadcast fetches all contacts from this list and sends one transactional email per recipient via Brevo /smtp/email with {`{ templateId, to, params }`}. No campaign is created.
-              </p>
-            </div>
-
 
             <div className="space-y-1 border border-border rounded p-2 bg-background">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Params sent to Brevo (use as {`{{ params.X }}`})
+                Mailchimp content payload
               </p>
               <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono">
-{`subject        = ${title}
-title          = ${title}
-excerpt        = ${(excerpt || "").slice(0, 80)}${excerpt.length > 80 ? "…" : ""}
-url            = ${SITE_URL_PREVIEW}/post/${previewSlug}
-author         = ${author}
-featured_image = ${featuredImage || "(none)"}
-slug           = ${previewSlug}
-blog_html      = ${blogHtml.length} chars`}
+{`subject_line  = ${title}
+preview_text  = ${title}
+from_name     = ${author || "Fan The Spark"}
+reply_to      = newsletter@fanthespark.com
+template_id   = 10000067
+audience_id   = a97040f5e0
+blog_html     = ${blogHtml.length} chars`}
               </pre>
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground pt-1">
                 blog_html preview (first 300 chars)
@@ -694,24 +477,11 @@ blog_html      = ${blogHtml.length} chars`}
                 <p className="text-[11px] text-destructive break-words">{blogHtmlError}</p>
               )}
               <p className="text-[10px] text-muted-foreground leading-relaxed pt-1">
-                In Brevo templates, render the full body with:{" "}
-                <code>{`{% autoescape off %}{{ params.blog_html }}{% endautoescape %}`}</code>
+                The rendered post HTML is inserted into the template section named <code>blog_html</code>.
               </p>
             </div>
-            <Button
-              size="sm"
-              className="w-full"
-              onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedTemplateId == null || selectedListId == null || !blogHtml}
-            >
-              {announcementSentAt ? "Resend broadcast" : "Send broadcast"}
-            </Button>
 
-            {emailMsg && (
-              <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
-            )}
-
-            <div className="mt-6 pt-4 border-t border-border space-y-3">
+            <div className="mt-2 pt-2 border-t border-border space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide">
                 Mailchimp Campaign
               </p>
