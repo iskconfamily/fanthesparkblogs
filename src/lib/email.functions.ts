@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { buildBlogEmailHtml } from "@/lib/email-html";
+import { buildBlogEmailHtml, buildFullBlogEmailHtml } from "@/lib/email-html";
 
 const SITE_URL = "https://fanthesparkblogs.lovable.app";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/brevo";
