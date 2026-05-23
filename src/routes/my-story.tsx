@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
+import { ContactSection } from "@/components/contact-section";
 import dotsUrl from "@/assets/my-story/dots.png";
 import heroForest from "@/assets/my-story/vaisesika-meditation.png";
 import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg";
