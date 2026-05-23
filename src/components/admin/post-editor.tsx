@@ -28,8 +28,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const fetchTemplates = useServerFn(listBrevoTemplates);
   const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
-  const fetchMcTemplates = useServerFn(listMandrillTemplates);
-  const sendMailchimp = useServerFn(sendBlogAnnouncementMailchimp);
+  const sendMcTest = useServerFn(sendMailchimpCampaignTest);
+  const sendMcLive = useServerFn(sendMailchimpCampaignLive);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
