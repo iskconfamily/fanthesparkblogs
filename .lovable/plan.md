@@ -1,15 +1,13 @@
-## Plan: Fix image cropping on My Journey hub
+## Plan: Tighten the pre-scroll header
 
-### Problem
-The My Story tile image (`vaisesika-meditation.png`) is being cropped by `object-fit: cover` with the default `object-position: center center`, which cuts off the person in the frame.
+### Observation
+When not scrolled, the logo lockup ("Fan The Spark" wordmark + deity stamp) renders at 64px tall, which makes the wordmark very wide and pushes the nav into a cramped two-line wrap. Once scrolled, the logo shrinks to 40px and the nav breathes — that state already looks right.
 
-### Solution
-Add an optional `imagePosition` prop to the `JourneyTile` component so the My Story tile can receive `objectPosition: "30% 35%"` (shifting the focal point left-of-center and slightly above center) while the My Guru tile keeps the default center-center crop.
-
-### Changes
-1. In `src/routes/my-journey.index.tsx`:
-   - Add optional `imagePosition?: string` to `TileProps`
-   - Apply it as `style={{ objectPosition: imagePosition }}` on the `<img>` inside `JourneyTile`
-   - Pass `imagePosition="30% 35%"` on the `<JourneyTile>` instance for My Story
+### Change
+In `src/components/site-header-web.tsx`:
+- Reduce the non-scrolled logo height from `64` → `52` (keeps presence, frees ~30–40px of horizontal room).
+- Reduce the non-scrolled header height from `96` → `84` so the band stays proportional to the smaller logo.
+- Leave scrolled values (`40` / `64`) untouched.
+- Leave nav spacing and `whitespace-nowrap` from the previous turn in place — two-line wrap is acceptable per the user.
 
 No other files touched.
