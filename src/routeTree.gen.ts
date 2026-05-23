@@ -34,6 +34,7 @@ import { Route as PreviewSlugRouteImport } from './routes/preview.$slug'
 import { Route as PostSlugRouteImport } from './routes/post.$slug'
 import { Route as NextStepsSpiritualRetreatRouteImport } from './routes/next-steps.spiritual-retreat'
 import { Route as NextStepsSmallGroupsRouteImport } from './routes/next-steps.small-groups'
+import { Route as NextStepsOtherProjectsRouteImport } from './routes/next-steps.other-projects'
 import { Route as NextStepsAskRouteImport } from './routes/next-steps.ask'
 import { Route as MyJourneyMyStoryRouteImport } from './routes/my-journey.my-story'
 import { Route as MyJourneyMyGuruRouteImport } from './routes/my-journey.my-guru'
@@ -120,9 +121,9 @@ const WisdomLordRoute = WisdomLordRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const WisdomBlogRoute = WisdomBlogRouteImport.update({
-  id: '/wisdom/blog',
-  path: '/wisdom/blog',
-  getParentRoute: () => rootRouteImport,
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => WisdomRoute,
 } as any)
 const WisdomAudioPlaylistsRoute = WisdomAudioPlaylistsRouteImport.update({
   id: '/wisdom/audio-playlists',
@@ -135,20 +136,20 @@ const TagSlugRoute = TagSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServeVolunteerRoute = ServeVolunteerRouteImport.update({
-  id: '/serve/volunteer',
-  path: '/serve/volunteer',
-  getParentRoute: () => rootRouteImport,
+  id: '/volunteer',
+  path: '/volunteer',
+  getParentRoute: () => ServeRoute,
 } as any)
 const ServeTransformationalStoriesRoute =
   ServeTransformationalStoriesRouteImport.update({
-    id: '/serve/transformational-stories',
-    path: '/serve/transformational-stories',
-    getParentRoute: () => rootRouteImport,
+    id: '/transformational-stories',
+    path: '/transformational-stories',
+    getParentRoute: () => ServeRoute,
   } as any)
 const ServeGiveRoute = ServeGiveRouteImport.update({
-  id: '/serve/give',
-  path: '/serve/give',
-  getParentRoute: () => rootRouteImport,
+  id: '/give',
+  path: '/give',
+  getParentRoute: () => ServeRoute,
 } as any)
 const PreviewSlugRoute = PreviewSlugRouteImport.update({
   id: '/preview/$slug',
@@ -171,20 +172,25 @@ const NextStepsSmallGroupsRoute = NextStepsSmallGroupsRouteImport.update({
   path: '/next-steps/small-groups',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NextStepsOtherProjectsRoute = NextStepsOtherProjectsRouteImport.update({
+  id: '/next-steps/other-projects',
+  path: '/next-steps/other-projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NextStepsAskRoute = NextStepsAskRouteImport.update({
   id: '/next-steps/ask',
   path: '/next-steps/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyJourneyMyStoryRoute = MyJourneyMyStoryRouteImport.update({
-  id: '/my-journey/my-story',
-  path: '/my-journey/my-story',
-  getParentRoute: () => rootRouteImport,
+  id: '/my-story',
+  path: '/my-story',
+  getParentRoute: () => MyJourneyRoute,
 } as any)
 const MyJourneyMyGuruRoute = MyJourneyMyGuruRouteImport.update({
-  id: '/my-journey/my-guru',
-  path: '/my-journey/my-guru',
-  getParentRoute: () => rootRouteImport,
+  id: '/my-guru',
+  path: '/my-guru',
+  getParentRoute: () => MyJourneyRoute,
 } as any)
 const AdminSetupRoute = AdminSetupRouteImport.update({
   id: '/setup',
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/my-journey/my-guru': typeof MyJourneyMyGuruRoute
   '/my-journey/my-story': typeof MyJourneyMyStoryRoute
   '/next-steps/ask': typeof NextStepsAskRoute
+  '/next-steps/other-projects': typeof NextStepsOtherProjectsRoute
   '/next-steps/small-groups': typeof NextStepsSmallGroupsRoute
   '/next-steps/spiritual-retreat': typeof NextStepsSpiritualRetreatRoute
   '/post/$slug': typeof PostSlugRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/my-journey/my-guru': typeof MyJourneyMyGuruRoute
   '/my-journey/my-story': typeof MyJourneyMyStoryRoute
   '/next-steps/ask': typeof NextStepsAskRoute
+  '/next-steps/other-projects': typeof NextStepsOtherProjectsRoute
   '/next-steps/small-groups': typeof NextStepsSmallGroupsRoute
   '/next-steps/spiritual-retreat': typeof NextStepsSpiritualRetreatRoute
   '/post/$slug': typeof PostSlugRoute
@@ -305,6 +313,7 @@ export interface FileRoutesById {
   '/my-journey/my-guru': typeof MyJourneyMyGuruRoute
   '/my-journey/my-story': typeof MyJourneyMyStoryRoute
   '/next-steps/ask': typeof NextStepsAskRoute
+  '/next-steps/other-projects': typeof NextStepsOtherProjectsRoute
   '/next-steps/small-groups': typeof NextStepsSmallGroupsRoute
   '/next-steps/spiritual-retreat': typeof NextStepsSpiritualRetreatRoute
   '/post/$slug': typeof PostSlugRoute
@@ -343,6 +352,7 @@ export interface FileRouteTypes {
     | '/my-journey/my-guru'
     | '/my-journey/my-story'
     | '/next-steps/ask'
+    | '/next-steps/other-projects'
     | '/next-steps/small-groups'
     | '/next-steps/spiritual-retreat'
     | '/post/$slug'
@@ -378,6 +388,7 @@ export interface FileRouteTypes {
     | '/my-journey/my-guru'
     | '/my-journey/my-story'
     | '/next-steps/ask'
+    | '/next-steps/other-projects'
     | '/next-steps/small-groups'
     | '/next-steps/spiritual-retreat'
     | '/post/$slug'
@@ -414,6 +425,7 @@ export interface FileRouteTypes {
     | '/my-journey/my-guru'
     | '/my-journey/my-story'
     | '/next-steps/ask'
+    | '/next-steps/other-projects'
     | '/next-steps/small-groups'
     | '/next-steps/spiritual-retreat'
     | '/post/$slug'
@@ -445,19 +457,14 @@ export interface RootRouteChildren {
   NewsletterRoute: typeof NewsletterRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SurpriseRoute: typeof SurpriseRoute
-  MyJourneyMyGuruRoute: typeof MyJourneyMyGuruRoute
-  MyJourneyMyStoryRoute: typeof MyJourneyMyStoryRoute
   NextStepsAskRoute: typeof NextStepsAskRoute
+  NextStepsOtherProjectsRoute: typeof NextStepsOtherProjectsRoute
   NextStepsSmallGroupsRoute: typeof NextStepsSmallGroupsRoute
   NextStepsSpiritualRetreatRoute: typeof NextStepsSpiritualRetreatRoute
   PostSlugRoute: typeof PostSlugRoute
   PreviewSlugRoute: typeof PreviewSlugRoute
-  ServeGiveRoute: typeof ServeGiveRoute
-  ServeTransformationalStoriesRoute: typeof ServeTransformationalStoriesRoute
-  ServeVolunteerRoute: typeof ServeVolunteerRoute
   TagSlugRoute: typeof TagSlugRoute
   WisdomAudioPlaylistsRoute: typeof WisdomAudioPlaylistsRoute
-  WisdomBlogRoute: typeof WisdomBlogRouteWithChildren
   WisdomLordRoute: typeof WisdomLordRoute
   MyJourneyIndexRoute: typeof MyJourneyIndexRoute
   NextStepsIndexRoute: typeof NextStepsIndexRoute
@@ -574,10 +581,10 @@ declare module '@tanstack/react-router' {
     }
     '/wisdom/blog': {
       id: '/wisdom/blog'
-      path: '/wisdom/blog'
+      path: '/blog'
       fullPath: '/wisdom/blog'
       preLoaderRoute: typeof WisdomBlogRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof WisdomRoute
     }
     '/wisdom/audio-playlists': {
       id: '/wisdom/audio-playlists'
@@ -595,24 +602,24 @@ declare module '@tanstack/react-router' {
     }
     '/serve/volunteer': {
       id: '/serve/volunteer'
-      path: '/serve/volunteer'
+      path: '/volunteer'
       fullPath: '/serve/volunteer'
       preLoaderRoute: typeof ServeVolunteerRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ServeRoute
     }
     '/serve/transformational-stories': {
       id: '/serve/transformational-stories'
-      path: '/serve/transformational-stories'
+      path: '/transformational-stories'
       fullPath: '/serve/transformational-stories'
       preLoaderRoute: typeof ServeTransformationalStoriesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ServeRoute
     }
     '/serve/give': {
       id: '/serve/give'
-      path: '/serve/give'
+      path: '/give'
       fullPath: '/serve/give'
       preLoaderRoute: typeof ServeGiveRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ServeRoute
     }
     '/preview/$slug': {
       id: '/preview/$slug'
@@ -642,6 +649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NextStepsSmallGroupsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/next-steps/other-projects': {
+      id: '/next-steps/other-projects'
+      path: '/next-steps/other-projects'
+      fullPath: '/next-steps/other-projects'
+      preLoaderRoute: typeof NextStepsOtherProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/next-steps/ask': {
       id: '/next-steps/ask'
       path: '/next-steps/ask'
@@ -651,17 +665,17 @@ declare module '@tanstack/react-router' {
     }
     '/my-journey/my-story': {
       id: '/my-journey/my-story'
-      path: '/my-journey/my-story'
+      path: '/my-story'
       fullPath: '/my-journey/my-story'
       preLoaderRoute: typeof MyJourneyMyStoryRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MyJourneyRoute
     }
     '/my-journey/my-guru': {
       id: '/my-journey/my-guru'
-      path: '/my-journey/my-guru'
+      path: '/my-guru'
       fullPath: '/my-journey/my-guru'
       preLoaderRoute: typeof MyJourneyMyGuruRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof MyJourneyRoute
     }
     '/admin/setup': {
       id: '/admin/setup'
@@ -728,18 +742,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface WisdomBlogRouteChildren {
-  WisdomBlogSlugRoute: typeof WisdomBlogSlugRoute
-}
-
-const WisdomBlogRouteChildren: WisdomBlogRouteChildren = {
-  WisdomBlogSlugRoute: WisdomBlogSlugRoute,
-}
-
-const WisdomBlogRouteWithChildren = WisdomBlogRoute._addFileChildren(
-  WisdomBlogRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -750,19 +752,14 @@ const rootRouteChildren: RootRouteChildren = {
   NewsletterRoute: NewsletterRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SurpriseRoute: SurpriseRoute,
-  MyJourneyMyGuruRoute: MyJourneyMyGuruRoute,
-  MyJourneyMyStoryRoute: MyJourneyMyStoryRoute,
   NextStepsAskRoute: NextStepsAskRoute,
+  NextStepsOtherProjectsRoute: NextStepsOtherProjectsRoute,
   NextStepsSmallGroupsRoute: NextStepsSmallGroupsRoute,
   NextStepsSpiritualRetreatRoute: NextStepsSpiritualRetreatRoute,
   PostSlugRoute: PostSlugRoute,
   PreviewSlugRoute: PreviewSlugRoute,
-  ServeGiveRoute: ServeGiveRoute,
-  ServeTransformationalStoriesRoute: ServeTransformationalStoriesRoute,
-  ServeVolunteerRoute: ServeVolunteerRoute,
   TagSlugRoute: TagSlugRoute,
   WisdomAudioPlaylistsRoute: WisdomAudioPlaylistsRoute,
-  WisdomBlogRoute: WisdomBlogRouteWithChildren,
   WisdomLordRoute: WisdomLordRoute,
   MyJourneyIndexRoute: MyJourneyIndexRoute,
   NextStepsIndexRoute: NextStepsIndexRoute,
@@ -772,3 +769,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
