@@ -185,94 +185,6 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     if (url) setFeaturedImage(url);
   };
 
-  const sendTest = async () => {
-    if (!id) {
-      setEmailMsg("Save the post first.");
-      return;
-    }
-    if (!testEmail) {
-      setEmailMsg("Enter a test email address.");
-      return;
-    }
-    if (selectedTemplateId == null) {
-      setEmailMsg("Select a Brevo template first.");
-      return;
-    }
-    if (!blogHtml || blogHtml.trim().length === 0) {
-      setEmailMsg("blog_html is empty — add content to the post before sending.");
-      return;
-    }
-    setBusy("Sending test…");
-    setEmailMsg("");
-    try {
-      const r = await sendEmail({
-        data: {
-          postId: id,
-          mode: "test",
-          testEmail,
-          templateId: selectedTemplateId,
-        },
-      });
-      setEmailMsg(`Test sent to ${r.sentTo} via template #${r.templateId}`);
-    } catch (e) {
-      setEmailMsg(e instanceof Error ? e.message : "Failed");
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const sendBroadcast = async () => {
-    if (!id) {
-      setEmailMsg("Save the post first.");
-      return;
-    }
-    if (selectedTemplateId == null) {
-      setEmailMsg("Select a Brevo template first.");
-      return;
-    }
-    if (selectedListId == null) {
-      setEmailMsg("Select a Brevo list first.");
-      return;
-    }
-    if (!blogHtml || blogHtml.trim().length === 0) {
-      setEmailMsg("blog_html is empty — add content to the post before sending.");
-      return;
-    }
-    setBusy("Checking…");
-    setEmailMsg("");
-    try {
-      const list = brevoLists.find((l) => l.id === selectedListId);
-      const count = list?.totalSubscribers ?? 0;
-      const tpl = brevoTemplates.find((t) => t.id === selectedTemplateId);
-      const confirmMsg = `Send "${title}" to list "${list?.name ?? selectedListId}" (${count} subscriber${count === 1 ? "" : "s"}) using transactional template "${tpl?.name ?? selectedTemplateId}"?\n\nOne transactional email per recipient will be sent via Brevo /smtp/email.`;
-      const ok = window.confirm(confirmMsg);
-      if (!ok) {
-        setBusy(null);
-        return;
-      }
-      setBusy(`Sending to ${count}…`);
-      const r = await sendEmail({
-        data: {
-          postId: id,
-          mode: "broadcast",
-          templateId: selectedTemplateId,
-          listId: selectedListId,
-        },
-      });
-      setAnnouncementSentAt(new Date().toISOString());
-      setAnnouncementCount(r.recipientCount);
-      const failNote =
-        r.failureCount && r.failureCount > 0 ? ` (${r.failureCount} failed)` : "";
-      setEmailMsg(
-        `Sent to ${r.recipientCount} / ${r.attempted ?? r.recipientCount} recipient${r.recipientCount === 1 ? "" : "s"} via template #${r.templateId}${failNote}.`,
-      );
-    } catch (e) {
-      setEmailMsg(e instanceof Error ? e.message : "Failed");
-    } finally {
-      setBusy(null);
-    }
-  };
-
   const sendMailchimpTestEmail = async () => {
     if (!id) {
       setMcMsg("Save the post first.");
@@ -309,13 +221,10 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setMcMsg("blog_html is empty — add content to the post before sending.");
       return;
     }
-    if (!mcConfirmLive) {
-      const ok = window.confirm(
-        "Send this blog post as a live campaign to ALL subscribers in your Mailchimp audience? This cannot be undone.",
-      );
-      if (!ok) return;
-      setMcConfirmLive(true);
-    }
+    const ok = window.confirm(
+      "Send this blog post as a live campaign to ALL subscribers in your Mailchimp audience? This cannot be undone.",
+    );
+    if (!ok) return;
     setBusy("Sending live Mailchimp campaign…");
     setMcMsg("");
     try {
