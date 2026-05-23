@@ -24,6 +24,7 @@ import { Route as NextStepsIndexRouteImport } from './routes/next-steps.index'
 import { Route as MyJourneyIndexRouteImport } from './routes/my-journey.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WisdomVideosRouteImport } from './routes/wisdom.videos'
+import { Route as WisdomLordRouteImport } from './routes/wisdom.lord'
 import { Route as WisdomBlogRouteImport } from './routes/wisdom.blog'
 import { Route as WisdomAudioPlaylistsRouteImport } from './routes/wisdom.audio-playlists'
 import { Route as TagSlugRouteImport } from './routes/tag.$slug'
@@ -117,6 +118,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const WisdomVideosRoute = WisdomVideosRouteImport.update({
   id: '/wisdom/videos',
   path: '/wisdom/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WisdomLordRoute = WisdomLordRouteImport.update({
+  id: '/wisdom/lord',
+  path: '/wisdom/lord',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WisdomBlogRoute = WisdomBlogRouteImport.update({
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/tag/$slug': typeof TagSlugRoute
   '/wisdom/audio-playlists': typeof WisdomAudioPlaylistsRoute
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
+  '/wisdom/lord': typeof WisdomLordRoute
   '/wisdom/videos': typeof WisdomVideosRoute
   '/admin/': typeof AdminIndexRoute
   '/my-journey/': typeof MyJourneyIndexRoute
@@ -278,6 +285,7 @@ export interface FileRoutesByTo {
   '/tag/$slug': typeof TagSlugRoute
   '/wisdom/audio-playlists': typeof WisdomAudioPlaylistsRoute
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
+  '/wisdom/lord': typeof WisdomLordRoute
   '/wisdom/videos': typeof WisdomVideosRoute
   '/admin': typeof AdminIndexRoute
   '/my-journey': typeof MyJourneyIndexRoute
@@ -315,6 +323,7 @@ export interface FileRoutesById {
   '/tag/$slug': typeof TagSlugRoute
   '/wisdom/audio-playlists': typeof WisdomAudioPlaylistsRoute
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
+  '/wisdom/lord': typeof WisdomLordRoute
   '/wisdom/videos': typeof WisdomVideosRoute
   '/admin/': typeof AdminIndexRoute
   '/my-journey/': typeof MyJourneyIndexRoute
@@ -353,6 +362,7 @@ export interface FileRouteTypes {
     | '/tag/$slug'
     | '/wisdom/audio-playlists'
     | '/wisdom/blog'
+    | '/wisdom/lord'
     | '/wisdom/videos'
     | '/admin/'
     | '/my-journey/'
@@ -388,6 +398,7 @@ export interface FileRouteTypes {
     | '/tag/$slug'
     | '/wisdom/audio-playlists'
     | '/wisdom/blog'
+    | '/wisdom/lord'
     | '/wisdom/videos'
     | '/admin'
     | '/my-journey'
@@ -424,6 +435,7 @@ export interface FileRouteTypes {
     | '/tag/$slug'
     | '/wisdom/audio-playlists'
     | '/wisdom/blog'
+    | '/wisdom/lord'
     | '/wisdom/videos'
     | '/admin/'
     | '/my-journey/'
@@ -458,6 +470,7 @@ export interface RootRouteChildren {
   TagSlugRoute: typeof TagSlugRoute
   WisdomAudioPlaylistsRoute: typeof WisdomAudioPlaylistsRoute
   WisdomBlogRoute: typeof WisdomBlogRouteWithChildren
+  WisdomLordRoute: typeof WisdomLordRoute
   WisdomVideosRoute: typeof WisdomVideosRoute
   MyJourneyIndexRoute: typeof MyJourneyIndexRoute
   NextStepsIndexRoute: typeof NextStepsIndexRoute
@@ -570,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/wisdom/videos'
       fullPath: '/wisdom/videos'
       preLoaderRoute: typeof WisdomVideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wisdom/lord': {
+      id: '/wisdom/lord'
+      path: '/wisdom/lord'
+      fullPath: '/wisdom/lord'
+      preLoaderRoute: typeof WisdomLordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/wisdom/blog': {
@@ -763,6 +783,7 @@ const rootRouteChildren: RootRouteChildren = {
   TagSlugRoute: TagSlugRoute,
   WisdomAudioPlaylistsRoute: WisdomAudioPlaylistsRoute,
   WisdomBlogRoute: WisdomBlogRouteWithChildren,
+  WisdomLordRoute: WisdomLordRoute,
   WisdomVideosRoute: WisdomVideosRoute,
   MyJourneyIndexRoute: MyJourneyIndexRoute,
   NextStepsIndexRoute: NextStepsIndexRoute,
