@@ -100,7 +100,7 @@ export function SiteHeaderWeb() {
       <div
         className="mx-auto flex max-w-[1200px] items-center justify-between px-6"
         style={{
-          height: isScrolled ? 64 : 96,
+          height: isScrolled ? 64 : 84,
           transition: `height ${duration} ${ease}`,
         }}
       >
@@ -114,7 +114,7 @@ export function SiteHeaderWeb() {
             src={logoUrl}
             alt="Fan The Spark"
             style={{
-              height: isScrolled ? 40 : 64,
+              height: isScrolled ? 40 : 52,
               width: "auto",
               objectFit: "contain",
               transition: `height ${duration} ${ease}`,
