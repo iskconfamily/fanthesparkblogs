@@ -237,17 +237,18 @@ function MyStoryPage() {
       </Prose>
 
       {/* FULL-BLEED TEMPLE PHOTO */}
-      <section
-        className="w-full"
-        style={{
-          height: "clamp(380px, 64vh, 640px)",
-          backgroundImage: `url(${templeNamaste})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-label="Vaisesika Dasa in prayer at a temple"
-      />
+      <section className="w-full">
+        <img
+          src={templeNamaste}
+          alt="Vaisesika Dasa in prayer at a temple"
+          className="block w-full h-auto"
+          style={{
+            maxHeight: "88vh",
+            objectFit: "cover",
+            objectPosition: "center 30%",
+          }}
+        />
+      </section>
 
       {/* CLOSING PROSE + CTA */}
       <Prose>
