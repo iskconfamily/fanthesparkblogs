@@ -32,6 +32,14 @@ const heroImageStyles = `
     height: auto;
   }
 
+  @media (min-width: 1280px) and (min-height: 820px) {
+    .my-story-hero-image {
+      max-height: min(70vh, 760px);
+      object-fit: cover;
+      object-position: center 18%;
+    }
+  }
+
   @media (min-width: 1800px) and (min-aspect-ratio: 2 / 1) {
     .my-story-hero-image {
       max-height: 74vh;
