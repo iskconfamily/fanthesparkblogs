@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml, sendMailchimpCampaignTest, sendMailchimpCampaignLive } from "@/lib/email.functions";
+import { getBlogEmailHtml, sendMailchimpCampaignTest, sendMailchimpCampaignLive } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,6 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const save = useServerFn(savePost);
   const upload = useServerFn(uploadImage);
   const genImage = useServerFn(generateBlogImage);
-  const sendEmail = useServerFn(sendBlogAnnouncement);
-  
-  const fetchTemplates = useServerFn(listBrevoTemplates);
-  const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
   const sendMcTest = useServerFn(sendMailchimpCampaignTest);
   const sendMcLive = useServerFn(sendMailchimpCampaignLive);
@@ -49,60 +45,13 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
 
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [testEmail, setTestEmail] = useState("");
-  const [emailMsg, setEmailMsg] = useState("");
   const [announcementSentAt, setAnnouncementSentAt] = useState<string | null>(
     existing?.announcement_sent_at ?? null,
   );
-  const [announcementCount, setAnnouncementCount] = useState<number | null>(
-    existing?.announcement_recipient_count ?? null,
-  );
-  const [brevoTemplates, setBrevoTemplates] = useState<
-    Array<{ id: number; name: string; subject: string | null; isActive: boolean }>
-  >([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
-  const [templatesError, setTemplatesError] = useState("");
-  const [brevoLists, setBrevoLists] = useState<
-    Array<{ id: number; name: string; totalSubscribers: number }>
-  >([]);
-  const [selectedListId, setSelectedListId] = useState<number | null>(null);
-  const [listsError, setListsError] = useState("");
   const [blogHtml, setBlogHtml] = useState<string>("");
   const [blogHtmlError, setBlogHtmlError] = useState<string>("");
   const [mcTestEmail, setMcTestEmail] = useState("");
   const [mcMsg, setMcMsg] = useState("");
-  const [mcConfirmLive, setMcConfirmLive] = useState(false);
-
-  
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [tRes, lRes] = await Promise.all([fetchTemplates(), fetchLists()]);
-        if (cancelled) return;
-        if (!tRes.ok) setTemplatesError(tRes.error ?? "Failed to load Brevo templates");
-        else {
-          setBrevoTemplates(tRes.templates);
-          setSelectedTemplateId((prev) => {
-            if (prev != null) return prev;
-            const firstActive = tRes.templates.find((t) => t.isActive);
-            return firstActive?.id ?? tRes.templates[0]?.id ?? null;
-          });
-        }
-        if (!lRes.ok) setListsError(lRes.error ?? "Failed to load Brevo lists");
-        else {
-          setBrevoLists(lRes.lists);
-          setSelectedListId((prev) => prev ?? lRes.lists[0]?.id ?? null);
-        }
-      } catch (e) {
-        if (!cancelled) setTemplatesError(e instanceof Error ? e.message : "Failed to load");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchTemplates, fetchLists]);
 
 
   const id = existing?.id;
