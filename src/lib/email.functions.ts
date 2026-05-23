@@ -328,11 +328,28 @@ async function mcCall(path: string, init: { method: string; body?: unknown }) {
   }
 }
 
+async function getMailchimpTemplateSectionKey(templateId: number) {
+  const content = (await mcCall(`/templates/${templateId}/default-content`, {
+    method: "GET",
+  })) as { sections?: Record<string, string> };
+
+  const sectionKeys = Object.keys(content.sections ?? {});
+  if (sectionKeys.includes("blog_html")) return "blog_html";
+  if (sectionKeys.includes("main")) return "main";
+  if (sectionKeys.length === 1) return sectionKeys[0]!;
+
+  throw new Error(
+    `Mailchimp template ${templateId} does not expose a usable editable section. Available sections: ${sectionKeys.join(", ") || "none"}`,
+  );
+}
+
 async function createAndPrepareCampaign(post: {
   id: string;
   title: string;
   author: string | null;
 }, blogHtml: string) {
+  const sectionKey = await getMailchimpTemplateSectionKey(MC_TEMPLATE_ID);
+
   const created = (await mcCall("/campaigns", {
     method: "POST",
     body: {
@@ -353,7 +370,7 @@ async function createAndPrepareCampaign(post: {
     body: {
       template: {
         id: MC_TEMPLATE_ID,
-        sections: { blog_html: blogHtml },
+        sections: { [sectionKey]: blogHtml },
       },
     },
   });
