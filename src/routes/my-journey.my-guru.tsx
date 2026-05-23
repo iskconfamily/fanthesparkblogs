@@ -8,7 +8,7 @@ import laughingUrl from "@/assets/my-guru/prabhupada-laughing.png";
 import darshanUrl from "@/assets/my-guru/prabhupada-darshan.jpg";
 import initiationUrl from "@/assets/my-guru/prabhupada-initiation.jpg";
 
-export const Route = createFileRoute("/my-guru")({
+export const Route = createFileRoute("/my-journey/my-guru")({
   head: () => ({
     meta: [
       { title: "My Guru — Srila Prabhupada · Fan The Spark" },
@@ -25,6 +25,7 @@ export const Route = createFileRoute("/my-guru")({
       },
       { property: "og:image", content: heroUrl },
     ],
+    links: [{ rel: "canonical", href: "https://fanthesparkblogs.lovable.app/my-journey/my-guru" }],
   }),
   component: MyGuruPage,
 });
@@ -56,7 +57,6 @@ function MyGuruPage() {
     <SiteLayoutWeb>
       <style>{heroImageStyles}</style>
 
-      {/* HERO */}
       <section className="relative w-full" style={{ backgroundColor: "#14110a" }}>
         <img
           src={heroUrl}
@@ -111,7 +111,6 @@ function MyGuruPage() {
         </div>
       </section>
 
-      {/* LEAD */}
       <Prose tight="bottom">
         <Dots />
         <Para>
@@ -130,7 +129,6 @@ function MyGuruPage() {
         </Para>
       </Prose>
 
-      {/* EARLY LIFE */}
       <Prose tight="both">
         <Para>
           Born Abhay Charan De on September 1, 1896, in Calcutta, as a youth he became
@@ -187,7 +185,6 @@ function MyGuruPage() {
         </Para>
       </Prose>
 
-      {/* FULL-BLEED PHOTO */}
       <section className="w-full">
         <img
           src={speakingUrl}
@@ -197,7 +194,6 @@ function MyGuruPage() {
         />
       </section>
 
-      {/* NEW YORK */}
       <Prose tight="top">
         <Para>
           In New York he faced great hardships without money or a place to live. He began
@@ -217,7 +213,6 @@ function MyGuruPage() {
         </Para>
       </Prose>
 
-      {/* TWO-UP PHOTO ROW */}
       <section className="w-full" style={{ backgroundColor: "var(--background)" }}>
         <div className="mx-auto max-w-[1200px] px-6 pb-10 sm:pb-14">
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
@@ -237,7 +232,6 @@ function MyGuruPage() {
         </div>
       </section>
 
-      {/* SAN FRANCISCO + GLOBAL */}
       <Prose tight="top">
         <Para>
           Having begun initiating his American followers into the Gaudiya Vaishnava
@@ -265,7 +259,6 @@ function MyGuruPage() {
         </Para>
       </Prose>
 
-      {/* FULL-BLEED INITIATION PHOTO */}
       <section className="w-full">
         <img
           src={initiationUrl}
@@ -275,7 +268,6 @@ function MyGuruPage() {
         />
       </section>
 
-      {/* BOOKS + LEGACY */}
       <Prose>
         <Para>
           Perhaps Srila Prabhupada’s most significant contribution is his books. He
@@ -312,7 +304,7 @@ function MyGuruPage() {
         <Dots />
       </Prose>
 
-      <ContactSection />
+      <ContactSection defaultCategory="Wisdom / Dhamesvara" />
     </SiteLayoutWeb>
   );
 }
