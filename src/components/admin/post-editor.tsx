@@ -349,6 +349,47 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     }
   };
 
+  const sendMailchimpTest = async () => {
+    if (!id) {
+      setMcMsg("Save the post first.");
+      return;
+    }
+    if (!selectedMcSlug) {
+      setMcMsg("Select a Mailchimp template first.");
+      return;
+    }
+    if (!mcRecipients.trim()) {
+      setMcMsg("Enter at least one recipient email.");
+      return;
+    }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setMcMsg("blog_html is empty — add content to the post before sending.");
+      return;
+    }
+    setBusy("Sending via Mailchimp…");
+    setMcMsg("");
+    try {
+      const r = await sendMailchimp({
+        data: {
+          postId: id,
+          templateSlug: selectedMcSlug,
+          recipients: mcRecipients,
+          trackingTag: mcTrackingTag.trim() || undefined,
+        },
+      });
+      const summary = r.results
+        .map((x) => `${x.email}: ${x.status}${x.rejectReason ? ` (${x.rejectReason})` : ""}`)
+        .join(" • ");
+      setMcMsg(`Sent ${r.recipientCount} via "${r.templateSlug}" — ${summary}`);
+    } catch (e) {
+      setMcMsg(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+
+
 
   const previewSlug = slug || slugify(title);
 
