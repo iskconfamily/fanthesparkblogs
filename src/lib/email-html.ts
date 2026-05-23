@@ -277,8 +277,7 @@ export function buildFullBlogEmailHtml(
     @media only screen and (max-width:620px) {
       .container { width:100% !important; }
       .px { padding-left:20px !important; padding-right:20px !important; }
-      .brand { font-size:26px !important; letter-spacing:0.18em !important; }
-      .brand-logo { width:52px !important; height:52px !important; }
+      .brand-logo { height:52px !important; }
     }
   `;
 
