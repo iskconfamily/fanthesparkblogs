@@ -60,55 +60,50 @@ function Prose({ children }: { children: React.ReactNode }) {
 function MyStoryPage() {
   return (
     <SiteLayoutWeb>
-      {/* HERO — full-bleed photo with title overlay */}
-      <section
-        className="relative w-full"
-        style={{
-          height: "clamp(420px, 72vh, 720px)",
-          backgroundImage: `url(${heroForest})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center center",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "#1a1a0d",
-        }}
-      >
-        {/* Darken left side for text legibility; leave right side natural so the photo's light doesn't fight a fade overlay */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
+      {/* HERO — real img, no-crop on normal screens; soft cap only on very tall renderings */}
+      <section className="relative w-full" style={{ backgroundColor: "#1a1a0d" }}>
+        <img
+          src={heroForest}
+          alt="Vaisesika Dasa in meditation in a forest clearing"
+          className="block w-full h-auto"
           style={{
-            background:
-              "linear-gradient(90deg, rgba(10, 8, 4, 0.72) 0%, rgba(10, 8, 4, 0.45) 35%, rgba(10, 8, 4, 0.15) 65%, rgba(10, 8, 4, 0) 90%)",
+            maxHeight: "92vh",
+            objectFit: "cover",
+            objectPosition: "center 28%",
           }}
         />
 
-        <div className="relative mx-auto h-full max-w-[1200px] px-6 flex items-center">
-          <div className="max-w-[560px]">
-            <p
-              className="mb-4"
-              style={{
-                fontFamily: "var(--font-meta)",
-                fontSize: 12,
-                letterSpacing: "0.32em",
-                textTransform: "uppercase",
-                color: "#fef9e9",
-              }}
-            >
-              My Journey
-            </p>
-            <h1
-              style={{
-                fontFamily: "var(--font-serif-display)",
-                fontSize: "clamp(56px, 9vw, 104px)",
-                fontStyle: "italic",
-                fontWeight: 500,
-                lineHeight: 1.02,
-                color: "#fffaf0",
-                textShadow: "0 2px 24px rgba(0,0,0,0.35)",
-              }}
-            >
-              My Story
-            </h1>
+        {/* Bottom-left title overlay — no gradient wash, just text shadow */}
+        <div className="absolute inset-x-0 bottom-0">
+          <div className="mx-auto max-w-[1200px] px-6 pb-8 sm:pb-12">
+            <div className="max-w-[560px]">
+              <p
+                className="mb-3"
+                style={{
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 12,
+                  letterSpacing: "0.32em",
+                  textTransform: "uppercase",
+                  color: "#fef9e9",
+                  textShadow: "0 1px 8px rgba(0,0,0,0.55)",
+                }}
+              >
+                My Journey
+              </p>
+              <h1
+                style={{
+                  fontFamily: "var(--font-serif-display)",
+                  fontSize: "clamp(48px, 7.5vw, 88px)",
+                  fontStyle: "italic",
+                  fontWeight: 500,
+                  lineHeight: 1.02,
+                  color: "#fffaf0",
+                  textShadow: "0 2px 18px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.45)",
+                }}
+              >
+                My Story
+              </h1>
+            </div>
           </div>
         </div>
       </section>
@@ -242,17 +237,18 @@ function MyStoryPage() {
       </Prose>
 
       {/* FULL-BLEED TEMPLE PHOTO */}
-      <section
-        className="w-full"
-        style={{
-          height: "clamp(380px, 64vh, 640px)",
-          backgroundImage: `url(${templeNamaste})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-label="Vaisesika Dasa in prayer at a temple"
-      />
+      <section className="w-full">
+        <img
+          src={templeNamaste}
+          alt="Vaisesika Dasa in prayer at a temple"
+          className="block w-full h-auto"
+          style={{
+            maxHeight: "88vh",
+            objectFit: "cover",
+            objectPosition: "center 30%",
+          }}
+        />
+      </section>
 
       {/* CLOSING PROSE + CTA */}
       <Prose>
