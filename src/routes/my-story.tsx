@@ -57,7 +57,7 @@ const heroImageStyles = `
 
 function Dots() {
   return (
-    <div className="flex justify-center my-10">
+    <div className="flex justify-center my-6 sm:my-10">
       <img src={dotsUrl} alt="" aria-hidden="true" style={{ height: 14, width: "auto", opacity: 0.85 }} />
     </div>
   );
