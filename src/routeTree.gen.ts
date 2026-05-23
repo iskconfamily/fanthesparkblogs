@@ -9,19 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WisdomRouteImport } from './routes/wisdom'
 import { Route as SurpriseRouteImport } from './routes/surprise'
-import { Route as ServeRouteImport } from './routes/serve'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
-import { Route as NextStepsRouteImport } from './routes/next-steps'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
-import { Route as MyJourneyRouteImport } from './routes/my-journey'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WisdomIndexRouteImport } from './routes/wisdom.index'
+import { Route as ServeIndexRouteImport } from './routes/serve.index'
+import { Route as NextStepsIndexRouteImport } from './routes/next-steps.index'
+import { Route as MyJourneyIndexRouteImport } from './routes/my-journey.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WisdomVideosRouteImport } from './routes/wisdom.videos'
 import { Route as WisdomBlogRouteImport } from './routes/wisdom.blog'
@@ -44,19 +44,9 @@ import { Route as WisdomBlogSlugRouteImport } from './routes/wisdom.blog.$slug'
 import { Route as AdminEditIdRouteImport } from './routes/admin.edit.$id'
 import { Route as AdminDesignIdRouteImport } from './routes/admin.design.$id'
 
-const WisdomRoute = WisdomRouteImport.update({
-  id: '/wisdom',
-  path: '/wisdom',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SurpriseRoute = SurpriseRouteImport.update({
   id: '/surprise',
   path: '/surprise',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServeRoute = ServeRouteImport.update({
-  id: '/serve',
-  path: '/serve',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RssDotxmlRoute = RssDotxmlRouteImport.update({
@@ -64,19 +54,9 @@ const RssDotxmlRoute = RssDotxmlRouteImport.update({
   path: '/rss.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NextStepsRoute = NextStepsRouteImport.update({
-  id: '/next-steps',
-  path: '/next-steps',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const NewsletterRoute = NewsletterRouteImport.update({
   id: '/newsletter',
   path: '/newsletter',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyJourneyRoute = MyJourneyRouteImport.update({
-  id: '/my-journey',
-  path: '/my-journey',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -107,6 +87,26 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WisdomIndexRoute = WisdomIndexRouteImport.update({
+  id: '/wisdom/',
+  path: '/wisdom/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServeIndexRoute = ServeIndexRouteImport.update({
+  id: '/serve/',
+  path: '/serve/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NextStepsIndexRoute = NextStepsIndexRouteImport.update({
+  id: '/next-steps/',
+  path: '/next-steps/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyJourneyIndexRoute = MyJourneyIndexRouteImport.update({
+  id: '/my-journey/',
+  path: '/my-journey/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -224,13 +224,9 @@ export interface FileRoutesByFullPath {
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
-  '/my-journey': typeof MyJourneyRouteWithChildren
   '/newsletter': typeof NewsletterRoute
-  '/next-steps': typeof NextStepsRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
-  '/serve': typeof ServeRouteWithChildren
   '/surprise': typeof SurpriseRoute
-  '/wisdom': typeof WisdomRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/setup': typeof AdminSetupRoute
@@ -249,6 +245,10 @@ export interface FileRoutesByFullPath {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/videos': typeof WisdomVideosRoute
   '/admin/': typeof AdminIndexRoute
+  '/my-journey/': typeof MyJourneyIndexRoute
+  '/next-steps/': typeof NextStepsIndexRoute
+  '/serve/': typeof ServeIndexRoute
+  '/wisdom/': typeof WisdomIndexRoute
   '/admin/design/$id': typeof AdminDesignIdRoute
   '/admin/edit/$id': typeof AdminEditIdRoute
   '/wisdom/blog/$slug': typeof WisdomBlogSlugRoute
@@ -259,13 +259,9 @@ export interface FileRoutesByTo {
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
-  '/my-journey': typeof MyJourneyRouteWithChildren
   '/newsletter': typeof NewsletterRoute
-  '/next-steps': typeof NextStepsRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
-  '/serve': typeof ServeRouteWithChildren
   '/surprise': typeof SurpriseRoute
-  '/wisdom': typeof WisdomRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/setup': typeof AdminSetupRoute
@@ -284,6 +280,10 @@ export interface FileRoutesByTo {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/videos': typeof WisdomVideosRoute
   '/admin': typeof AdminIndexRoute
+  '/my-journey': typeof MyJourneyIndexRoute
+  '/next-steps': typeof NextStepsIndexRoute
+  '/serve': typeof ServeIndexRoute
+  '/wisdom': typeof WisdomIndexRoute
   '/admin/design/$id': typeof AdminDesignIdRoute
   '/admin/edit/$id': typeof AdminEditIdRoute
   '/wisdom/blog/$slug': typeof WisdomBlogSlugRoute
@@ -296,13 +296,9 @@ export interface FileRoutesById {
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
-  '/my-journey': typeof MyJourneyRouteWithChildren
   '/newsletter': typeof NewsletterRoute
-  '/next-steps': typeof NextStepsRouteWithChildren
   '/rss.xml': typeof RssDotxmlRoute
-  '/serve': typeof ServeRouteWithChildren
   '/surprise': typeof SurpriseRoute
-  '/wisdom': typeof WisdomRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/setup': typeof AdminSetupRoute
@@ -321,6 +317,10 @@ export interface FileRoutesById {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/videos': typeof WisdomVideosRoute
   '/admin/': typeof AdminIndexRoute
+  '/my-journey/': typeof MyJourneyIndexRoute
+  '/next-steps/': typeof NextStepsIndexRoute
+  '/serve/': typeof ServeIndexRoute
+  '/wisdom/': typeof WisdomIndexRoute
   '/admin/design/$id': typeof AdminDesignIdRoute
   '/admin/edit/$id': typeof AdminEditIdRoute
   '/wisdom/blog/$slug': typeof WisdomBlogSlugRoute
@@ -334,13 +334,9 @@ export interface FileRouteTypes {
     | '/archive'
     | '/contact'
     | '/events'
-    | '/my-journey'
     | '/newsletter'
-    | '/next-steps'
     | '/rss.xml'
-    | '/serve'
     | '/surprise'
-    | '/wisdom'
     | '/admin/login'
     | '/admin/new'
     | '/admin/setup'
@@ -359,6 +355,10 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/videos'
     | '/admin/'
+    | '/my-journey/'
+    | '/next-steps/'
+    | '/serve/'
+    | '/wisdom/'
     | '/admin/design/$id'
     | '/admin/edit/$id'
     | '/wisdom/blog/$slug'
@@ -369,13 +369,9 @@ export interface FileRouteTypes {
     | '/archive'
     | '/contact'
     | '/events'
-    | '/my-journey'
     | '/newsletter'
-    | '/next-steps'
     | '/rss.xml'
-    | '/serve'
     | '/surprise'
-    | '/wisdom'
     | '/admin/login'
     | '/admin/new'
     | '/admin/setup'
@@ -394,6 +390,10 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/videos'
     | '/admin'
+    | '/my-journey'
+    | '/next-steps'
+    | '/serve'
+    | '/wisdom'
     | '/admin/design/$id'
     | '/admin/edit/$id'
     | '/wisdom/blog/$slug'
@@ -405,13 +405,9 @@ export interface FileRouteTypes {
     | '/archive'
     | '/contact'
     | '/events'
-    | '/my-journey'
     | '/newsletter'
-    | '/next-steps'
     | '/rss.xml'
-    | '/serve'
     | '/surprise'
-    | '/wisdom'
     | '/admin/login'
     | '/admin/new'
     | '/admin/setup'
@@ -430,6 +426,10 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/videos'
     | '/admin/'
+    | '/my-journey/'
+    | '/next-steps/'
+    | '/serve/'
+    | '/wisdom/'
     | '/admin/design/$id'
     | '/admin/edit/$id'
     | '/wisdom/blog/$slug'
@@ -442,39 +442,25 @@ export interface RootRouteChildren {
   ArchiveRoute: typeof ArchiveRoute
   ContactRoute: typeof ContactRoute
   EventsRoute: typeof EventsRoute
-  MyJourneyRoute: typeof MyJourneyRouteWithChildren
   NewsletterRoute: typeof NewsletterRoute
-  NextStepsRoute: typeof NextStepsRouteWithChildren
   RssDotxmlRoute: typeof RssDotxmlRoute
-  ServeRoute: typeof ServeRouteWithChildren
   SurpriseRoute: typeof SurpriseRoute
-  WisdomRoute: typeof WisdomRouteWithChildren
   PostSlugRoute: typeof PostSlugRoute
   PreviewSlugRoute: typeof PreviewSlugRoute
   TagSlugRoute: typeof TagSlugRoute
+  MyJourneyIndexRoute: typeof MyJourneyIndexRoute
+  NextStepsIndexRoute: typeof NextStepsIndexRoute
+  ServeIndexRoute: typeof ServeIndexRoute
+  WisdomIndexRoute: typeof WisdomIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/wisdom': {
-      id: '/wisdom'
-      path: '/wisdom'
-      fullPath: '/wisdom'
-      preLoaderRoute: typeof WisdomRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/surprise': {
       id: '/surprise'
       path: '/surprise'
       fullPath: '/surprise'
       preLoaderRoute: typeof SurpriseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/serve': {
-      id: '/serve'
-      path: '/serve'
-      fullPath: '/serve'
-      preLoaderRoute: typeof ServeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rss.xml': {
@@ -484,25 +470,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RssDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/next-steps': {
-      id: '/next-steps'
-      path: '/next-steps'
-      fullPath: '/next-steps'
-      preLoaderRoute: typeof NextStepsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/newsletter': {
       id: '/newsletter'
       path: '/newsletter'
       fullPath: '/newsletter'
       preLoaderRoute: typeof NewsletterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/my-journey': {
-      id: '/my-journey'
-      path: '/my-journey'
-      fullPath: '/my-journey'
-      preLoaderRoute: typeof MyJourneyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -545,6 +517,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wisdom/': {
+      id: '/wisdom/'
+      path: '/wisdom'
+      fullPath: '/wisdom/'
+      preLoaderRoute: typeof WisdomIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/serve/': {
+      id: '/serve/'
+      path: '/serve'
+      fullPath: '/serve/'
+      preLoaderRoute: typeof ServeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/next-steps/': {
+      id: '/next-steps/'
+      path: '/next-steps'
+      fullPath: '/next-steps/'
+      preLoaderRoute: typeof NextStepsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-journey/': {
+      id: '/my-journey/'
+      path: '/my-journey'
+      fullPath: '/my-journey/'
+      preLoaderRoute: typeof MyJourneyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -717,77 +717,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface MyJourneyRouteChildren {
-  MyJourneyMyGuruRoute: typeof MyJourneyMyGuruRoute
-  MyJourneyMyStoryRoute: typeof MyJourneyMyStoryRoute
-}
-
-const MyJourneyRouteChildren: MyJourneyRouteChildren = {
-  MyJourneyMyGuruRoute: MyJourneyMyGuruRoute,
-  MyJourneyMyStoryRoute: MyJourneyMyStoryRoute,
-}
-
-const MyJourneyRouteWithChildren = MyJourneyRoute._addFileChildren(
-  MyJourneyRouteChildren,
-)
-
-interface NextStepsRouteChildren {
-  NextStepsAskRoute: typeof NextStepsAskRoute
-  NextStepsSmallGroupsRoute: typeof NextStepsSmallGroupsRoute
-  NextStepsSpiritualRetreatRoute: typeof NextStepsSpiritualRetreatRoute
-}
-
-const NextStepsRouteChildren: NextStepsRouteChildren = {
-  NextStepsAskRoute: NextStepsAskRoute,
-  NextStepsSmallGroupsRoute: NextStepsSmallGroupsRoute,
-  NextStepsSpiritualRetreatRoute: NextStepsSpiritualRetreatRoute,
-}
-
-const NextStepsRouteWithChildren = NextStepsRoute._addFileChildren(
-  NextStepsRouteChildren,
-)
-
-interface ServeRouteChildren {
-  ServeGiveRoute: typeof ServeGiveRoute
-  ServeTransformationalStoriesRoute: typeof ServeTransformationalStoriesRoute
-  ServeVolunteerRoute: typeof ServeVolunteerRoute
-}
-
-const ServeRouteChildren: ServeRouteChildren = {
-  ServeGiveRoute: ServeGiveRoute,
-  ServeTransformationalStoriesRoute: ServeTransformationalStoriesRoute,
-  ServeVolunteerRoute: ServeVolunteerRoute,
-}
-
-const ServeRouteWithChildren = ServeRoute._addFileChildren(ServeRouteChildren)
-
-interface WisdomBlogRouteChildren {
-  WisdomBlogSlugRoute: typeof WisdomBlogSlugRoute
-}
-
-const WisdomBlogRouteChildren: WisdomBlogRouteChildren = {
-  WisdomBlogSlugRoute: WisdomBlogSlugRoute,
-}
-
-const WisdomBlogRouteWithChildren = WisdomBlogRoute._addFileChildren(
-  WisdomBlogRouteChildren,
-)
-
-interface WisdomRouteChildren {
-  WisdomAudioPlaylistsRoute: typeof WisdomAudioPlaylistsRoute
-  WisdomBlogRoute: typeof WisdomBlogRouteWithChildren
-  WisdomVideosRoute: typeof WisdomVideosRoute
-}
-
-const WisdomRouteChildren: WisdomRouteChildren = {
-  WisdomAudioPlaylistsRoute: WisdomAudioPlaylistsRoute,
-  WisdomBlogRoute: WisdomBlogRouteWithChildren,
-  WisdomVideosRoute: WisdomVideosRoute,
-}
-
-const WisdomRouteWithChildren =
-  WisdomRoute._addFileChildren(WisdomRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -795,17 +724,27 @@ const rootRouteChildren: RootRouteChildren = {
   ArchiveRoute: ArchiveRoute,
   ContactRoute: ContactRoute,
   EventsRoute: EventsRoute,
-  MyJourneyRoute: MyJourneyRouteWithChildren,
   NewsletterRoute: NewsletterRoute,
-  NextStepsRoute: NextStepsRouteWithChildren,
   RssDotxmlRoute: RssDotxmlRoute,
-  ServeRoute: ServeRouteWithChildren,
   SurpriseRoute: SurpriseRoute,
-  WisdomRoute: WisdomRouteWithChildren,
   PostSlugRoute: PostSlugRoute,
   PreviewSlugRoute: PreviewSlugRoute,
   TagSlugRoute: TagSlugRoute,
+  MyJourneyIndexRoute: MyJourneyIndexRoute,
+  NextStepsIndexRoute: NextStepsIndexRoute,
+  ServeIndexRoute: ServeIndexRoute,
+  WisdomIndexRoute: WisdomIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
