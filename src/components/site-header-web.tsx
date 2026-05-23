@@ -105,7 +105,7 @@ export function SiteHeaderWeb() {
         }}
       >
         <Link
-          to="/my-story"
+          to="/"
           aria-label="Fan The Spark — Home"
           className="no-underline flex items-center"
           style={{ borderBottom: "none" }}
