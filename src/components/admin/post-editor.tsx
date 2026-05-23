@@ -69,6 +69,14 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [listsError, setListsError] = useState("");
   const [blogHtml, setBlogHtml] = useState<string>("");
   const [blogHtmlError, setBlogHtmlError] = useState<string>("");
+  const [mcTemplates, setMcTemplates] = useState<
+    Array<{ slug: string; name: string; subject: string | null; publishName: string | null }>
+  >([]);
+  const [mcTemplatesError, setMcTemplatesError] = useState("");
+  const [selectedMcSlug, setSelectedMcSlug] = useState<string>("");
+  const [mcRecipients, setMcRecipients] = useState("");
+  const [mcTrackingTag, setMcTrackingTag] = useState("");
+  const [mcMsg, setMcMsg] = useState("");
 
   
 
