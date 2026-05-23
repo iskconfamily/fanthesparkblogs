@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { savePost, uploadImage, generateBlogImage } from "@/lib/admin.functions";
-import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml } from "@/lib/email.functions";
+import { sendBlogAnnouncement, listBrevoTemplates, listBrevoLists, getBlogEmailHtml, listMandrillTemplates, sendBlogAnnouncementMailchimp } from "@/lib/email.functions";
 import type { DbBlogPost, ImagePrompt } from "@/lib/blog-adapter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,8 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const fetchTemplates = useServerFn(listBrevoTemplates);
   const fetchLists = useServerFn(listBrevoLists);
   const fetchBlogHtml = useServerFn(getBlogEmailHtml);
+  const fetchMcTemplates = useServerFn(listMandrillTemplates);
+  const sendMailchimp = useServerFn(sendBlogAnnouncementMailchimp);
 
   const [title, setTitle] = useState(existing?.title ?? "");
   const [slug, setSlug] = useState(existing?.slug ?? "");
@@ -67,6 +69,14 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
   const [listsError, setListsError] = useState("");
   const [blogHtml, setBlogHtml] = useState<string>("");
   const [blogHtmlError, setBlogHtmlError] = useState<string>("");
+  const [mcTemplates, setMcTemplates] = useState<
+    Array<{ slug: string; name: string; subject: string | null; publishName: string | null }>
+  >([]);
+  const [mcTemplatesError, setMcTemplatesError] = useState("");
+  const [selectedMcSlug, setSelectedMcSlug] = useState<string>("");
+  const [mcRecipients, setMcRecipients] = useState("");
+  const [mcTrackingTag, setMcTrackingTag] = useState("");
+  const [mcMsg, setMcMsg] = useState("");
 
   
 
@@ -98,6 +108,27 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       cancelled = true;
     };
   }, [fetchTemplates, fetchLists]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const r = await fetchMcTemplates();
+        if (cancelled) return;
+        if (!r.ok) {
+          setMcTemplatesError(r.error ?? "Failed to load Mailchimp templates");
+        } else {
+          setMcTemplates(r.templates);
+          setSelectedMcSlug((prev) => prev || r.templates[0]?.slug || "");
+        }
+      } catch (e) {
+        if (!cancelled) setMcTemplatesError(e instanceof Error ? e.message : "Failed to load");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchMcTemplates]);
 
   const id = existing?.id;
 
@@ -317,6 +348,47 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
       setBusy(null);
     }
   };
+
+  const sendMailchimpTest = async () => {
+    if (!id) {
+      setMcMsg("Save the post first.");
+      return;
+    }
+    if (!selectedMcSlug) {
+      setMcMsg("Select a Mailchimp template first.");
+      return;
+    }
+    if (!mcRecipients.trim()) {
+      setMcMsg("Enter at least one recipient email.");
+      return;
+    }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setMcMsg("blog_html is empty — add content to the post before sending.");
+      return;
+    }
+    setBusy("Sending via Mailchimp…");
+    setMcMsg("");
+    try {
+      const r = await sendMailchimp({
+        data: {
+          postId: id,
+          templateSlug: selectedMcSlug,
+          recipients: mcRecipients,
+          trackingTag: mcTrackingTag.trim() || undefined,
+        },
+      });
+      const summary = r.results
+        .map((x) => `${x.email}: ${x.status}${x.rejectReason ? ` (${x.rejectReason})` : ""}`)
+        .join(" • ");
+      setMcMsg(`Sent ${r.recipientCount} via "${r.templateSlug}" — ${summary}`);
+    } catch (e) {
+      setMcMsg(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+
 
 
   const previewSlug = slug || slugify(title);
@@ -646,6 +718,69 @@ blog_html      = ${blogHtml.length} chars`}
             {emailMsg && (
               <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
             )}
+
+            <div className="mt-6 pt-4 border-t border-border space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide">
+                Mailchimp Transactional (test)
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Mailchimp template
+                </label>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  value={selectedMcSlug}
+                  onChange={(e) => setSelectedMcSlug(e.target.value)}
+                  disabled={!!busy || mcTemplates.length === 0}
+                >
+                  {mcTemplates.length === 0 && <option value="">Loading…</option>}
+                  {!selectedMcSlug && <option value="">— select —</option>}
+                  {mcTemplates.map((t) => (
+                    <option key={t.slug} value={t.slug}>
+                      {t.name} ({t.slug})
+                    </option>
+                  ))}
+                </select>
+                {mcTemplatesError && (
+                  <p className="text-[11px] text-destructive break-words">{mcTemplatesError}</p>
+                )}
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  blog_html is injected into the template's <code>mc:edit="blog_html"</code> editable region.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Recipients (comma-separated, max 25)
+                </label>
+                <Input
+                  value={mcRecipients}
+                  onChange={(e) => setMcRecipients(e.target.value)}
+                  placeholder="you@example.com, another@example.com"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Tracking tag (optional)
+                </label>
+                <Input
+                  value={mcTrackingTag}
+                  onChange={(e) => setMcTrackingTag(e.target.value)}
+                  placeholder="e.g. preview-batch-1"
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={sendMailchimpTest}
+                disabled={!!busy || !id || !selectedMcSlug || !mcRecipients.trim() || !blogHtml}
+              >
+                Send Mailchimp test
+              </Button>
+              {mcMsg && (
+                <p className="text-[11px] text-muted-foreground break-words">{mcMsg}</p>
+              )}
+            </div>
           </div>
         </aside>
       </div>
