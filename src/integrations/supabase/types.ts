@@ -122,6 +122,48 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          end_date: string
+          id: string
+          image_url: string | null
+          location: string
+          short_note: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          end_date: string
+          id?: string
+          image_url?: string | null
+          location: string
+          short_note?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          end_date?: string
+          id?: string
+          image_url?: string | null
+          location?: string
+          short_note?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["event_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -158,6 +200,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      event_status: "draft" | "published"
       post_status: "draft" | "published"
     }
     CompositeTypes: {
@@ -287,6 +330,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      event_status: ["draft", "published"],
       post_status: ["draft", "published"],
     },
   },
