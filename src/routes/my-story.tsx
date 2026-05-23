@@ -25,6 +25,22 @@ export const Route = createFileRoute("/my-story")({
   component: MyStoryPage,
 });
 
+const heroImageStyles = `
+  .my-story-hero-image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (min-width: 1800px) and (min-aspect-ratio: 2 / 1) {
+    .my-story-hero-image {
+      max-height: 74vh;
+      object-fit: cover;
+      object-position: center 24%;
+    }
+  }
+`;
+
 function Dots() {
   return (
     <div className="flex justify-center my-10">
@@ -60,17 +76,14 @@ function Prose({ children }: { children: React.ReactNode }) {
 function MyStoryPage() {
   return (
     <SiteLayoutWeb>
-      {/* HERO — real img, no-crop on normal screens; soft cap only on very tall renderings */}
+      <style>{heroImageStyles}</style>
+
+      {/* HERO — real img, no-crop on normal screens; soft cap only on very wide cinematic renderings */}
       <section className="relative w-full" style={{ backgroundColor: "#1a1a0d" }}>
         <img
           src={heroForest}
           alt="Vaisesika Dasa in meditation in a forest clearing"
-          className="block w-full h-auto"
-          style={{
-            maxHeight: "78vh",
-            objectFit: "cover",
-            objectPosition: "center 25%",
-          }}
+          className="my-story-hero-image"
         />
 
         {/* Bottom-left title overlay — no gradient wash, just text shadow */}
