@@ -104,26 +104,6 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     };
   }, [fetchTemplates, fetchLists]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const r = await fetchMcTemplates();
-        if (cancelled) return;
-        if (!r.ok) {
-          setMcTemplatesError(r.error ?? "Failed to load Mailchimp templates");
-        } else {
-          setMcTemplates(r.templates);
-          setSelectedMcSlug((prev) => prev || r.templates[0]?.slug || "");
-        }
-      } catch (e) {
-        if (!cancelled) setMcTemplatesError(e instanceof Error ? e.message : "Failed to load");
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchMcTemplates]);
 
   const id = existing?.id;
 
