@@ -1,66 +1,74 @@
-## New page: `/my-guru`
 
-A biographical page about Srila Prabhupada, designed in the same editorial language as `/my-story` (cream background, serif body, dotted dividers, full-bleed photography, reusable `ContactSection` at the foot).
+# Site restructure — scaffold all routes
 
-### 1. Assets
+Build out the full information architecture as placeholder pages so the nav and URLs are live. Real content per section comes in follow-up turns.
 
-Copy all 7 uploaded photos into `src/assets/my-guru/`:
-- `prabhupada-hero.png`           ← `Prabhupada7-2.png` (forest, garland — hero)
-- `prabhupada-laughing.png`       ← `Prabhupada3-2.png` (with disciples, smiling)
-- `prabhupada-darshan.jpg`        ← `Prabhupada1-3.jpg` (seated, rose petals, audience)
-- `prabhupada-portrait.jpg`       ← `prabhupada1-672x372-2.jpg` (close portrait)
-- `prabhupada-speaking.jpg`       ← `prabhupad_4-2.jpg` (orange garland, speaking)
-- `prabhupada-initiation.jpg`     ← `prabhupad-2-2.jpg` (large group, giving beads)
-- `prabhupada-srila-card.png`     ← `Prabhuapda5-2.png` (orange "SRILA PRABHUPADA" card)
+## New route files (all under `src/routes/`)
 
-Reuse `src/assets/my-story/dots.png` for the three-dot dividers.
+Flat dot-separated naming (TanStack convention):
 
-### 2. Route: `src/routes/my-guru.tsx`
+```
+my-journey.tsx                          → /my-journey (index w/ links to 2 children)
+my-journey.my-story.tsx                 → /my-journey/my-story (move existing content here)
+my-journey.my-guru.tsx                  → /my-journey/my-guru  (move existing content here)
 
-`createFileRoute("/my-guru")` with `head()` meta (title, description, og:title, og:description, og:image → hero). Wraps content in `SiteLayoutWeb`.
+wisdom.tsx                              → /wisdom (hub index)
+wisdom.blog.tsx                         → /wisdom/blog (lists published posts, reuses index logic)
+wisdom.blog.$slug.tsx                   → /wisdom/blog/:slug (reuses post.$slug logic)
+wisdom.videos.tsx                       → /wisdom/videos
+wisdom.audio-playlists.tsx              → /wisdom/audio-playlists
 
-Layout sequence (mobile-first, matches /my-story rhythm):
+next-steps.tsx                          → /next-steps (hub index)
+next-steps.ask.tsx                      → /next-steps/ask
+next-steps.small-groups.tsx             → /next-steps/small-groups
+next-steps.spiritual-retreat.tsx        → /next-steps/spiritual-retreat
 
-1. **Hero band** — full-bleed `prabhupada-hero.png` on dark backdrop, bottom-left overlay:
-   - eyebrow `MY JOURNEY` (uppercase tracked)
-   - large italic display `My Guru`
-   - small caption `His Divine Grace A. C. Bhaktivedanta Swami Prabhupada · 1896–1977`
-2. **Lead prose** (`Prose` / `Para` helpers, same typography as /my-story) — dots divider, then opening paragraph about Prabhupada being the pre-eminent exponent of Bhakti-yoga and Founder-Acarya of ISKCON (link "Founder-Acarya" → `http://www.founderacharya.com/`, link "International Society for Krishna Consciousness" plain text).
-3. **Para** — "Born Abhay Charan De…" through "set off on his mission to the West."
-4. **Pull quote** (italic display, centered, like /my-story):
-   > "Bring the teachings of Krishna to the English-speaking world."
-   small caption: — Srila Bhaktisiddhanta Sarasvati to young Abhay
-5. **Para** — "Having since been awarded the honorary title of Bhaktivedanta…" (cargo-ship passage).
-6. **Full-bleed photo** — `prabhupada-speaking.jpg` (max-height ~80vh, object-position center).
-7. **Para** — "In New York he faced great hardships…" (Bowery, Tompkins Square, founding ISKCON July 1966).
-8. **Two-up photo row** (desktop: two columns; mobile: stacked) — `prabhupada-laughing.png` + `prabhupada-darshan.jpg`, each with subtle caption.
-9. **Para** — "Having begun initiating his American followers…" (San Francisco, Summer of Love, "Srila Prabhupada" name).
-10. **Para** — "In the eleven years that followed…" (14 times around globe, temples worldwide, Vrindavana, Mayapur).
-11. **Full-bleed photo** — `prabhupada-initiation.jpg`.
-12. **Para** — "Perhaps Srila Prabhupada's most significant contribution is his books…" (70+ volumes, 76 languages, BG As It Is, Srimad-Bhagavatam, Caitanya-caritamrita).
-13. **Para** — "For millennia the teachings of Bhakti-yoga had been concealed…" (closing reflection).
-14. **Closing line** — "A. C. Bhaktivedanta Swami Prabhupada passed away on November 14, 1977, in the holy town of Vrindaban, surrounded by his loving disciples who carry on his mission today." Render slightly larger / italic display as a soft sign-off, followed by a final dots divider.
-15. **ContactSection** — `<ContactSection defaultCategory="Wisdom: Dhamesvara Mahaprabhu" />` (or default category) at the foot.
+events.tsx                              → /events
 
-The `prabhupada-portrait.jpg` and `prabhupada-srila-card.png` are kept in assets but not all used in the initial layout — they're available for future tweaks; if room remains, the orange-card image becomes a small inline aside next to the opening lead paragraph.
+serve.tsx                               → /serve (hub index)
+serve.volunteer.tsx                     → /serve/volunteer
+serve.give.tsx                          → /serve/give
+serve.transformational-stories.tsx      → /serve/transformational-stories
+```
 
-### 3. Wording fidelity
+## Existing routes — what changes
 
-All body text matches the old site verbatim (including the "all-attactive" original typo → fix to "all-attractive"). Em-dashes and curly quotes preserved.
+- **Delete** `src/routes/my-story.tsx` and `src/routes/my-guru.tsx` (content moves to `my-journey.my-story.tsx` / `my-journey.my-guru.tsx` verbatim — same components, same images, same ContactSection wiring).
+- **Keep** `src/routes/post.$slug.tsx` exactly as-is. Existing posts continue working at `/post/:slug`.
+- **`/wisdom/blog`** becomes the new canonical blog landing. `wisdom.blog.$slug.tsx` proxies to the same loader/component as `/post/:slug` so both URLs render the same essay (canonical stays `/post/:slug` for now to avoid SEO churn).
+- **Keep** `/archive`, `/about`, `/newsletter`, `/contact`, `/surprise`, `/admin*`, `/rss.xml` untouched.
 
-### 4. Reuse / shared components
+## Placeholder page shape
 
-- Reuses `SiteLayoutWeb`, `ContactSection`, and the `Para`/`Prose`/`Dots` helper pattern from `/my-story`. To avoid duplication I'll extract `Prose`, `Para`, and `Dots` into a small shared module `src/components/editorial.tsx` and import from both `/my-story` and `/my-guru`. This is a pure refactor — no visual change to /my-story.
+Each new placeholder uses `SiteLayoutWeb`, sets per-route `head()` (title, description, og:title, og:description), and renders a hero + short copy + `ContactSection` at the foot with a sensible `defaultCategory`. Hub indexes (`/my-journey`, `/wisdom`, `/next-steps`, `/serve`) render a simple card grid linking to their children using the shared `editorial` components for visual consistency with `/my-story`.
 
-### 5. SEO
+No new images generated yet — placeholders use type-only hero bands. Real imagery comes when each section gets its content pass.
 
-`head()`:
-- title: `My Guru — Srila Prabhupada · Fan The Spark`
-- description: ~155 chars on Prabhupada bringing Bhakti-yoga to the West, founding ISKCON, his books and legacy.
-- og:image: hero photo.
+## Header nav update
 
-### Out of scope
+Update `src/components/site-header-web.tsx` to the new top-level IA:
 
-- Adding /my-guru to header navigation (can wire it after page approval).
-- Image-gallery / lightbox interactions.
-- Animation beyond the existing site's static feel.
+```
+My Journey  ·  Wisdom  ·  Next Steps  ·  Events  ·  Serve  ·  About  ·  Contact
+```
+
+Each top-level link goes to its hub index. Dropdowns are out of scope for this pass — mobile menu lists all hubs and their children as a flat indented list.
+
+## SEO
+
+- Per-route `head()` on every new file with route-specific title + description + og:title + og:description.
+- `<link rel="canonical">` on leaf routes only (not hubs, not __root).
+- Update `src/routes/sitemap[.]xml.ts` if present (or skip if not) to include every new public route.
+
+## Out of scope (explicit)
+
+- No redirects from old `/my-story` and `/my-guru` (user chose "just replace them" — old URLs will 404).
+- No real content for `/wisdom/videos`, `/audio-playlists`, `/events`, `/serve/*`, `/next-steps/*` yet. Placeholder copy only.
+- No header dropdown menus, no breadcrumbs component, no design system changes.
+- No imagery generation for new sections.
+
+## Technical notes
+
+- TanStack auto-regenerates `routeTree.gen.ts` — don't hand-edit.
+- The shared `ContactSection` already accepts `defaultCategory`, so each placeholder passes a contextual value (e.g. `"Volunteer"` on `/serve/volunteer`, `"Small Groups"` on `/next-steps/small-groups`). Existing `category` enum in the form may need new options — will add to the dropdown in `src/components/contact-section.tsx` to cover the new sections.
+- `/wisdom/blog` index reuses `getPublishedDbPosts` + `mergePosts` logic from `src/routes/index.tsx` (extracted into a small helper to avoid duplication).

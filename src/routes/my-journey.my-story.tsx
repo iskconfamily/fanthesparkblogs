@@ -5,7 +5,7 @@ import { Dots, Para, Prose } from "@/components/editorial";
 import heroForest from "@/assets/my-story/vaisesika-meditation.png";
 import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg";
 
-export const Route = createFileRoute("/my-story")({
+export const Route = createFileRoute("/my-journey/my-story")({
   head: () => ({
     meta: [
       { title: "My Story — Fan The Spark" },
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/my-story")({
       },
       { property: "og:image", content: heroForest },
     ],
+    links: [{ rel: "canonical", href: "https://fanthesparkblogs.lovable.app/my-journey/my-story" }],
   }),
   component: MyStoryPage,
 });
@@ -56,21 +57,17 @@ const heroImageStyles = `
   }
 `;
 
-
 function MyStoryPage() {
   return (
     <SiteLayoutWeb>
       <style>{heroImageStyles}</style>
 
-      {/* HERO — real img, no-crop on normal screens; soft cap only on very wide cinematic renderings */}
       <section className="relative w-full" style={{ backgroundColor: "#1a1a0d" }}>
         <img
           src={heroForest}
           alt="Vaisesika Dasa in meditation in a forest clearing"
           className="my-story-hero-image"
         />
-
-        {/* Bottom-left title overlay — no gradient wash, just text shadow */}
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-[1200px] px-6 pb-8 sm:pb-12">
             <div className="max-w-[560px]">
@@ -105,7 +102,6 @@ function MyStoryPage() {
         </div>
       </section>
 
-      {/* LEAD */}
       <Prose tight="bottom">
         <Dots />
         <Para>
@@ -115,7 +111,6 @@ function MyStoryPage() {
         </Para>
       </Prose>
 
-      {/* YOUTUBE — wider container */}
       <section style={{ backgroundColor: "var(--background)" }}>
         <div className="mx-auto max-w-[960px] px-6 pt-2 pb-6 sm:pt-4 sm:pb-10">
           <div
@@ -141,9 +136,7 @@ function MyStoryPage() {
         </div>
       </section>
 
-      {/* BODY — first half + pull quote */}
       <Prose tight="top">
-
         <Para>
           I remember looking up at the night sky, asking my big brother, “What’s on the other
           side?” He couldn’t say but I wanted to know more than anything. By the time I was in high
@@ -234,7 +227,6 @@ function MyStoryPage() {
         </Para>
       </Prose>
 
-      {/* FULL-BLEED VAISESIKA ARCHWAY PHOTO */}
       <section className="w-full">
         <img
           src={vaisesikaArchway}
@@ -248,7 +240,6 @@ function MyStoryPage() {
         />
       </section>
 
-      {/* CLOSING PROSE + CTA */}
       <Prose>
         <Para>
           In 1986, friends introduced me to Nirakula Dasi – a fellow disciple of my guru, Srila
