@@ -124,7 +124,7 @@ export function SiteHeaderWeb() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-5 lg:gap-6">
           {NAV.map((item) =>
             item.children ? (
               <DropdownMenu key={item.label}>
