@@ -121,9 +121,9 @@ const WisdomLordRoute = WisdomLordRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const WisdomBlogRoute = WisdomBlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => WisdomRoute,
+  id: '/wisdom/blog',
+  path: '/wisdom/blog',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const WisdomAudioPlaylistsRoute = WisdomAudioPlaylistsRouteImport.update({
   id: '/wisdom/audio-playlists',
@@ -136,20 +136,20 @@ const TagSlugRoute = TagSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServeVolunteerRoute = ServeVolunteerRouteImport.update({
-  id: '/volunteer',
-  path: '/volunteer',
-  getParentRoute: () => ServeRoute,
+  id: '/serve/volunteer',
+  path: '/serve/volunteer',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ServeTransformationalStoriesRoute =
   ServeTransformationalStoriesRouteImport.update({
-    id: '/transformational-stories',
-    path: '/transformational-stories',
-    getParentRoute: () => ServeRoute,
+    id: '/serve/transformational-stories',
+    path: '/serve/transformational-stories',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ServeGiveRoute = ServeGiveRouteImport.update({
-  id: '/give',
-  path: '/give',
-  getParentRoute: () => ServeRoute,
+  id: '/serve/give',
+  path: '/serve/give',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PreviewSlugRoute = PreviewSlugRouteImport.update({
   id: '/preview/$slug',
@@ -183,14 +183,14 @@ const NextStepsAskRoute = NextStepsAskRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const MyJourneyMyStoryRoute = MyJourneyMyStoryRouteImport.update({
-  id: '/my-story',
-  path: '/my-story',
-  getParentRoute: () => MyJourneyRoute,
+  id: '/my-journey/my-story',
+  path: '/my-journey/my-story',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MyJourneyMyGuruRoute = MyJourneyMyGuruRouteImport.update({
-  id: '/my-guru',
-  path: '/my-guru',
-  getParentRoute: () => MyJourneyRoute,
+  id: '/my-journey/my-guru',
+  path: '/my-journey/my-guru',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSetupRoute = AdminSetupRouteImport.update({
   id: '/setup',
@@ -457,14 +457,20 @@ export interface RootRouteChildren {
   NewsletterRoute: typeof NewsletterRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SurpriseRoute: typeof SurpriseRoute
+  MyJourneyMyGuruRoute: typeof MyJourneyMyGuruRoute
+  MyJourneyMyStoryRoute: typeof MyJourneyMyStoryRoute
   NextStepsAskRoute: typeof NextStepsAskRoute
   NextStepsOtherProjectsRoute: typeof NextStepsOtherProjectsRoute
   NextStepsSmallGroupsRoute: typeof NextStepsSmallGroupsRoute
   NextStepsSpiritualRetreatRoute: typeof NextStepsSpiritualRetreatRoute
   PostSlugRoute: typeof PostSlugRoute
   PreviewSlugRoute: typeof PreviewSlugRoute
+  ServeGiveRoute: typeof ServeGiveRoute
+  ServeTransformationalStoriesRoute: typeof ServeTransformationalStoriesRoute
+  ServeVolunteerRoute: typeof ServeVolunteerRoute
   TagSlugRoute: typeof TagSlugRoute
   WisdomAudioPlaylistsRoute: typeof WisdomAudioPlaylistsRoute
+  WisdomBlogRoute: typeof WisdomBlogRouteWithChildren
   WisdomLordRoute: typeof WisdomLordRoute
   MyJourneyIndexRoute: typeof MyJourneyIndexRoute
   NextStepsIndexRoute: typeof NextStepsIndexRoute
@@ -581,10 +587,10 @@ declare module '@tanstack/react-router' {
     }
     '/wisdom/blog': {
       id: '/wisdom/blog'
-      path: '/blog'
+      path: '/wisdom/blog'
       fullPath: '/wisdom/blog'
       preLoaderRoute: typeof WisdomBlogRouteImport
-      parentRoute: typeof WisdomRoute
+      parentRoute: typeof rootRouteImport
     }
     '/wisdom/audio-playlists': {
       id: '/wisdom/audio-playlists'
@@ -602,24 +608,24 @@ declare module '@tanstack/react-router' {
     }
     '/serve/volunteer': {
       id: '/serve/volunteer'
-      path: '/volunteer'
+      path: '/serve/volunteer'
       fullPath: '/serve/volunteer'
       preLoaderRoute: typeof ServeVolunteerRouteImport
-      parentRoute: typeof ServeRoute
+      parentRoute: typeof rootRouteImport
     }
     '/serve/transformational-stories': {
       id: '/serve/transformational-stories'
-      path: '/transformational-stories'
+      path: '/serve/transformational-stories'
       fullPath: '/serve/transformational-stories'
       preLoaderRoute: typeof ServeTransformationalStoriesRouteImport
-      parentRoute: typeof ServeRoute
+      parentRoute: typeof rootRouteImport
     }
     '/serve/give': {
       id: '/serve/give'
-      path: '/give'
+      path: '/serve/give'
       fullPath: '/serve/give'
       preLoaderRoute: typeof ServeGiveRouteImport
-      parentRoute: typeof ServeRoute
+      parentRoute: typeof rootRouteImport
     }
     '/preview/$slug': {
       id: '/preview/$slug'
@@ -665,17 +671,17 @@ declare module '@tanstack/react-router' {
     }
     '/my-journey/my-story': {
       id: '/my-journey/my-story'
-      path: '/my-story'
+      path: '/my-journey/my-story'
       fullPath: '/my-journey/my-story'
       preLoaderRoute: typeof MyJourneyMyStoryRouteImport
-      parentRoute: typeof MyJourneyRoute
+      parentRoute: typeof rootRouteImport
     }
     '/my-journey/my-guru': {
       id: '/my-journey/my-guru'
-      path: '/my-guru'
+      path: '/my-journey/my-guru'
       fullPath: '/my-journey/my-guru'
       preLoaderRoute: typeof MyJourneyMyGuruRouteImport
-      parentRoute: typeof MyJourneyRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/setup': {
       id: '/admin/setup'
@@ -742,6 +748,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface WisdomBlogRouteChildren {
+  WisdomBlogSlugRoute: typeof WisdomBlogSlugRoute
+}
+
+const WisdomBlogRouteChildren: WisdomBlogRouteChildren = {
+  WisdomBlogSlugRoute: WisdomBlogSlugRoute,
+}
+
+const WisdomBlogRouteWithChildren = WisdomBlogRoute._addFileChildren(
+  WisdomBlogRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -752,14 +770,20 @@ const rootRouteChildren: RootRouteChildren = {
   NewsletterRoute: NewsletterRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SurpriseRoute: SurpriseRoute,
+  MyJourneyMyGuruRoute: MyJourneyMyGuruRoute,
+  MyJourneyMyStoryRoute: MyJourneyMyStoryRoute,
   NextStepsAskRoute: NextStepsAskRoute,
   NextStepsOtherProjectsRoute: NextStepsOtherProjectsRoute,
   NextStepsSmallGroupsRoute: NextStepsSmallGroupsRoute,
   NextStepsSpiritualRetreatRoute: NextStepsSpiritualRetreatRoute,
   PostSlugRoute: PostSlugRoute,
   PreviewSlugRoute: PreviewSlugRoute,
+  ServeGiveRoute: ServeGiveRoute,
+  ServeTransformationalStoriesRoute: ServeTransformationalStoriesRoute,
+  ServeVolunteerRoute: ServeVolunteerRoute,
   TagSlugRoute: TagSlugRoute,
   WisdomAudioPlaylistsRoute: WisdomAudioPlaylistsRoute,
+  WisdomBlogRoute: WisdomBlogRouteWithChildren,
   WisdomLordRoute: WisdomLordRoute,
   MyJourneyIndexRoute: MyJourneyIndexRoute,
   NextStepsIndexRoute: NextStepsIndexRoute,
@@ -769,13 +793,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
