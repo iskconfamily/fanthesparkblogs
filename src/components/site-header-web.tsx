@@ -234,25 +234,41 @@ export function SiteHeaderWeb() {
                   ? item.children.map((c) => ({
                       label: `${item.label} — ${c.label}`,
                       to: c.to,
+                      external: c.external,
                     }))
-                  : [{ label: item.label, to: item.to }],
-              ).map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className="uppercase no-underline"
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 14,
-                    letterSpacing: "0.18em",
-                    color: "var(--brand-title-color)",
-                    borderBottom: "none",
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
+                  : [{ label: item.label, to: item.to, external: false }],
+              ).map((link) => {
+                const linkStyle = {
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 14,
+                  letterSpacing: "0.18em",
+                  color: "var(--brand-title-color)",
+                  borderBottom: "none",
+                } as const;
+                return link.external ? (
+                  <a
+                    key={link.label}
+                    href={link.to}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileOpen(false)}
+                    className="uppercase no-underline"
+                    style={linkStyle}
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    onClick={() => setMobileOpen(false)}
+                    className="uppercase no-underline"
+                    style={linkStyle}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </nav>
           </SheetContent>
         </Sheet>
