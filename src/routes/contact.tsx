@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { SiteLayoutMarketing } from "@/components/site-layout-marketing";
+import { SiteLayoutWeb } from "@/components/site-layout-web";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
   return (
-    <SiteLayoutMarketing>
+    <SiteLayoutWeb>
       <div className="mx-auto max-w-[720px] px-6 py-16">
         <p
           className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-3"
@@ -36,6 +36,6 @@ function ContactPage() {
           Contact details and form coming soon.
         </p>
       </div>
-    </SiteLayoutMarketing>
+    </SiteLayoutWeb>
   );
 }
