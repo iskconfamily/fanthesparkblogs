@@ -14,10 +14,12 @@ import {
 } from "@/components/ui/sheet";
 import logoUrl from "@/assets/fts-logo-stamp.png";
 
+type NavChild = { label: string; to: string; external?: boolean };
+
 type NavItem = {
   label: string;
   to: string;
-  children?: { label: string; to: string }[];
+  children?: NavChild[];
 };
 
 const NAV: NavItem[] = [
@@ -33,9 +35,11 @@ const NAV: NavItem[] = [
     label: "Wisdom",
     to: "/wisdom",
     children: [
+      { label: "Lord Chaitanya", to: "/wisdom/lord" },
       { label: "Blog", to: "/wisdom/blog" },
-      { label: "Videos", to: "/wisdom/videos" },
+      { label: "Videos", to: "https://www.youtube.com/c/FanTheSpark", external: true },
       { label: "Audio Playlists", to: "/wisdom/audio-playlists" },
+      { label: "iTunes Podcast", to: "https://podcasts.apple.com/us/podcast/fan-the-spark/id1153081672", external: true },
     ],
   },
   {
@@ -148,23 +152,34 @@ export function SiteHeaderWeb() {
                     border: "1px solid var(--brand-header-border)",
                   }}
                 >
-                  {item.children.map((child) => (
-                    <DropdownMenuItem key={child.label} asChild>
-                      <Link
-                        to={child.to}
-                        className="cursor-pointer uppercase"
-                        style={{
-                          fontFamily: "var(--font-meta)",
-                          fontSize: 12,
-                          letterSpacing: "0.16em",
-                          color: "var(--brand-title-color)",
-                          borderBottom: "none",
-                        }}
-                      >
-                        {child.label}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
+                  {item.children.map((child) => {
+                    const linkStyle = {
+                      fontFamily: "var(--font-meta)",
+                      fontSize: 12,
+                      letterSpacing: "0.16em",
+                      color: "var(--brand-title-color)",
+                      borderBottom: "none",
+                    } as const;
+                    return (
+                      <DropdownMenuItem key={child.label} asChild>
+                        {child.external ? (
+                          <a
+                            href={child.to}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cursor-pointer uppercase"
+                            style={linkStyle}
+                          >
+                            {child.label}
+                          </a>
+                        ) : (
+                          <Link to={child.to} className="cursor-pointer uppercase" style={linkStyle}>
+                            {child.label}
+                          </Link>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -219,25 +234,41 @@ export function SiteHeaderWeb() {
                   ? item.children.map((c) => ({
                       label: `${item.label} — ${c.label}`,
                       to: c.to,
+                      external: c.external,
                     }))
-                  : [{ label: item.label, to: item.to }],
-              ).map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className="uppercase no-underline"
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 14,
-                    letterSpacing: "0.18em",
-                    color: "var(--brand-title-color)",
-                    borderBottom: "none",
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
+                  : [{ label: item.label, to: item.to, external: false }],
+              ).map((link) => {
+                const linkStyle = {
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 14,
+                  letterSpacing: "0.18em",
+                  color: "var(--brand-title-color)",
+                  borderBottom: "none",
+                } as const;
+                return link.external ? (
+                  <a
+                    key={link.label}
+                    href={link.to}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileOpen(false)}
+                    className="uppercase no-underline"
+                    style={linkStyle}
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    onClick={() => setMobileOpen(false)}
+                    className="uppercase no-underline"
+                    style={linkStyle}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
             </nav>
           </SheetContent>
         </Sheet>

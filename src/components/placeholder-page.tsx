@@ -78,6 +78,7 @@ interface HubLink {
   to: string;
   label: string;
   blurb: string;
+  external?: boolean;
 }
 
 interface HubPageProps {
@@ -134,55 +135,74 @@ export function HubPage({ eyebrow, title, intro, links, contactCategory }: HubPa
       <section style={{ backgroundColor: "var(--background)" }}>
         <div className="mx-auto max-w-[1100px] px-6 pb-16 sm:pb-24">
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {links.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                className="block group no-underline"
-                style={{
-                  border: "1px solid var(--brand-header-border, var(--border))",
-                  borderRadius: 4,
-                  padding: "28px 24px",
-                  backgroundColor: "var(--brand-header-bg, var(--card))",
-                  transition: "transform 200ms ease, box-shadow 200ms ease",
-                }}
-              >
-                <p
-                  className="mb-2"
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 11,
-                    letterSpacing: "0.22em",
-                    textTransform: "uppercase",
-                    color: "var(--brand-olive, var(--muted-foreground))",
-                  }}
+            {links.map((l) => {
+              const cardStyle = {
+                border: "1px solid var(--brand-header-border, var(--border))",
+                borderRadius: 4,
+                padding: "28px 24px",
+                backgroundColor: "var(--brand-header-bg, var(--card))",
+                transition: "transform 200ms ease, box-shadow 200ms ease",
+              } as const;
+              const inner = (
+                <>
+                  <p
+                    className="mb-2"
+                    style={{
+                      fontFamily: "var(--font-meta)",
+                      fontSize: 11,
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      color: "var(--brand-olive, var(--muted-foreground))",
+                    }}
+                  >
+                    {l.external ? "Visit" : "Explore"}
+                  </p>
+                  <h2
+                    className="mb-3"
+                    style={{
+                      fontFamily: "var(--font-serif-display)",
+                      fontStyle: "italic",
+                      fontSize: 26,
+                      lineHeight: 1.15,
+                      color: "var(--brand-title-color, var(--foreground))",
+                    }}
+                  >
+                    {l.label}
+                  </h2>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-serif-body)",
+                      fontSize: 15,
+                      lineHeight: 1.6,
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    {l.blurb}
+                  </p>
+                </>
+              );
+              return l.external ? (
+                <a
+                  key={l.to}
+                  href={l.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group no-underline"
+                  style={cardStyle}
                 >
-                  Explore
-                </p>
-                <h2
-                  className="mb-3"
-                  style={{
-                    fontFamily: "var(--font-serif-display)",
-                    fontStyle: "italic",
-                    fontSize: 26,
-                    lineHeight: 1.15,
-                    color: "var(--brand-title-color, var(--foreground))",
-                  }}
+                  {inner}
+                </a>
+              ) : (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  className="block group no-underline"
+                  style={cardStyle}
                 >
-                  {l.label}
-                </h2>
-                <p
-                  style={{
-                    fontFamily: "var(--font-serif-body)",
-                    fontSize: 15,
-                    lineHeight: 1.6,
-                    color: "var(--muted-foreground)",
-                  }}
-                >
-                  {l.blurb}
-                </p>
-              </Link>
-            ))}
+                  {inner}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HubPage } from "@/components/placeholder-page";
 
+const YOUTUBE_URL = "https://www.youtube.com/c/FanTheSpark";
+const ITUNES_URL = "https://podcasts.apple.com/us/podcast/fan-the-spark/id1153081672";
+
 export const Route = createFileRoute("/wisdom/")({
   head: () => ({
     meta: [
@@ -17,9 +20,11 @@ export const Route = createFileRoute("/wisdom/")({
       title="Wisdom"
       intro="Quiet, long-form bhakti — to read, to watch, and to hear."
       links={[
+        { to: "/wisdom/lord", label: "Lord Chaitanya", blurb: "The history and philosophy of Sri Caitanya Mahaprabhu — the Golden Avatara who inaugurated the sankirtana movement." },
         { to: "/wisdom/blog", label: "Blog", blurb: "Essays on hearing, chanting and the practice of remembering Krishna." },
-        { to: "/wisdom/videos", label: "Videos", blurb: "Talks and conversations from retreats, classes and travels." },
-        { to: "/wisdom/audio-playlists", label: "Audio Playlists", blurb: "Curated kirtan and chanting playlists for daily practice." },
+        { to: YOUTUBE_URL, label: "Videos", blurb: "Talks, classes and conversations on the Fan The Spark YouTube channel.", external: true },
+        { to: "/wisdom/audio-playlists", label: "Audio Playlists", blurb: "Curated SoundCloud playlists — kirtan, japa and weekly podcasts." },
+        { to: ITUNES_URL, label: "iTunes Podcast", blurb: "Subscribe to Fan The Spark on Apple Podcasts.", external: true },
       ]}
       contactCategory="Wisdom / Dhamesvara"
     />
