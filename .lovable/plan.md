@@ -1,101 +1,66 @@
-
 ## Goal
 
-Send blog announcements through **Mailchimp Transactional (Mandrill)** using a stored template, injecting the rendered post HTML into the `mc:edit="blog_html"` editable region. Test mode only for now — single email or a Mandrill recipient tag.
+Stop depending on Mailchimp templates entirely. Lovable builds the complete, email-safe HTML (header + blog body + footer) and uploads it as the campaign's raw HTML via Mailchimp's `html` content field. This eliminates the Classic/Drag-and-Drop template mismatch and the `blog_html` section-key issue.
 
-Why Mandrill (not Marketing API): `mc:edit` regions are only populated per-send via Mandrill's `messages/send-template` endpoint with a `template_content` array. The Marketing API has no equivalent.
+## What changes
 
-## Scope
+### 1. New `buildFullBlogEmailHtml` in `src/lib/email-html.ts`
 
-- Add Mandrill alongside the existing Brevo path (Brevo stays untouched).
-- New server function: `sendBlogAnnouncementMailchimp` in `src/lib/email.functions.ts`.
-- New helper: list Mandrill templates so the admin UI can pick one.
-- Minimal admin UI: a Mailchimp section with template picker, "send to email" and "send to tag" inputs, and a Send Test button.
+Wrap the existing `buildBlogEmailHtml(post)` body inside a complete, Mailchimp-compatible email document:
 
-## New secret required
+- Full `<!doctype html>` + `<html lang>` + `<head>` with:
+  - `meta charset`, `meta viewport`
+  - `<title>` = post title
+  - Google Fonts `@import` (already in body, will be deduped)
+  - Minimal email-reset CSS (`body{margin:0}`, `img{border:0;display:block}`, table reset)
+  - One `@media (max-width:600px)` rule so the centered 640px column shrinks cleanly on mobile
+- Outer 100% bg table → centered 640px container table (the email convention that survives Outlook, Gmail, Apple Mail).
+- **Header**: site brand row — wordmark "FAN THE SPARK" in Cormorant Garamond italic, linked to `SITE_URL`, with the small tagline/date strip styled like the website header. Plain HTML/CSS, no images required (keeps it bulletproof).
+- **Body**: existing `buildBlogEmailHtml(post)` output, unchanged, so it stays visually consistent with the site's `ArticleBody`.
+- **Read on web** CTA button under the article → `${SITE_URL}/post/${slug}`.
+- **Footer**:
+  - "You're receiving this because you subscribed to Fan The Spark."
+  - Physical address line (required by Mailchimp / CAN-SPAM — they will inject it anyway; we render our own so the look matches).
+  - **Mailchimp merge tags** so the campaign passes compliance checks: `*|UNSUB|*` unsubscribe link, `*|LIST:ADDRESSLINE|*` address, `*|CURRENT_YEAR|*`. Mailchimp rejects regular HTML campaigns that lack an unsubscribe link or address — using the merge tags is the canonical fix and works for both **test sends** and **live sends**.
+- Single signature for the new function: `buildFullBlogEmailHtml(post, { siteUrl }) → string`.
 
-`MANDRILL_API_KEY` — Mandrill API key from Mailchimp Transactional dashboard. I'll request it via the secret tool before touching code.
+The existing `buildBlogEmailHtml` stays as-is and is still used by Brevo (which has its own template params flow).
 
-## Server changes — `src/lib/email.functions.ts`
+### 2. Rewrite the Mailchimp path in `src/lib/email.functions.ts`
 
-Reuse the existing `buildParams(post)` to get `blog_html` (no changes to rendering).
+- Delete `MC_TEMPLATE_ID`, `getMailchimpTemplateSectionKey`, and the `template: { id, sections }` body.
+- `createAndPrepareCampaign(post, fullHtml)` now does:
+  ```
+  PUT /campaigns/{id}/content
+  { "html": fullHtml }
+  ```
+- `loadPostAndHtml` builds `fullHtml` via `buildFullBlogEmailHtml` instead of just the body fragment.
+- Test send + live send call paths stay the same (`/actions/test`, `/actions/send`).
+- Campaign `settings` gains `to_name: "*|FNAME|*"` for personalized greeting headers, and keeps `subject_line`, `preview_text`, `from_name`, `reply_to`.
 
-Add two server fns, both admin-gated via `assertAdmin`:
+### 3. Mailchimp requirements we explicitly satisfy
 
-1. **`listMandrillTemplates`** (POST, no input)
-   - `POST https://mandrillapp.com/api/1.0/templates/list` with `{ key: MANDRILL_API_KEY }`
-   - Returns `[{ slug, name, subject, publish_name }]`
+- ✅ Unsubscribe link via `*|UNSUB|*` (Mailchimp **requires** this in custom-HTML campaigns; without it the campaign cannot be sent).
+- ✅ Physical address via `*|LIST:ADDRESSLINE|*` (required by CAN-SPAM; pulled from the audience's default address).
+- ✅ `<!doctype html>` + valid `<head>`/`<body>` so Mailchimp's parser accepts the upload.
+- ✅ Inline styles only (no external stylesheets beyond the Google Fonts `@import`, which Gmail strips gracefully without breaking layout — the font stacks fall back to Georgia/Times).
+- ✅ Tables-for-layout centered 640px column, web-safe sizing, `max-width:100%` images.
+- ✅ No template ID required — campaign content is uploaded as raw HTML, which bypasses Classic vs Drag-and-Drop template restrictions entirely.
 
-2. **`sendBlogAnnouncementMailchimp`** (POST)
-   - Input (Zod):
-     ```
-     { postId: uuid,
-       templateSlug: string,           // Mandrill template slug
-       mode: 'email' | 'tag',
-       testEmail?: email,              // when mode=email
-       tag?: string }                  // when mode=tag
-     ```
-   - Loads post → builds `params = buildParams(post)` → extracts `blog_html`.
-   - Calls `POST https://mandrillapp.com/api/1.0/messages/send-template` with:
-     ```
-     {
-       key: MANDRILL_API_KEY,
-       template_name: templateSlug,
-       template_content: [{ name: 'blog_html', content: params.blog_html }],
-       message: {
-         subject: post.title,
-         from_email: <sender>,
-         from_name: <author or site>,
-         to: mode==='email'
-           ? [{ email: testEmail, type: 'to' }]
-           : [],                       // when using tag, recipients come from tag filter
-         tags: mode==='tag' ? [tag] : ['blog-announcement'],
-         merge_language: 'handlebars',
-         global_merge_vars: [
-           { name: 'title', content: params.title },
-           { name: 'excerpt', content: params.excerpt },
-           { name: 'url', content: params.url },
-           { name: 'author', content: params.author },
-           { name: 'featured_image', content: params.featured_image },
-           { name: 'slug', content: params.slug },
-         ],
-       },
-       async: false,
-     }
-     ```
-   - **Tag mode note**: Mandrill's `send-template` requires `to`. To send to "everyone with tag X", we'll fetch recipients via `POST /tags/all-time-series` is insufficient — instead use `POST /metadata` is not it either. The accurate path is to pre-collect recipients tagged X via `POST /tags/info` (only stats) — **Mandrill does not expose a "list members by tag" endpoint**. So for tag mode we'll instead pass the tag in `message.tags[]` and rely on the **template's own recipient logic** is also not a thing.
-   - **Revised tag-mode behavior**: Mandrill doesn't have audiences/tags as recipient lists. We will therefore drop "tag" as a recipient source and keep it only as a Mandrill **labeling tag** added to `message.tags[]`. For now, mode is effectively just `email` (one or more comma-separated test addresses) plus an optional tag label for tracking.
-   - Final input shape:
-     ```
-     { postId, templateSlug,
-       recipients: string  // comma-separated emails
-       trackingTag?: string }
-     ```
-   - Validate `blog_html` non-empty (same guard as Brevo path).
-   - Return `{ recipientCount, mandrillResponse: [{ email, status, _id, reject_reason }] }`.
+### 4. No UI changes
 
-Sender constants: reuse `SITE_URL` host; from_email = `noreply@fanthesparkblogs.lovable.app` (or env `MANDRILL_FROM_EMAIL` if set). I'll add a `MANDRILL_FROM_EMAIL` optional secret note in the plan but not block on it.
+The admin "Send test" / "Send live" buttons keep working — only the backend payload changes. No new env vars, no new secrets.
 
-## Admin UI changes — `src/components/admin/blog-studio.tsx` (or wherever Brevo controls live)
+## Technical details
 
-Add a small "Mailchimp (test)" panel next to existing Brevo controls:
-- Template `<Select>` populated from `listMandrillTemplates`
-- Recipients `<Input>` (comma-separated emails)
-- Optional tracking tag `<Input>`
-- "Send Mailchimp test" button → calls `sendBlogAnnouncementMailchimp`
-- Toast with per-recipient status from the response
+- Files touched:
+  - `src/lib/email-html.ts` — add `buildFullBlogEmailHtml`.
+  - `src/lib/email.functions.ts` — swap `createAndPrepareCampaign` body to `{ html }`, drop template lookup, drop `MC_TEMPLATE_ID`.
+- Files unchanged: Brevo path, admin UI, blog adapters, all `.tsx`.
+- Mailchimp endpoint reference: `PUT /3.0/campaigns/{id}/content` with `{ html: "<!doctype html>..." }` is the documented way to upload a full HTML campaign; sections/template are mutually exclusive with raw `html`.
 
-I'll locate the current Brevo UI block first and mirror its layout.
+## Out of scope
 
-## What's NOT in this plan
-
-- No Mandrill broadcast / audience send (Mandrill has no audience concept).
-- No suppression/bounce dashboard.
-- Brevo flow remains as-is.
-- `mc:edit` regions other than `blog_html` are not populated. If the template has more editable regions, they'll show their default content.
-
-## Files touched
-
-- `src/lib/email.functions.ts` — add 2 server fns, no change to `buildParams` / `buildBlogEmailHtml`.
-- One admin component file (TBD after locating Brevo controls) — add Mailchimp panel.
-- New secret: `MANDRILL_API_KEY` (requested via secret tool first).
+- No changes to how subscribers are managed in the Mailchimp audience.
+- No change to the Brevo transactional flow.
+- No new design tokens — reuses the existing email colors/fonts from `email-html.ts` so the email matches the site.
