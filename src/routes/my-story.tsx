@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots, Para, Prose } from "@/components/editorial";
