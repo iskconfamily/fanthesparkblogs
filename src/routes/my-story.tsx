@@ -29,22 +29,28 @@ const heroImageStyles = `
   .my-story-hero-image {
     display: block;
     width: 100%;
-    height: auto;
+    height: 78vh;
+    min-height: 520px;
+    max-height: 760px;
+    object-fit: cover;
+    object-position: 50% 30%;
   }
 
   @media (min-width: 1024px) {
     .my-story-hero-image {
-      max-height: min(66vh, 680px);
+      height: auto;
+      min-height: 0;
+      max-height: min(70vh, 760px);
       object-fit: cover;
-      object-position: 38% 20%;
+      object-position: center 18%;
     }
   }
 
   @media (min-width: 1800px) and (min-aspect-ratio: 2 / 1) {
     .my-story-hero-image {
-      max-height: 72vh;
+      max-height: 74vh;
       object-fit: cover;
-      object-position: 36% 22%;
+      object-position: center 24%;
     }
   }
 `;
