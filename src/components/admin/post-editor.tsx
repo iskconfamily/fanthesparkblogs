@@ -324,38 +324,55 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
     }
   };
 
-  const sendMailchimpTest = async () => {
+  const sendMailchimpTestEmail = async () => {
     if (!id) {
       setMcMsg("Save the post first.");
       return;
     }
-    if (!selectedMcSlug) {
-      setMcMsg("Select a Mailchimp template first.");
-      return;
-    }
-    if (!mcRecipients.trim()) {
-      setMcMsg("Enter at least one recipient email.");
+    if (!mcTestEmail.trim()) {
+      setMcMsg("Enter a test email address.");
       return;
     }
     if (!blogHtml || blogHtml.trim().length === 0) {
       setMcMsg("blog_html is empty — add content to the post before sending.");
       return;
     }
-    setBusy("Sending via Mailchimp…");
+    setBusy("Sending Mailchimp test…");
     setMcMsg("");
     try {
-      const r = await sendMailchimp({
-        data: {
-          postId: id,
-          templateSlug: selectedMcSlug,
-          recipients: mcRecipients,
-          trackingTag: mcTrackingTag.trim() || undefined,
-        },
+      const r = await sendMcTest({
+        data: { postId: id, testEmail: mcTestEmail.trim() },
       });
-      const summary = r.results
-        .map((x) => `${x.email}: ${x.status}${x.rejectReason ? ` (${x.rejectReason})` : ""}`)
-        .join(" • ");
-      setMcMsg(`Sent ${r.recipientCount} via "${r.templateSlug}" — ${summary}`);
+      setMcMsg(`✅ Test sent to ${r.testEmail} (campaign ${r.campaignId}).`);
+    } catch (e) {
+      setMcMsg(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const sendMailchimpToAudience = async () => {
+    if (!id) {
+      setMcMsg("Save the post first.");
+      return;
+    }
+    if (!blogHtml || blogHtml.trim().length === 0) {
+      setMcMsg("blog_html is empty — add content to the post before sending.");
+      return;
+    }
+    if (!mcConfirmLive) {
+      const ok = window.confirm(
+        "Send this blog post as a live campaign to ALL subscribers in your Mailchimp audience? This cannot be undone.",
+      );
+      if (!ok) return;
+      setMcConfirmLive(true);
+    }
+    setBusy("Sending live Mailchimp campaign…");
+    setMcMsg("");
+    try {
+      const r = await sendMcLive({ data: { postId: id, confirm: true } });
+      setMcMsg(`🚀 Live campaign sent (id ${r.campaignId}) to audience ${r.audienceId}.`);
+      setAnnouncementSentAt(new Date().toISOString());
     } catch (e) {
       setMcMsg(e instanceof Error ? e.message : "Failed");
     } finally {
