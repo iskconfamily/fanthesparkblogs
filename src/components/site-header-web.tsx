@@ -129,7 +129,7 @@ export function SiteHeaderWeb() {
             item.children ? (
               <DropdownMenu key={item.label}>
                 <DropdownMenuTrigger
-                  className="inline-flex items-center gap-1 uppercase outline-none focus-visible:ring-0"
+                  className="inline-flex items-center gap-1 uppercase whitespace-nowrap outline-none focus-visible:ring-0"
                   style={{
                     fontFamily: "var(--font-meta)",
                     fontSize: 12,
@@ -171,7 +171,7 @@ export function SiteHeaderWeb() {
               <Link
                 key={item.label}
                 to={item.to}
-                className="uppercase no-underline transition-colors hover:opacity-70"
+                className="uppercase whitespace-nowrap no-underline transition-colors hover:opacity-70"
                 style={{
                   fontFamily: "var(--font-meta)",
                   fontSize: 12,
