@@ -329,17 +329,30 @@ async function mcCall(path: string, init: { method: string; body?: unknown }) {
 }
 
 async function getMailchimpTemplateSectionKey(templateId: number) {
+  const template = (await mcCall(`/templates/${templateId}`, {
+    method: "GET",
+  })) as {
+    id?: number;
+    name?: string;
+    drag_and_drop?: boolean;
+  };
+
   const content = (await mcCall(`/templates/${templateId}/default-content`, {
     method: "GET",
   })) as { sections?: Record<string, string> };
 
   const sectionKeys = Object.keys(content.sections ?? {});
+
+  if (template.drag_and_drop) {
+    throw new Error(
+      `Mailchimp template ${templateId} (${template.name ?? "unnamed"}) is a Drag & Drop template. Campaign content sections only work with a Classic template whose default-content exposes sections like blog_html.`,
+    );
+  }
+
   if (sectionKeys.includes("blog_html")) return "blog_html";
-  if (sectionKeys.includes("main")) return "main";
-  if (sectionKeys.length === 1) return sectionKeys[0]!;
 
   throw new Error(
-    `Mailchimp template ${templateId} does not expose a usable editable section. Available sections: ${sectionKeys.join(", ") || "none"}`,
+    `Mailchimp template ${templateId} does not expose the required blog_html editable section. Available sections: ${sectionKeys.join(", ") || "none"}`,
   );
 }
 
