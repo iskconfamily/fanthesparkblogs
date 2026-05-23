@@ -1,15 +1,29 @@
-## Adjust mobile hero crop on /my-story
+# Remember Drive folder + wire up image pulls
 
-The subject's lap/hands are getting clipped at the bottom of the mobile hero. Shift the crop down so more of the lower body is visible.
+## What I'll do
 
-### Change
+1. **Save the Drive folder to project memory** at `mem://references/image-drive.md`:
+   - Folder URL: `https://drive.google.com/drive/folders/1bfp-GM0lJmQp2Qx5vMILCzTgs9iwHVtH`
+   - Folder ID: `1bfp-GM0lJmQp2Qx5vMILCzTgs9iwHVtH`
+   - Purpose: source of truth for all `my-story` page images (VaisesikaDasa1–14, Prabhupada3/7, manifesto3, book cover, signature, etc.)
+   - Update `mem://index.md` Core to note: "All my-story images live in the shared Drive folder — pull via Google Drive connector before referencing in code."
 
-In `src/routes/my-story.tsx`, update the mobile `heroImageStyles`:
+2. **Connect the Google Drive connector** to this project (using `standard_connectors--connect` with `connector_id: google_drive`). You'll be prompted to pick/authorize a Google account that has access to the folder.
 
-- `object-position: 62% 32%` → `object-position: 62% 50%`
+3. **Pull images on demand** — once connected, when you ask for a specific image (e.g. "use VaisesikaDasa5 in the hero"), I'll:
+   - Query the folder via the connector gateway
+   - Download the file straight into `src/assets/my-story/`
+   - Wire it into the component via a normal Vite import
 
-Y% goes from 32% (image pulled up, showing more sky/top) to 50% (centered vertically, showing the full seated pose). X% stays at 62% so horizontal framing is unchanged.
+## Important caveat about "public" Drive folders
 
-Desktop rules (`min-width: 1024px` and `1800px`) stay untouched.
+Even though the folder is shared "anyone with the link," the Google Drive connector authenticates as **your Google account**, not anonymously. So the account you connect just needs to be able to see the folder — which it will, since it's public. No extra permission setup needed on your side.
 
-No other files affected.
+## What I won't do in this step
+
+- I won't bulk-download all images right now. That's wasteful if we only end up using a subset. I'll pull each image the first time it's referenced and cache it in `src/assets/my-story/`.
+- I won't touch `src/routes/my-story.tsx` in this plan — pure setup only.
+
+## After you approve
+
+Approve this plan → I'll save the memory file and trigger the Drive connector picker. Then on the next message you can say things like *"put VaisesikaDasa3 next to the manifesto section"* and I'll fetch + wire it in one step.
