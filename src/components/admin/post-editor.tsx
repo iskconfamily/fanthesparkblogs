@@ -713,66 +713,56 @@ blog_html      = ${blogHtml.length} chars`}
 
             <div className="mt-6 pt-4 border-t border-border space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide">
-                Mailchimp Transactional (test)
+                Mailchimp Campaign
               </p>
+              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                Uses template <code>#10000067</code> (audience <code>a97040f5e0</code>). The post's
+                rendered HTML is injected into the <code>mc:edit="blog_html"</code> region.
+              </p>
+
               <div className="space-y-1.5">
                 <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Mailchimp template
+                  Send test email
                 </label>
-                <select
-                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  value={selectedMcSlug}
-                  onChange={(e) => setSelectedMcSlug(e.target.value)}
-                  disabled={!!busy || mcTemplates.length === 0}
+                <Input
+                  type="email"
+                  value={mcTestEmail}
+                  onChange={(e) => setMcTestEmail(e.target.value)}
+                  placeholder="you@example.com"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  onClick={sendMailchimpTestEmail}
+                  disabled={!!busy || !id || !mcTestEmail.trim() || !blogHtml}
                 >
-                  {mcTemplates.length === 0 && <option value="">Loading…</option>}
-                  {!selectedMcSlug && <option value="">— select —</option>}
-                  {mcTemplates.map((t) => (
-                    <option key={t.slug} value={t.slug}>
-                      {t.name} ({t.slug})
-                    </option>
-                  ))}
-                </select>
-                {mcTemplatesError && (
-                  <p className="text-[11px] text-destructive break-words">{mcTemplatesError}</p>
-                )}
+                  Send test email
+                </Button>
+              </div>
+
+              <div className="pt-2 border-t border-border space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Live broadcast
+                </label>
+                <Button
+                  size="sm"
+                  className="w-full"
+                  onClick={sendMailchimpToAudience}
+                  disabled={!!busy || !id || !blogHtml}
+                >
+                  🚀 Send to all subscribers
+                </Button>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
-                  blog_html is injected into the template's <code>mc:edit="blog_html"</code> editable region.
+                  Triggers a live Mailchimp campaign to your entire audience. You'll be asked to confirm.
                 </p>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Recipients (comma-separated, max 25)
-                </label>
-                <Input
-                  value={mcRecipients}
-                  onChange={(e) => setMcRecipients(e.target.value)}
-                  placeholder="you@example.com, another@example.com"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Tracking tag (optional)
-                </label>
-                <Input
-                  value={mcTrackingTag}
-                  onChange={(e) => setMcTrackingTag(e.target.value)}
-                  placeholder="e.g. preview-batch-1"
-                />
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full"
-                onClick={sendMailchimpTest}
-                disabled={!!busy || !id || !selectedMcSlug || !mcRecipients.trim() || !blogHtml}
-              >
-                Send Mailchimp test
-              </Button>
+
               {mcMsg && (
                 <p className="text-[11px] text-muted-foreground break-words">{mcMsg}</p>
               )}
             </div>
+
           </div>
         </aside>
       </div>
