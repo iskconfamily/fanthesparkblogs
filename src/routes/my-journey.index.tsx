@@ -58,13 +58,20 @@ interface TileProps {
   title: string;
   teaser: string;
   cta: string;
+  imagePosition?: string;
 }
 
-function JourneyTile({ to, image, imageAlt, title, teaser, cta }: TileProps) {
+function JourneyTile({ to, image, imageAlt, title, teaser, cta, imagePosition }: TileProps) {
   return (
     <Link to={to} className="mj-tile group">
       <div className="mj-tile-img-wrap">
-        <img src={image} alt={imageAlt} className="mj-tile-img" loading="lazy" />
+        <img
+          src={image}
+          alt={imageAlt}
+          className="mj-tile-img"
+          loading="lazy"
+          style={imagePosition ? { objectPosition: imagePosition } : undefined}
+        />
       </div>
       <h2
         className="mt-6 mb-3"
@@ -161,6 +168,7 @@ function MyJourneyHub() {
               title="My Story"
               teaser="When I was a child, I was deeply curious about the mystery of life."
               cta="Read My Story"
+              imagePosition="30% 35%"
             />
             <JourneyTile
               to="/my-journey/my-guru"
