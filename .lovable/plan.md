@@ -1,49 +1,48 @@
-## Decision
+# Plan — My Story Hero + Author Byline
 
-- **Layout pattern (web layout, all non-blog pages):** Option C — full-width sections, prose constrained to ~720px inside.
-- **Photos:** Yes, both uploaded images work well — they bookend the narrative (opening calm/meditation, closing devotion).
+## Terminology going forward
+- The current `/` route is now called the **Blog Homepage** (not "homepage")
+- A future **Home** page will be built later and will eventually become the real homepage
+- This plan does NOT touch the Blog Homepage — we'll discuss its hero separately
 
-## Photo placement on /my-story
+## Decisions locked in
+- **My Story hero**: `VaisesikaDasa.png` (meditation, garden, wide cinematic)
+- **Author byline on blog posts**: Yes — small circular portrait + name + date
+- **Blog Homepage**: untouched this round
+- **AI blog images**: kept as-is
+- **`FTS_LogoStamp_WithBackground-02-2.png`**: saved to assets for future use, not placed yet
 
-- **`image-78.png` (forest, meditative, "MY STORY" already overlaid on right):**
-  Full-bleed **hero section** at the top of the page. Title "My Story" rendered by us (not from image) over the left side of the photo with a soft warm gradient overlay so text stays legible. Eyebrow "My Journey" above. Crop the image to ~60vh on desktop, ~50vh on mobile. We'll mask/hide the right side that already has "MY STORY" baked in by using `object-position: left` and our overlay covering that area — or crop it cleanly.
-  - Save to: `src/assets/my-story/hero-forest.jpg`
+## What gets built
 
-- **`image-79.png` (white robes, temple pillars, namaste):**
-  Full-bleed section near the **end** of the narrative, just before the closing CTA. Acts as a visual breath after the long read. Caption/eyebrow underneath optional.
-  - Save to: `src/assets/my-story/temple-namaste.jpg`
+### 1. Asset imports
+- `user-uploads://VaisesikaDasa.png` → `src/assets/my-story/vaisesika-meditation.png`
+- `user-uploads://VaisesikaDasa10.png` → `src/assets/vaisesika-portrait.png` (author byline)
+- `user-uploads://FTS_LogoStamp_WithBackground-02-2.png` → `src/assets/fts-logo-stamp-hero.png` (parked for the future Home page)
 
-## Page structure (Option C applied)
+### 2. My Story page hero
+Replace the broken AI forest image (`src/assets/my-story/hero-forest.jpg`) with `vaisesika-meditation.png`:
+- Full-bleed hero, ~70vh
+- Subtle dark gradient overlay at the bottom for headline legibility
+- Headline + intro paragraph anchored bottom-left
+- Existing layout, type, and copy preserved — only the image swaps
 
+### 3. Author byline on blog posts
+Add to the top of each blog post (under the title, above the body):
+
+```text
+[●] Vaiśeṣika Dāsa  ·  May 23, 2026  ·  6 min read
 ```
-<SiteLayoutWeb>
-  <section> ← full-bleed hero with forest photo + title overlay
-  <section> ← cream background band, prose 720px: lead paragraph
-  <section> ← full-bleed YouTube embed in a 960px container
-  <section> ← cream background band, prose 720px: body + pull-quote + more body
-  <section> ← full-bleed temple photo
-  <section> ← prose 720px: final 2 paragraphs + dots + CTA
-</SiteLayoutWeb>
-```
 
-Each `<section>` controls its own background and inner max-width. Header/footer untouched.
+- 40px circular crop of `vaisesika-portrait.png`
+- Name in body font, muted color for date + read time
+- New reusable component `src/components/blog/AuthorByline.tsx` so future posts get it automatically
 
-## Files
+## Technical notes
+- Images go into `src/assets/` (ES6 imports, bundled + hashed)
+- No data model changes, no new routes, no backend work
+- `hero-forest.jpg` left in place (not deleted) in case we want to revert
 
-- `src/routes/my-story.tsx` — restructure into full-bleed sections; keep all existing copy verbatim
-- `src/assets/my-story/hero-forest.jpg` — copy from `user-uploads://image-78.png`
-- `src/assets/my-story/temple-namaste.jpg` — copy from `user-uploads://image-79.png`
-
-## Pattern for future web-layout pages (Contact, About, etc.)
-
-Same recipe: page = stack of full-width `<section>` elements, each with its own inner `max-w-[720px]` (prose) or `max-w-[1200px]` (wider blocks like image grids or two-column). I'll apply this to `/contact` in a follow-up if you want.
-
-## Not touched
-
-Blog (`SiteLayout`, sidebar, post pages, RSS, admin), header, footer, design tokens, DB.
-
-## Note on the forest image
-
-The uploaded crop already has "MY STORY" + dots typeset into the photo on the right. Two options — I'll default to **(a)** unless you say otherwise:
-- **(a)** Use the image as background, crop/position so the baked-in text falls off-canvas or is covered by our overlay, and render our own title on the left in brand typography. Consistent with the rest of the site.
-- **(b)** Use the image as-is with the baked-in text visible. Faster but the typography won't match brand fonts and the text isn't selectable/SEO-readable.
+## Out of scope (later)
+- Blog Homepage hero direction (using the logo stamp or otherwise)
+- New `/home` page build
+- Brand kit doc, manifesto page, favicon, asset cleanup
