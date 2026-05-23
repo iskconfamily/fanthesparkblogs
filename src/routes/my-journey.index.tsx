@@ -83,13 +83,14 @@ function JourneyTile({ to, image, imageAlt, title, teaser, cta }: TileProps) {
         className="mb-5"
         style={{
           fontFamily: "var(--font-serif-body)",
+          fontStyle: "italic",
           fontSize: 17,
           lineHeight: 1.6,
           color: "var(--muted-foreground)",
           maxWidth: 420,
         }}
       >
-        {teaser}
+        “{teaser}”
       </p>
       <span
         style={{
