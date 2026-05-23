@@ -63,9 +63,12 @@ const NAV: NavItem[] = [
       { label: "Transformational Stories", to: "/serve/transformational-stories" },
     ],
   },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" },
 ];
+
+const LOGIN_LINK = {
+  label: "Login",
+  href: "https://fanthespark.elvanto.net/login/",
+};
 
 export function SiteHeaderWeb() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -212,6 +215,21 @@ export function SiteHeaderWeb() {
               </Link>
             ),
           )}
+          <a
+            href={LOGIN_LINK.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="uppercase whitespace-nowrap no-underline transition-colors hover:opacity-70"
+            style={{
+              fontFamily: "var(--font-meta)",
+              fontSize: 12,
+              letterSpacing: "0.18em",
+              color: "var(--brand-title-color)",
+              borderBottom: "none",
+            }}
+          >
+            {LOGIN_LINK.label}
+          </a>
         </nav>
 
         {/* Mobile hamburger */}
@@ -271,6 +289,22 @@ export function SiteHeaderWeb() {
                   </Link>
                 );
               })}
+              <a
+                href={LOGIN_LINK.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileOpen(false)}
+                className="uppercase no-underline"
+                style={{
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 14,
+                  letterSpacing: "0.18em",
+                  color: "var(--brand-title-color)",
+                  borderBottom: "none",
+                }}
+              >
+                {LOGIN_LINK.label}
+              </a>
             </nav>
           </SheetContent>
         </Sheet>
