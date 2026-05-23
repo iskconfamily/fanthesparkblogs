@@ -342,7 +342,7 @@ async function createAndPrepareCampaign(
         title: `Blog: ${post.title} [${post.id.slice(0, 8)}]`,
         from_name: MC_FROM_NAME,
         reply_to: MC_REPLY_TO,
-        to_name: "*|FNAME|*|*|EMAIL|*|*",
+        to_name: "*|IF:FNAME|**|FNAME|**|ELSE:|*Friend*|END:IF|*",
       },
     },
   })) as { id: string };
