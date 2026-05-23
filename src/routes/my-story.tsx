@@ -86,7 +86,7 @@ function Prose({
   children: React.ReactNode;
   tight?: "top" | "bottom" | "both";
 }) {
-  const pt = tight === "top" || tight === "both" ? "pt-4 sm:pt-8" : "pt-10 sm:pt-12";
+  const pt = tight === "top" || tight === "both" ? "pt-4 sm:pt-8" : "pt-6 sm:pt-12";
   const pb = tight === "bottom" || tight === "both" ? "pb-4 sm:pb-8" : "pb-10 sm:pb-12";
   return (
     <section style={{ backgroundColor: "var(--background)" }}>
