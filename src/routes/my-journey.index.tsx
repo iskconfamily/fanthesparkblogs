@@ -134,7 +134,7 @@ function MyJourneyHub() {
             My Journey
           </p>
           <h1
-            className="mb-6"
+            className="mb-5"
             style={{
               fontFamily: "var(--font-serif-display)",
               fontSize: "clamp(44px, 6.5vw, 76px)",
@@ -146,20 +146,6 @@ function MyJourneyHub() {
           >
             My Journey
           </h1>
-          <p
-            className="mx-auto"
-            style={{
-              fontFamily: "var(--font-serif-body)",
-              fontSize: 19,
-              lineHeight: 1.6,
-              color: "var(--foreground)",
-              maxWidth: 560,
-            }}
-          >
-            Two threads run through the life of Vaisesika Dasa — the personal search
-            that brought him to bhakti as a teenager, and the teacher whose shelter
-            shaped every step that followed.
-          </p>
           <Dots />
         </div>
       </section>
