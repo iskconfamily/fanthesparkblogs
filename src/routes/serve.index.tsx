@@ -5,9 +5,9 @@ export const Route = createFileRoute("/serve/")({
   head: () => ({
     meta: [
       { title: "Serve — Fan The Spark" },
-      { name: "description", content: "Ways to take part — volunteer your time, give, or share a transformational story." },
+      { name: "description", content: "Meet the servant leaders, give back, volunteer your time and skills, or read transformational stories of bhakti in action." },
       { property: "og:title", content: "Serve — Fan The Spark" },
-      { property: "og:description", content: "Ways to take part — volunteer your time, give, or share a transformational story." },
+      { property: "og:description", content: "Meet the servant leaders, give back, volunteer your time and skills, or read transformational stories of bhakti in action." },
     ],
     links: [{ rel: "canonical", href: "https://fanthesparkblogs.lovable.app/serve" }],
   }),
@@ -15,13 +15,14 @@ export const Route = createFileRoute("/serve/")({
     <HubPage
       eyebrow="Serve"
       title="Serve"
-      intro="Service is the heart of bhakti. Here are a few ways to take part."
+      intro="In the yogic tradition, selfless service — seva — is the most beneficial method for deepening what we've received as a gift from spirit. Here are a few ways to take part."
       links={[
-        { to: "/serve/volunteer", label: "Volunteer", blurb: "Lend your time and skills — design, tech, writing, events, more." },
-        { to: "/serve/give", label: "Give", blurb: "Support the work of sharing bhakti with seekers around the world." },
-        { to: "/serve/transformational-stories", label: "Transformational Stories", blurb: "How bhakti has changed lives — read, and share your own." },
+        { to: "/serve/servant-leaders", label: "Servant Leaders", blurb: "Meet the team of platinum, gold, silver, bronze and copper-level selfless servants who keep this work alive." },
+        { to: "/serve/give", label: "Give", blurb: "Become a digital donor and help sustain the daily production of classes, podcasts, and bhakti teachings." },
+        { to: "/serve/volunteer", label: "Volunteer", blurb: "Lend your time and skills — digital, retreats, books, conscious cooking, and the monthly programs." },
+        { to: "/serve/transformational-stories", label: "Transformational Stories", blurb: "Read how bhakti has changed lives — and share your own." },
       ]}
-      contactCategory="Volunteer"
+      contactCategory="Serve"
     />
   ),
 });
