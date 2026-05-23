@@ -63,9 +63,12 @@ const NAV: NavItem[] = [
       { label: "Transformational Stories", to: "/serve/transformational-stories" },
     ],
   },
-  { label: "About", to: "/about" },
-  { label: "Contact", to: "/contact" },
 ];
+
+const LOGIN_LINK = {
+  label: "Login",
+  href: "https://fanthespark.elvanto.net/login/",
+};
 
 export function SiteHeaderWeb() {
   const [isScrolled, setIsScrolled] = useState(false);
