@@ -450,97 +450,22 @@ export function PostEditor({ existing }: { existing?: DbBlogPost }) {
             )}
             {announcementSentAt && (
               <p className="text-[11px] text-muted-foreground">
-                Last sent {new Date(announcementSentAt).toLocaleString()} to{" "}
-                {announcementCount ?? "?"} recipient
-                {announcementCount === 1 ? "" : "s"}.
+                Last campaign sent {new Date(announcementSentAt).toLocaleString()}.
               </p>
             )}
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Send test to
-              </label>
-              <Input
-                type="email"
-                value={testEmail}
-                onChange={(e) => setTestEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full"
-                onClick={sendTest}
-                disabled={!!busy || !id}
-              >
-                Send test email
-              </Button>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo transactional template
-              </label>
-              <select
-                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedTemplateId ?? ""}
-                onChange={(e) =>
-                  setSelectedTemplateId(e.target.value ? Number(e.target.value) : null)
-                }
-                disabled={!!busy || brevoTemplates.length === 0}
-              >
-                {brevoTemplates.length === 0 && <option value="">Loading…</option>}
-                {selectedTemplateId == null && <option value="">— select —</option>}
-                {brevoTemplates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    #{t.id} {t.name}{t.isActive ? "" : " (inactive)"}
-                  </option>
-                ))}
-              </select>
-              {templatesError && (
-                <p className="text-[11px] text-destructive break-words">{templatesError}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                Brevo list (recipients for broadcast)
-              </label>
-              <select
-                className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
-                value={selectedListId ?? ""}
-                onChange={(e) =>
-                  setSelectedListId(e.target.value ? Number(e.target.value) : null)
-                }
-                disabled={!!busy || brevoLists.length === 0}
-              >
-                {brevoLists.length === 0 && <option value="">Loading…</option>}
-                {selectedListId == null && <option value="">— select —</option>}
-                {brevoLists.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name} — {l.totalSubscribers}
-                  </option>
-                ))}
-              </select>
-              {listsError && (
-                <p className="text-[11px] text-destructive break-words">{listsError}</p>
-              )}
-              <p className="text-[10px] text-muted-foreground leading-relaxed">
-                Broadcast fetches all contacts from this list and sends one transactional email per recipient via Brevo /smtp/email with {`{ templateId, to, params }`}. No campaign is created.
-              </p>
-            </div>
-
 
             <div className="space-y-1 border border-border rounded p-2 bg-background">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Params sent to Brevo (use as {`{{ params.X }}`})
+                Mailchimp content payload
               </p>
               <pre className="text-[10px] leading-snug whitespace-pre-wrap break-all text-muted-foreground font-mono">
-{`subject        = ${title}
-title          = ${title}
-excerpt        = ${(excerpt || "").slice(0, 80)}${excerpt.length > 80 ? "…" : ""}
-url            = ${SITE_URL_PREVIEW}/post/${previewSlug}
-author         = ${author}
-featured_image = ${featuredImage || "(none)"}
-slug           = ${previewSlug}
-blog_html      = ${blogHtml.length} chars`}
+{`subject_line  = ${title}
+preview_text  = ${title}
+from_name     = ${author || "Fan The Spark"}
+reply_to      = newsletter@fanthespark.com
+template_id   = 10000067
+audience_id   = a97040f5e0
+blog_html     = ${blogHtml.length} chars`}
               </pre>
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground pt-1">
                 blog_html preview (first 300 chars)
@@ -552,24 +477,11 @@ blog_html      = ${blogHtml.length} chars`}
                 <p className="text-[11px] text-destructive break-words">{blogHtmlError}</p>
               )}
               <p className="text-[10px] text-muted-foreground leading-relaxed pt-1">
-                In Brevo templates, render the full body with:{" "}
-                <code>{`{% autoescape off %}{{ params.blog_html }}{% endautoescape %}`}</code>
+                The rendered post HTML is inserted into the template section named <code>blog_html</code>.
               </p>
             </div>
-            <Button
-              size="sm"
-              className="w-full"
-              onClick={sendBroadcast}
-              disabled={!!busy || !id || selectedTemplateId == null || selectedListId == null || !blogHtml}
-            >
-              {announcementSentAt ? "Resend broadcast" : "Send broadcast"}
-            </Button>
 
-            {emailMsg && (
-              <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
-            )}
-
-            <div className="mt-6 pt-4 border-t border-border space-y-3">
+            <div className="mt-2 pt-2 border-t border-border space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide">
                 Mailchimp Campaign
               </p>
