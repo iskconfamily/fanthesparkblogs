@@ -83,6 +83,45 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_submissions: {
+        Row: {
+          category: string
+          consent: boolean
+          created_at: string
+          email: string
+          id: string
+          ip_address: string | null
+          message: string
+          name: string
+          page_path: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          category: string
+          consent?: boolean
+          created_at?: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          message: string
+          name: string
+          page_path?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          category?: string
+          consent?: boolean
+          created_at?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          message?: string
+          name?: string
+          page_path?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

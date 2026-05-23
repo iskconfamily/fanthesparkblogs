@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
+import { ContactSection } from "@/components/contact-section";
 import dotsUrl from "@/assets/my-story/dots.png";
 import heroForest from "@/assets/my-story/vaisesika-meditation.png";
 import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg";
@@ -314,27 +315,9 @@ function MyStoryPage() {
           I appreciate the time you have taken to hear my story. Now I would love to hear your
           story. Please drop me a note.
         </Para>
-
-        <Dots />
-
-        <div className="text-center mt-10">
-          <Link
-            to="/contact"
-            className="inline-block no-underline"
-            style={{
-              fontFamily: "var(--font-meta)",
-              fontSize: 12,
-              letterSpacing: "0.24em",
-              textTransform: "uppercase",
-              color: "var(--brand-title-color)",
-              borderBottom: "1px solid var(--brand-gold)",
-              paddingBottom: 4,
-            }}
-          >
-            Share your story
-          </Link>
-        </div>
       </Prose>
+
+      <ContactSection />
     </SiteLayoutWeb>
   );
 }
