@@ -718,6 +718,69 @@ blog_html      = ${blogHtml.length} chars`}
             {emailMsg && (
               <p className="text-[11px] text-muted-foreground break-words">{emailMsg}</p>
             )}
+
+            <div className="mt-6 pt-4 border-t border-border space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide">
+                Mailchimp Transactional (test)
+              </p>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Mailchimp template
+                </label>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  value={selectedMcSlug}
+                  onChange={(e) => setSelectedMcSlug(e.target.value)}
+                  disabled={!!busy || mcTemplates.length === 0}
+                >
+                  {mcTemplates.length === 0 && <option value="">Loading…</option>}
+                  {!selectedMcSlug && <option value="">— select —</option>}
+                  {mcTemplates.map((t) => (
+                    <option key={t.slug} value={t.slug}>
+                      {t.name} ({t.slug})
+                    </option>
+                  ))}
+                </select>
+                {mcTemplatesError && (
+                  <p className="text-[11px] text-destructive break-words">{mcTemplatesError}</p>
+                )}
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  blog_html is injected into the template's <code>mc:edit="blog_html"</code> editable region.
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Recipients (comma-separated, max 25)
+                </label>
+                <Input
+                  value={mcRecipients}
+                  onChange={(e) => setMcRecipients(e.target.value)}
+                  placeholder="you@example.com, another@example.com"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  Tracking tag (optional)
+                </label>
+                <Input
+                  value={mcTrackingTag}
+                  onChange={(e) => setMcTrackingTag(e.target.value)}
+                  placeholder="e.g. preview-batch-1"
+                />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={sendMailchimpTest}
+                disabled={!!busy || !id || !selectedMcSlug || !mcRecipients.trim() || !blogHtml}
+              >
+                Send Mailchimp test
+              </Button>
+              {mcMsg && (
+                <p className="text-[11px] text-muted-foreground break-words">{mcMsg}</p>
+              )}
+            </div>
           </div>
         </aside>
       </div>
