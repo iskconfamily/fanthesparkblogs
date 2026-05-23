@@ -115,17 +115,12 @@ export function PostArticle({
     <>
       <div className="mb-3 max-w-[560px]">
         <HeadingTag className="mb-1">{titleNode}</HeadingTag>
-        <p
-          className="text-xs uppercase tracking-[0.18em] text-muted-foreground"
-          style={{ fontFamily: "var(--font-meta)" }}
-        >
-          {formatDate(post.date)}
-        </p>
       </div>
-      <Byline author={post.author} />
+      <Byline author={post.author} date={formatDate(post.date)} />
 
       <ArticleBody blocks={blocks} />
       <div className="clear-both" />
     </>
   );
+
 }
