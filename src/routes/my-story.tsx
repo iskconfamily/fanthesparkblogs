@@ -29,17 +29,17 @@ const heroImageStyles = `
   .my-story-hero-image {
     display: block;
     width: 100%;
-    height: 78vh;
-    min-height: 520px;
-    max-height: 760px;
+    aspect-ratio: 4 / 5;
+    height: auto;
+    max-height: 560px;
     object-fit: cover;
-    object-position: 50% 30%;
+    object-position: 52% 32%;
   }
 
   @media (min-width: 1024px) {
     .my-story-hero-image {
+      aspect-ratio: auto;
       height: auto;
-      min-height: 0;
       max-height: min(70vh, 760px);
       object-fit: cover;
       object-position: center 18%;
