@@ -123,6 +123,3 @@ function EventSection({
     </section>
   );
 }
-
-// Re-export Link to avoid unused-import warning if needed later.
-export { Link };
