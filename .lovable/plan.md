@@ -1,48 +1,34 @@
-# Plan — My Story Hero + Author Byline
 
-## Terminology going forward
-- The current `/` route is now called the **Blog Homepage** (not "homepage")
-- A future **Home** page will be built later and will eventually become the real homepage
-- This plan does NOT touch the Blog Homepage — we'll discuss its hero separately
+Scope: `src/routes/my-story.tsx` only. No blog files touched. No business logic changes.
 
-## Decisions locked in
-- **My Story hero**: `VaisesikaDasa.png` (meditation, garden, wide cinematic)
-- **Author byline on blog posts**: Yes — small circular portrait + name + date
-- **Blog Homepage**: untouched this round
-- **AI blog images**: kept as-is
-- **`FTS_LogoStamp_WithBackground-02-2.png`**: saved to assets for future use, not placed yet
+### 1. Revert desktop hero to prior centered framing
 
-## What gets built
+In the `heroImageStyles` block:
+- `@media (min-width: 1024px)` → `max-height: min(70vh, 760px)`, `object-fit: cover`, `object-position: center 18%` (the framing you approved before the recent shift).
+- `@media (min-width: 1800px) and (min-aspect-ratio: 2/1)` → `max-height: 74vh`, `object-position: center 24%`.
 
-### 1. Asset imports
-- `user-uploads://VaisesikaDasa.png` → `src/assets/my-story/vaisesika-meditation.png`
-- `user-uploads://VaisesikaDasa10.png` → `src/assets/vaisesika-portrait.png` (author byline)
-- `user-uploads://FTS_LogoStamp_WithBackground-02-2.png` → `src/assets/fts-logo-stamp-hero.png` (parked for the future Home page)
+Net effect on 16" laptop/desktop: identical to the version you said looked good earlier.
 
-### 2. My Story page hero
-Replace the broken AI forest image (`src/assets/my-story/hero-forest.jpg`) with `vaisesika-meditation.png`:
-- Full-bleed hero, ~70vh
-- Subtle dark gradient overlay at the bottom for headline legibility
-- Headline + intro paragraph anchored bottom-left
-- Existing layout, type, and copy preserved — only the image swaps
+### 2. Mobile hero: center on the person, not fit-whole-image
 
-### 3. Author byline on blog posts
-Add to the top of each blog post (under the title, above the body):
+Right now mobile uses `height: auto` (pure no-crop), which is why the hero feels small and the person is shrunk into a wide letterbox. Original site uses a taller portrait crop centered on the subject.
 
-```text
-[●] Vaiśeṣika Dāsa  ·  May 23, 2026  ·  6 min read
-```
+Add a mobile-only block (default styles, overridden at `min-width: 1024px`):
+- `.my-story-hero-image` on mobile → `height: 78vh`, `min-height: 520px`, `max-height: 760px`, `object-fit: cover`, `object-position: 50% 30%` (centers on head/torso — the meditating subject).
+- This makes the hero a proper tall portrait frame on phones, matching the original site's feel, with the person centered.
 
-- 40px circular crop of `vaisesika-portrait.png`
-- Name in body font, muted color for date + read time
-- New reusable component `src/components/blog/AuthorByline.tsx` so future posts get it automatically
+Title overlay stays bottom-left with the existing faint text shadow. No gradient wash added.
 
-## Technical notes
-- Images go into `src/assets/` (ES6 imports, bundled + hashed)
-- No data model changes, no new routes, no backend work
-- `hero-forest.jpg` left in place (not deleted) in case we want to revert
+### 3. Tighten mobile spacing around the hero
 
-## Out of scope (later)
-- Blog Homepage hero direction (using the logo stamp or otherwise)
-- New `/home` page build
-- Brand kit doc, manifesto page, favicon, asset cleanup
+- Lead `Prose tight="bottom"` block: reduce top padding on mobile so the intro paragraph sits closer to the hero (`pt-6 sm:pt-10` instead of the current larger top padding inside `tight="bottom"`).
+- YouTube section: already `pt-2 pb-6` on mobile — keep as is.
+- Body `Prose tight="top"`: already tight on mobile — keep as is.
+
+### Files
+- `src/routes/my-story.tsx` — edit `heroImageStyles` CSS and the `Prose` `tight="bottom"` mobile padding.
+
+### Out of scope
+- Desktop layout beyond the revert.
+- Blog routes/components.
+- Image asset itself (no new crop file).
