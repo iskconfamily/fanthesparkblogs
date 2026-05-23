@@ -277,16 +277,13 @@ export function buildFullBlogEmailHtml(
     @media only screen and (max-width:620px) {
       .container { width:100% !important; }
       .px { padding-left:20px !important; padding-right:20px !important; }
-      .brand { font-size:26px !important; letter-spacing:0.18em !important; }
-      .brand-logo { width:52px !important; height:52px !important; }
+      .brand-logo { height:52px !important; }
     }
   `;
 
-  const brandStyle = `font-family:${FONT_DISPLAY};font-weight:500;font-size:34px;letter-spacing:0.22em;color:${C_FOREGROUND};text-decoration:none;text-transform:uppercase;line-height:1;vertical-align:middle;`;
-  const taglineStyle = `font-family:${FONT_META};font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:${C_MUTED_FG};margin-top:14px;text-align:center;`;
   const ctaStyle = `display:inline-block;padding:14px 28px;background:${C_PRIMARY};color:#ffffff;font-family:${FONT_META};font-size:11px;letter-spacing:0.28em;text-transform:uppercase;text-decoration:none;border-radius:2px;`;
-  const shareLabel = `font-family:${FONT_META};font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:${C_MUTED_FG};margin:0 0 14px 0;text-align:center;`;
-  const shareLink = `display:inline-block;padding:10px 18px;margin:0 4px;background:#ffffff;border:1px solid ${C_BORDER};color:${C_FOREGROUND};font-family:${FONT_META};font-size:11px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;border-radius:2px;`;
+  const shareLabel = `font-family:${FONT_META};font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:${C_MUTED_FG};margin:0 0 10px 0;text-align:center;`;
+  const shareLink = `font-family:${FONT_META};font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:${C_FOREGROUND};text-decoration:none;`;
   const footerText = `font-family:${FONT_META};font-size:11px;letter-spacing:0.12em;line-height:1.7;color:${C_MUTED_FG};text-align:center;`;
   const footerLink = `color:${C_MUTED_FG};text-decoration:underline;`;
 
@@ -319,11 +316,13 @@ ${body}
       </td></tr>
       <tr><td align="center" class="px" style="padding:8px 48px 40px 48px;border-top:1px solid ${C_BORDER};">
         <p style="${shareLabel}">Share this story</p>
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center"><tr>
-          <td><a href="${fbShare}" style="${shareLink}">Facebook</a></td>
-          <td><a href="${waShare}" style="${shareLink}">WhatsApp</a></td>
-          <td><a href="${mailShare}" style="${shareLink}">Email</a></td>
-        </tr></table>
+        <p style="margin:0;text-align:center;">
+          <a href="${fbShare}" style="${shareLink}">Facebook</a>
+          <span style="color:${C_BORDER};margin:1px 10px;">&middot;</span>
+          <a href="${waShare}" style="${shareLink}">WhatsApp</a>
+          <span style="color:${C_BORDER};margin:1px 10px;">&middot;</span>
+          <a href="${mailShare}" style="${shareLink}">Email</a>
+        </p>
       </td></tr>
       <tr><td class="px" style="padding:28px 48px 36px 48px;border-top:1px solid ${C_BORDER};background:${BG_OUTER};">
         <div style="${footerText}">
