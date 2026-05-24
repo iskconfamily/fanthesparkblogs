@@ -1,54 +1,32 @@
 ## Goal
 
-Keep the visual design and section flow of the first `/home` direction. Replace any invented author-style/editorial copy with approved wording from the current fanthespark.com site, or fall back to neutral labels.
+Match the `/home` hero to the current fanthespark.com hero: same light background image (the FTS logo stamp on the crowd-with-hands-raised plate) and same two CTAs.
 
-## Files touched
+## Changes (single file: `src/routes/home.tsx`, `Hero` component only)
 
-Only components under `src/components/home/` and `src/routes/home.tsx`. No design-token, layout, or routing changes.
+### Background image
+- Copy the uploaded `FTS_LogoStamp_WithBackground-01-4.png` into `src/assets/hero-stamp-background.png` and import it.
+- Replace the current full-bleed dark `prabhupada-with-devotees.jpg` + dark gradient overlay with this light stamp image as the hero background.
+- Use `background-color: #f2f0ea` (matches the light cream of the current site) behind it; image positioned `center top`, `object-fit: cover` on desktop, with enough height to show the stamp + the soft crowd silhouette below.
+- Remove the separate `<img src={stamp}>` mark and the dark `linear-gradient` overlay — the stamp is part of the background image itself on the live site.
 
-## Content changes by section
+### Copy (kept from approved welcome text)
+- Keep the existing approved welcome paragraph: "Welcome to the Fan The Spark website where you will find encouragement and support for expanding your book distribution, sadhana, and understanding of sastra. Click the links below to learn more."
+- Drop the large invented italic headline ("Welcome to the Fan The Spark website.") — the current site has no large H1; the welcome text itself sits beneath the stamp. Keep an `<h1>` for SEO but make it visually the welcome paragraph (or `sr-only` an H1 and render the welcome as a centered paragraph). Use the latter to match the live site exactly.
+- Remove the small "Fan The Spark · with Vaisesika Dasa" kicker — not present on the live hero.
 
-### 1. Hero (`hero.tsx`)
-- Replace invented tagline with the approved welcome text:
-  > "Welcome to the Fan The Spark website where you will find encouragement and support for expanding your book distribution, sadhana, and understanding of sastra. Click the links below to learn more."
-- Keep current hero image, stamp, and the two CTAs (Read the blog → `/wisdom/blog`, My Story → `/my-journey/my-story`).
+### CTAs (match live site)
+Replace the current "Read the blog" / "My story" buttons with the live-site pair:
+1. **Lord Chaitanya** → `/wisdom/lord`
+2. **Disciple of Srila Prabhupada** → `/my-journey/my-guru`
 
-### 2. Start Here (`quick-links.tsx`)
-- Card titles only — no invented subtitles:
-  - Ask Vaisesika Dasa → `/next-steps/ask`
-  - Small Groups Near You → `/next-steps/small-groups`
-  - Spiritual Retreats → `/next-steps/spiritual-retreat`
-  - Serve Selflessly → `/serve`
-- Remove any author-style blurbs beneath the labels. Keep iconography/visual treatment.
+Style them as solid orange/primary buttons (matching the live site's filled orange CTA look) using the existing `--primary` / brand-gold tokens; uppercase, generous padding, side-by-side.
 
-### 3. My Journey split (`journey-split.tsx`)
-- For both tiles (My Story, My Guru): show title + image + CTA only. Drop any invented excerpt text. (No approved short excerpt is available on the current site for these tiles.)
-
-### 4. Upcoming Events — unchanged (event data is from DB).
-
-### 5. Wisdom & Teachings (rename + reorder)
-- Rename section from "Watch & Listen" / "Books & Resources" grouping to **"Wisdom & Teachings"**.
-- Replace `watch-listen.tsx` + remove `books-resources.tsx` from this section; create a single `wisdom-teachings.tsx` containing three stacked subsections in this order:
-  1. **Watch** — latest YouTube embeds/thumbnails similar to current site. CTA: `Watch More →` linking to the FTS YouTube channel.
-  2. **Listen** — latest SoundCloud playlist embed(s). CTA: `Listen More →` `/wisdom/audio-playlists`.
-  3. **Read** — latest 3 published blog posts from DB (already loaded). Show image, category, title, date, and excerpt only when present on the post. CTA: `Read Articles →` `/wisdom/blog`.
-- Use neutral labels only: Watch / Listen / Read. No invented intro copy.
-- Books section is removed from the homepage in this pass (no approved short copy + user did not re-list it). Can be reintroduced later if desired.
-
-### 6. How Can I Be Of Service? (`serve-band.tsx`)
-- Use the existing approved heading "How Can I Be Of Service?" and keep the three link labels matching the current site (Give, Volunteer, Servant Leaders) pointing to `/serve/give`, `/serve/volunteer`, `/serve/servant-leaders`. No invented blurb copy.
-
-### 7. Transformational Stories (`servant-stories.tsx`)
-- Keep section but show only approved testimonial entries already present on the current FTS site. If none can be confirmed as approved, render the section with title + CTA to `/serve/transformational-stories` and omit invented quotes.
-
-## What stays the same
-- Overall layout, spacing, typography hierarchy, color treatment, full-bleed hero, section ordering apart from the Wisdom reorder above.
-- Loader (`getPublishedDbPosts` + `getUpcomingEvents`) and route metadata.
-- `SiteLayoutWeb` + `SiteFooter`.
+### Layout
+- Hero becomes a centered, light-themed section (not the dark full-bleed treatment). Stamp background fills the section; welcome text + 2 CTAs centered beneath.
+- Text color switches from cream (`#f8f1df`) to dark (`var(--foreground)`) for contrast against the light background.
 
 ## Out of scope
-- No nav/menu changes.
-- No new server functions.
-- No changes to `/` (blog index) or other routes.
-
-Ready to implement on approval.
+- No changes to any other section (Start Here, My Journey, Wisdom & Teachings, Service, Stories).
+- No routing/nav/menu changes.
+- The dark `prabhupada-with-devotees.jpg` asset stays in the repo (still used on `/my-journey/my-story`).
