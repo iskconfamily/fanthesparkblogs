@@ -82,67 +82,54 @@ function Hero() {
         position: "relative",
         width: "100%",
         backgroundColor: "#f2f0ea",
-        minHeight: "min(78vh, 680px)",
+        backgroundImage: `url(${heroStampBg})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center top",
+        backgroundSize: "100% auto",
+        paddingBottom: 80,
       }}
     >
       <div
-        className="relative mx-auto grid items-center grid-cols-1 md:grid-cols-[1.1fr_1fr]"
+        className="relative mx-auto flex flex-col items-center text-center"
         style={{
-          maxWidth: 1200,
-          minHeight: "min(78vh, 680px)",
-          padding: "48px 32px",
-          gap: 48,
+          maxWidth: 760,
+          padding: "0 24px",
+          paddingTop: "clamp(280px, 36vw, 460px)",
         }}
       >
-        <div style={{ maxWidth: 540, width: "100%", order: 2 }} className="md:!order-1">
-          <h1 className="sr-only">Fan The Spark</h1>
-          <p
-            style={{
-              fontFamily: "var(--font-meta)",
-              fontSize: 12,
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "#c2542a",
-              marginBottom: 24,
-            }}
-          >
-            Fan The Spark
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-serif-display)",
-              fontSize: "clamp(24px, 2.7vw, 34px)",
-              lineHeight: 1.3,
-              color: "#3a3623",
-              marginBottom: 36,
-            }}
-          >
-            Welcome to the Fan The Spark website where you will find
-            encouragement and support for expanding your book distribution,
-            sadhana, and understanding of sastra. Click the links below to
-            learn more.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" primary />
-            <HeroCTA
-              to="/my-journey/my-guru"
-              label="Disciple of Srila Prabhupada"
-            />
-          </div>
-        </div>
-        <div
-          className="flex justify-center md:justify-end"
-          style={{ order: 1 }}
+        <h1 className="sr-only">Fan The Spark</h1>
+        <p
+          style={{
+            fontFamily: "var(--font-meta)",
+            fontSize: 12,
+            letterSpacing: "0.28em",
+            textTransform: "uppercase",
+            color: "#c2542a",
+            marginBottom: 20,
+          }}
         >
-          <img
-            src={stamp}
-            alt="Fan The Spark"
-            style={{
-              width: "100%",
-              maxWidth: 440,
-              height: "auto",
-              display: "block",
-            }}
+          Fan The Spark
+        </p>
+        <p
+          style={{
+            fontFamily: "var(--font-serif-body)",
+            fontSize: "clamp(16px, 1.4vw, 19px)",
+            lineHeight: 1.6,
+            color: "#6b6448",
+            maxWidth: 620,
+            margin: "0 auto 40px",
+          }}
+        >
+          Welcome to the Fan The Spark website where you will find
+          encouragement and support for expanding your book distribution,
+          sadhana, and understanding of sastra. Click the links below to learn
+          more.
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" primary />
+          <HeroCTA
+            to="/my-journey/my-guru"
+            label="Disciple of Srila Prabhupada"
           />
         </div>
       </div>
