@@ -37,11 +37,12 @@ export const Route = createFileRoute("/home")({
     ],
   }),
   loader: async () => {
-    const [posts, upcoming] = await Promise.all([
+    const [posts, upcoming, videoIds] = await Promise.all([
       getPublishedDbPosts(),
       getUpcomingEvents({ data: { limit: 3 } }),
+      getLatestVideos(),
     ]);
-    return { posts, upcoming };
+    return { posts, upcoming, videoIds: videoIds.length ? videoIds : FALLBACK_VIDEO_IDS };
   },
   component: HomePage,
 });
