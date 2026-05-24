@@ -1,32 +1,34 @@
 ## Goal
 
-Match the `/home` hero to the current fanthespark.com hero: same light background image (the FTS logo stamp on the crowd-with-hands-raised plate) and same two CTAs.
+Keep the current **light FTS stamp background image** and the approved **welcome copy** — only change the layout around them. Move from centered → left-aligned editorial composition inspired by image-121 (eyebrow, large headline-style text block, CTA row, all flush left).
 
-## Changes (single file: `src/routes/home.tsx`, `Hero` component only)
+## Changes — `src/routes/home.tsx`, `Hero` only
 
-### Background image
-- Copy the uploaded `FTS_LogoStamp_WithBackground-01-4.png` into `src/assets/hero-stamp-background.png` and import it.
-- Replace the current full-bleed dark `prabhupada-with-devotees.jpg` + dark gradient overlay with this light stamp image as the hero background.
-- Use `background-color: #f2f0ea` (matches the light cream of the current site) behind it; image positioned `center top`, `object-fit: cover` on desktop, with enough height to show the stamp + the soft crowd silhouette below.
-- Remove the separate `<img src={stamp}>` mark and the dark `linear-gradient` overlay — the stamp is part of the background image itself on the live site.
+### Background (unchanged)
+- Keep `heroStampBg` (FTS_LogoStamp_WithBackground) as the section background.
+- Switch positioning so the stamp sits on the **right** side instead of dead center, freeing the left half for the text column. Use `background-position: right top` (or `right 5% top`) with `background-size: contain` so the stamp renders at a controlled size (~520–620px wide) and the soft crowd silhouette still bleeds across the section.
+- Keep `background-color: #f2f0ea`.
+- Section `min-height: min(80vh, 720px)`.
 
-### Copy (kept from approved welcome text)
-- Keep the existing approved welcome paragraph: "Welcome to the Fan The Spark website where you will find encouragement and support for expanding your book distribution, sadhana, and understanding of sastra. Click the links below to learn more."
-- Drop the large invented italic headline ("Welcome to the Fan The Spark website.") — the current site has no large H1; the welcome text itself sits beneath the stamp. Keep an `<h1>` for SEO but make it visually the welcome paragraph (or `sr-only` an H1 and render the welcome as a centered paragraph). Use the latter to match the live site exactly.
-- Remove the small "Fan The Spark · with Vaisesika Dasa" kicker — not present on the live hero.
+### Layout (new)
+- Container: `max-width: 1200px`, centered, `padding: 0 32px`.
+- Two-column flex on desktop (≥900px): left column ~52% holds text + CTAs; right column ~48% is empty space that lets the stamp (in the background) show through.
+- Mobile (<900px): single column, text stacks below the stamp. Use `background-position: center top` and `padding-top` large enough to clear the stamp.
 
-### CTAs (match live site)
-Replace the current "Read the blog" / "My story" buttons with the live-site pair:
-1. **Lord Chaitanya** → `/wisdom/lord`
-2. **Disciple of Srila Prabhupada** → `/my-journey/my-guru`
+### Left text column (top → bottom, all left-aligned)
+1. **Eyebrow**: `FAN THE SPARK` — uppercase, tracked `0.28em`, 12px, orange `#c2542a`, `var(--font-meta)`.
+2. **Welcome paragraph** (approved copy, used as the hero statement):
+   > "Welcome to the Fan The Spark website where you will find encouragement and support for expanding your book distribution, sadhana, and understanding of sastra. Click the links below to learn more."
+   - Rendered large: `var(--font-serif-display)`, `clamp(26px, 3vw, 38px)`, line-height ~1.3, color `#3a3623` (dark warm), max-width ~520px.
+   - SEO `<h1 className="sr-only">Fan The Spark</h1>` retained.
+3. **CTA row** (live-site pair, unchanged routes):
+   - **Lord Chaitanya** → `/wisdom/lord` — solid orange filled (current style kept).
+   - **Disciple of Srila Prabhupada** → `/my-journey/my-guru` — outlined ghost variant (1px solid `#c2542a`, transparent bg, orange text) to give visual hierarchy between primary and secondary.
 
-Style them as solid orange/primary buttons (matching the live site's filled orange CTA look) using the existing `--primary` / brand-gold tokens; uppercase, generous padding, side-by-side.
-
-### Layout
-- Hero becomes a centered, light-themed section (not the dark full-bleed treatment). Stamp background fills the section; welcome text + 2 CTAs centered beneath.
-- Text color switches from cream (`#f8f1df`) to dark (`var(--foreground)`) for contrast against the light background.
+### Vertical alignment
+- Left column vertically centered within the section (`align-items: center` on the flex row) so the text sits roughly at the stamp's vertical midpoint.
 
 ## Out of scope
-- No changes to any other section (Start Here, My Journey, Wisdom & Teachings, Service, Stories).
-- No routing/nav/menu changes.
-- The dark `prabhupada-with-devotees.jpg` asset stays in the repo (still used on `/my-journey/my-story`).
+- No copy changes beyond removing the centered layout.
+- No other section changes.
+- No routing/nav changes.
