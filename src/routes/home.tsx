@@ -105,7 +105,7 @@ function Hero() {
             letterSpacing: "0.28em",
             textTransform: "uppercase",
             color: "#c2542a",
-            marginBottom: 20,
+            marginBottom: 12,
           }}
         >
           Fan The Spark
