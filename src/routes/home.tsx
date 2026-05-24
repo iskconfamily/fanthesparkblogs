@@ -83,23 +83,34 @@ function Hero() {
         position: "relative",
         width: "100%",
         backgroundColor: "#f2f0ea",
-        backgroundImage: `linear-gradient(180deg, rgba(242,240,234,0) 60%, rgba(242,240,234,1) 100%), url(${heroCrowdBg})`,
-        backgroundRepeat: "no-repeat, no-repeat",
-        backgroundPosition: "center bottom, center bottom",
-        backgroundSize: "100% 100%, 100% auto",
+        backgroundImage: `url(${heroCrowdBg})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center bottom",
+        backgroundSize: "100% auto",
         paddingBottom: 100,
         overflow: "hidden",
       }}
     >
+      {/* Soften the crowd background so the emblem dominates */}
       <div
-        className="mx-auto flex justify-center"
-        style={{ paddingTop: 48 }}
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "#f2f0ea",
+          opacity: 0.55,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        className="relative mx-auto flex justify-center"
+        style={{ paddingTop: 56 }}
       >
         <img
           src={heroStamp}
           alt="Fan The Spark"
           style={{
-            width: "clamp(220px, 26vw, 340px)",
+            width: "clamp(300px, 38vw, 460px)",
             height: "auto",
             display: "block",
           }}
@@ -113,18 +124,6 @@ function Hero() {
         }}
       >
         <h1 className="sr-only">Fan The Spark</h1>
-        <p
-          style={{
-            fontFamily: "var(--font-meta)",
-            fontSize: 12,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "#c2542a",
-            marginBottom: 12,
-          }}
-        >
-          Fan The Spark
-        </p>
         <p
           style={{
             fontFamily: "var(--font-serif-body)",
@@ -141,7 +140,7 @@ function Hero() {
           more.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" primary />
+          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" />
           <HeroCTA
             to="/my-journey/my-guru"
             label="Disciple of Srila Prabhupada"
@@ -152,37 +151,29 @@ function Hero() {
   );
 }
 
-function HeroCTA({
-  to,
-  label,
-  primary,
-}: {
-  to: string;
-  label: string;
-  primary?: boolean;
-}) {
-  const style = primary
-    ? {
-        backgroundColor: "#e8623c",
-        color: "#ffffff",
-        border: "1px solid #e8623c",
-      }
-    : {
-        backgroundColor: "transparent",
-        color: "#c2542a",
-        border: "1px solid #c2542a",
-      };
+function HeroCTA({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
-      className="no-underline inline-block uppercase transition-opacity hover:opacity-90"
+      className="no-underline inline-block uppercase"
       style={{
-        ...style,
+        backgroundColor: "#faf2e8",
+        color: "#c2542a",
+        border: "1px solid #e8623c",
         padding: "16px 28px",
         fontFamily: "var(--font-meta)",
         fontSize: 12,
         letterSpacing: "0.22em",
         fontWeight: 600,
+        transition: "background-color 200ms ease, color 200ms ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "#e8623c";
+        e.currentTarget.style.color = "#ffffff";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "#faf2e8";
+        e.currentTarget.style.color = "#c2542a";
       }}
     >
       {label}
