@@ -700,11 +700,13 @@ function BooksFeature() {
         >
           {books.map((b) => (
             <Link
-              key={b.title}
-              to={b.to}
+              key={b.slug}
+              to="/wisdom/blog/$slug"
+              params={{ slug: b.slug }}
               className="no-underline block group"
               style={{ borderBottom: "none" }}
             >
+
               <div
                 style={{
                   aspectRatio: "3 / 4",
@@ -761,7 +763,8 @@ function BooksFeature() {
                   paddingBottom: 2,
                 }}
               >
-                Learn more →
+                Read More →
+
               </span>
             </Link>
           ))}
