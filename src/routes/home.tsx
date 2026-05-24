@@ -71,7 +71,7 @@ function HomePage() {
       <QuickLinks />
       <JourneySplit />
       <MyGuruFeature />
-      <LatestVideos />
+      <LatestVideos videoIds={initial.videoIds} />
       <LatestAudio />
       <LatestWritings posts={latest} />
       <MyStoryFeature />
