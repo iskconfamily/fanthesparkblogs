@@ -1,49 +1,54 @@
 ## Goal
 
-Build the redesigned homepage at a new route `/home`. Keep current `/` route (existing blog-style temp home) untouched. Pull richer book copy from existing book blog posts in the project; fall back to fanthespark.com / Amazon descriptions where needed.
+Keep the visual design and section flow of the first `/home` direction. Replace any invented author-style/editorial copy with approved wording from the current fanthespark.com site, or fall back to neutral labels.
 
-## Routing
+## Files touched
 
-- **Keep** `src/routes/index.tsx` as-is → still serves `/`.
-- **Create** `src/routes/home.tsx` → serves `/home`, contains the new editorial homepage.
-- `head()` on `/home` gets its own title/description/og metadata.
-- No nav/menu changes in this step — `/home` is reached by typing the URL. We can swap which route the menu points at after review.
+Only components under `src/components/home/` and `src/routes/home.tsx`. No design-token, layout, or routing changes.
 
-## Sections (unchanged from prior plan)
+## Content changes by section
 
-1. **Hero** — full-bleed `my-story/prabhupada-with-devotees.jpg`, dark gradient overlay, FTS stamp, tagline, two CTAs (Read the blog → `/wisdom/blog`, My Story → `/my-journey/my-story`).
-2. **Start Here** — 4-up card row (Ask VD, Small Groups, Spiritual Retreats, Serve Selflessly).
-3. **Latest Articles** — 3-up editorial grid from `getPublishedDbPosts()` merged with static posts.
-4. **My Journey preview** — two-tile split (My Story / My Guru).
-5. **Upcoming Events** — 3-up cards via `getUpcomingEvents({ limit: 3 })`.
-6. **Watch & Listen** — combined YouTube + audio playlists strip.
-7. **Books & Resources** — see updated content sourcing below.
-8. **How Can I Be Of Service?** — 3 inline links (Give, Volunteer, Servant Leaders).
-9. **Servant Leaders + Transformational Stories** — paired editorial row.
-10. **Footer** — unchanged `SiteFooter`.
+### 1. Hero (`hero.tsx`)
+- Replace invented tagline with the approved welcome text:
+  > "Welcome to the Fan The Spark website where you will find encouragement and support for expanding your book distribution, sadhana, and understanding of sastra. Click the links below to learn more."
+- Keep current hero image, stamp, and the two CTAs (Read the blog → `/wisdom/blog`, My Story → `/my-journey/my-story`).
 
-## Books section — content sourcing (updated)
+### 2. Start Here (`quick-links.tsx`)
+- Card titles only — no invented subtitles:
+  - Ask Vaisesika Dasa → `/next-steps/ask`
+  - Small Groups Near You → `/next-steps/small-groups`
+  - Spiritual Retreats → `/next-steps/spiritual-retreat`
+  - Serve Selflessly → `/serve`
+- Remove any author-style blurbs beneath the labels. Keep iconography/visual treatment.
 
-Order of preference for each book card's blurb:
-1. **Existing book blog post in this project** — scan `blog_posts` table + static posts for entries tagged/categorized as books (e.g. "Our Family Business", "The Four Questions"). Use the post's `excerpt` (or first paragraph of `content`) as the card blurb, and link "Learn more" to that blog post URL instead of generic `/wisdom/blog`.
-2. **fanthespark.com live copy** — if no matching blog post exists, pull the short book description from the current site's books section.
-3. **Amazon description** — fall back to the published Amazon book description, lightly trimmed.
+### 3. My Journey split (`journey-split.tsx`)
+- For both tiles (My Story, My Guru): show title + image + CTA only. Drop any invented excerpt text. (No approved short excerpt is available on the current site for these tiles.)
 
-Implementation: in the `/home` loader, after fetching posts, do a simple client-side match (slug/title/tag contains "four-questions" or "family-business") to attach `bookPostSlug` + `bookExcerpt` to each book card. Hard-coded fallback strings (sourced from fanthespark.com / Amazon) live in the books component for the no-match case.
+### 4. Upcoming Events — unchanged (event data is from DB).
 
-Cover images: existing book cover assets in `src/assets/` (or pull from the live site if missing — flagged before implementation if not found).
+### 5. Wisdom & Teachings (rename + reorder)
+- Rename section from "Watch & Listen" / "Books & Resources" grouping to **"Wisdom & Teachings"**.
+- Replace `watch-listen.tsx` + remove `books-resources.tsx` from this section; create a single `wisdom-teachings.tsx` containing three stacked subsections in this order:
+  1. **Watch** — latest YouTube embeds/thumbnails similar to current site. CTA: `Watch More →` linking to the FTS YouTube channel.
+  2. **Listen** — latest SoundCloud playlist embed(s). CTA: `Listen More →` `/wisdom/audio-playlists`.
+  3. **Read** — latest 3 published blog posts from DB (already loaded). Show image, category, title, date, and excerpt only when present on the post. CTA: `Read Articles →` `/wisdom/blog`.
+- Use neutral labels only: Watch / Listen / Read. No invented intro copy.
+- Books section is removed from the homepage in this pass (no approved short copy + user did not re-list it). Can be reintroduced later if desired.
 
-## Data wiring
+### 6. How Can I Be Of Service? (`serve-band.tsx`)
+- Use the existing approved heading "How Can I Be Of Service?" and keep the three link labels matching the current site (Give, Volunteer, Servant Leaders) pointing to `/serve/give`, `/serve/volunteer`, `/serve/servant-leaders`. No invented blurb copy.
 
-`/home` loader runs `Promise.all([getPublishedDbPosts(), getUpcomingEvents({ limit: 3 })])` via `ensureQueryData` + `useSuspenseQuery`. No new server functions.
+### 7. Transformational Stories (`servant-stories.tsx`)
+- Keep section but show only approved testimonial entries already present on the current FTS site. If none can be confirmed as approved, render the section with title + CTA to `/serve/transformational-stories` and omit invented quotes.
 
-## Components
+## What stays the same
+- Overall layout, spacing, typography hierarchy, color treatment, full-bleed hero, section ordering apart from the Wisdom reorder above.
+- Loader (`getPublishedDbPosts` + `getUpcomingEvents`) and route metadata.
+- `SiteLayoutWeb` + `SiteFooter`.
 
-Created under `src/components/home/`: hero, quick-links, latest-articles, journey-split, upcoming-events, watch-listen, books-resources, serve-band, servant-stories. Use existing design tokens. `/home` uses `SiteLayoutWeb` for full-bleed.
-
-## URLs after this change
-
-- `/` → existing blog page (unchanged)
-- `/home` → new redesigned homepage
+## Out of scope
+- No nav/menu changes.
+- No new server functions.
+- No changes to `/` (blog index) or other routes.
 
 Ready to implement on approval.

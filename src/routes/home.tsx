@@ -13,9 +13,9 @@ import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
 import guruImg from "@/assets/my-guru/prabhupada-portrait.jpg";
 import stamp from "@/assets/fts-logo-stamp-hero.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
-import postFamilyBusiness from "@/assets/post-family-business.jpg";
-import postFourQuestions from "@/assets/post-four-questions.jpg";
 import postServe from "@/assets/post-serve.jpg";
+
+const YOUTUBE_URL = "https://www.youtube.com/c/FanTheSpark";
 
 export const Route = createFileRoute("/home")({
   head: () => ({
@@ -24,13 +24,13 @@ export const Route = createFileRoute("/home")({
       {
         name: "description",
         content:
-          "A quiet place for hearing, chanting, and remembering Krishna — essays, talks, retreats, and small ways to serve, with Vaisesika Dasa.",
+          "Encouragement and support for expanding your book distribution, sadhana, and understanding of sastra — with Vaisesika Dasa.",
       },
       { property: "og:title", content: "Fan The Spark" },
       {
         property: "og:description",
         content:
-          "Sprinkling the water of hearing and chanting — long-form bhakti essays, retreats, and small ways to serve.",
+          "Encouragement and support for expanding your book distribution, sadhana, and understanding of sastra.",
       },
     ],
   }),
@@ -66,11 +66,9 @@ function HomePage() {
     <SiteLayoutWeb>
       <Hero />
       <QuickLinks />
-      <LatestArticles posts={latest} />
       <JourneySplit />
       {upcoming.length > 0 ? <UpcomingEvents events={upcoming} /> : null}
-      <WatchListen />
-      <BooksResources allPosts={all} />
+      <WisdomTeachings posts={latest} />
       <ServeBand />
       <ServantStories />
     </SiteLayoutWeb>
@@ -141,31 +139,31 @@ function Hero() {
         <h1
           style={{
             fontFamily: "var(--font-serif-display)",
-            fontSize: "clamp(40px, 6vw, 78px)",
-            lineHeight: 1.05,
+            fontSize: "clamp(34px, 5vw, 64px)",
+            lineHeight: 1.1,
             letterSpacing: "-0.01em",
             color: "#f8f1df",
-            maxWidth: 880,
+            maxWidth: 900,
             marginBottom: 26,
           }}
         >
-          Sprinkling the water of{" "}
-          <em style={{ fontStyle: "italic", color: "#f0d997" }}>hearing</em> and{" "}
-          <em style={{ fontStyle: "italic", color: "#f0d997" }}>chanting</em>.
+          Welcome to the{" "}
+          <em style={{ fontStyle: "italic", color: "#f0d997" }}>Fan The Spark</em>{" "}
+          website.
         </h1>
         <p
           style={{
             fontFamily: "var(--font-serif-body)",
             fontSize: 18,
             lineHeight: 1.7,
-            color: "rgba(248,241,223,0.82)",
-            maxWidth: 620,
+            color: "rgba(248,241,223,0.85)",
+            maxWidth: 680,
             marginBottom: 38,
           }}
         >
-          A quiet place to slow down, read a little, chant a little, and remember
-          what matters — guided by the teachings of Srila Prabhupada and his
-          student, Vaisesika Dasa.
+          Here you will find encouragement and support for expanding your book
+          distribution, sadhana, and understanding of sastra. Click the links
+          below to learn more.
         </p>
         <div className="flex flex-wrap gap-4">
           <HeroCTA to="/wisdom/blog" label="Read the blog" primary />
@@ -209,36 +207,23 @@ function HeroCTA({ to, label, primary }: { to: string; label: string; primary?: 
 /* ===================== QUICK LINKS ===================== */
 function QuickLinks() {
   const items = [
-    {
-      to: "/next-steps/ask",
-      kicker: "Begin a conversation",
-      title: "Ask Vaisesika Dasa",
-      blurb: "Send a question and receive a thoughtful reply.",
-    },
-    {
-      to: "/next-steps/small-groups",
-      kicker: "Find your sangha",
-      title: "Small Groups",
-      blurb: "Gather with practitioners near you for hearing & chanting.",
-    },
-    {
-      to: "/next-steps/spiritual-retreat",
-      kicker: "Step away",
-      title: "Spiritual Retreats",
-      blurb: "A few days of practice, simplicity, and shared silence.",
-    },
-    {
-      to: "/serve",
-      kicker: "Take part",
-      title: "Serve Selflessly",
-      blurb: "Small, daily ways to help the work go forward.",
-    },
+    { to: "/next-steps/ask", title: "Ask Vaisesika Dasa" },
+    { to: "/next-steps/small-groups", title: "Small Groups Near You" },
+    { to: "/next-steps/spiritual-retreat", title: "Spiritual Retreats" },
+    { to: "/serve", title: "Serve Selflessly" },
   ];
   return (
     <section style={{ padding: "96px 24px 60px" }}>
       <div className="mx-auto" style={{ maxWidth: 1200 }}>
         <SectionEyebrow text="Start Here" />
-        <div className="grid gap-px" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", background: "var(--border)", marginTop: 32 }}>
+        <div
+          className="grid gap-px"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            background: "var(--border)",
+            marginTop: 32,
+          }}
+        >
           {items.map((it) => (
             <Link
               key={it.to}
@@ -246,46 +231,23 @@ function QuickLinks() {
               className="no-underline group"
               style={{
                 backgroundColor: "var(--background)",
-                padding: "32px 28px 36px",
+                padding: "40px 28px 44px",
                 display: "block",
                 borderBottom: "none",
                 transition: "background-color 200ms ease",
               }}
             >
-              <p
-                style={{
-                  fontFamily: "var(--font-meta)",
-                  fontSize: 10,
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  color: "var(--brand-olive, var(--muted-foreground))",
-                  marginBottom: 12,
-                }}
-              >
-                {it.kicker}
-              </p>
               <h3
                 style={{
                   fontFamily: "var(--font-serif-display)",
-                  fontSize: 26,
-                  lineHeight: 1.15,
-                  marginBottom: 10,
+                  fontSize: 24,
+                  lineHeight: 1.2,
+                  marginBottom: 18,
                   color: "var(--foreground)",
                 }}
               >
                 {it.title}
               </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-serif-body)",
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: "var(--muted-foreground)",
-                  marginBottom: 18,
-                }}
-              >
-                {it.blurb}
-              </p>
               <span
                 style={{
                   display: "inline-block",
@@ -302,129 +264,6 @@ function QuickLinks() {
   );
 }
 
-/* ===================== LATEST ARTICLES ===================== */
-function LatestArticles({ posts }: { posts: Post[] }) {
-  return (
-    <section style={{ padding: "80px 24px" }}>
-      <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-12">
-          <div>
-            <SectionEyebrow text="From the blog" />
-            <h2
-              style={{
-                fontFamily: "var(--font-serif-display)",
-                fontStyle: "italic",
-                fontSize: "clamp(34px, 4vw, 48px)",
-                lineHeight: 1.1,
-                color: "var(--foreground)",
-                marginTop: 14,
-              }}
-            >
-              Recent essays
-            </h2>
-          </div>
-          <Link
-            to="/wisdom/blog"
-            className="no-underline uppercase"
-            style={{
-              fontFamily: "var(--font-meta)",
-              fontSize: 12,
-              letterSpacing: "0.22em",
-              color: "var(--primary)",
-              borderBottom: "1px solid var(--primary)",
-              paddingBottom: 2,
-            }}
-          >
-            All essays →
-          </Link>
-        </div>
-        <div
-          className="grid gap-10"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
-        >
-          {posts.map((p) => (
-            <article key={p.slug}>
-              <Link
-                to="/wisdom/blog/$slug"
-                params={{ slug: p.slug }}
-                className="no-underline block"
-                style={{ borderBottom: "none" }}
-              >
-                <div
-                  style={{
-                    aspectRatio: "4 / 3",
-                    overflow: "hidden",
-                    backgroundColor: "var(--muted)",
-                    marginBottom: 20,
-                  }}
-                >
-                  <img
-                    src={typeof p.featuredImage.src === "string" ? p.featuredImage.src : (p.featuredImage.src as unknown as string)}
-                    alt={p.featuredImage.alt}
-                    loading="lazy"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                      transition: "transform 600ms ease",
-                    }}
-                  />
-                </div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 11,
-                    letterSpacing: "0.22em",
-                    textTransform: "uppercase",
-                    color: "var(--brand-olive, var(--muted-foreground))",
-                    marginBottom: 10,
-                  }}
-                >
-                  {p.category} · {formatDate(p.date)}
-                </p>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-serif-display)",
-                    fontSize: 26,
-                    lineHeight: 1.2,
-                    color: "var(--foreground)",
-                    marginBottom: 12,
-                  }}
-                >
-                  {p.title}
-                </h3>
-                <p
-                  style={{
-                    fontFamily: "var(--font-serif-body)",
-                    fontSize: 15,
-                    lineHeight: 1.65,
-                    color: "var(--muted-foreground)",
-                    marginBottom: 14,
-                  }}
-                >
-                  {p.excerpt}
-                </p>
-                <span
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 12,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "var(--primary)",
-                  }}
-                >
-                  Read more →
-                </span>
-              </Link>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ===================== JOURNEY SPLIT ===================== */
 function JourneySplit() {
   const tiles = [
@@ -433,20 +272,23 @@ function JourneySplit() {
       img: storyImg,
       eyebrow: "My Journey",
       title: "My Story",
-      blurb: "How a quiet boy from California came to chant Krishna's names.",
+      cta: "Read →",
     },
     {
       to: "/my-journey/my-guru",
       img: guruImg,
       eyebrow: "My Journey",
       title: "My Guru",
-      blurb: "His Divine Grace A.C. Bhaktivedanta Swami Srila Prabhupada.",
+      cta: "Read →",
     },
   ];
   return (
     <section style={{ padding: "60px 24px 90px" }}>
       <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <div className="grid gap-6 md:gap-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))" }}>
+        <div
+          className="grid gap-6 md:gap-8"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))" }}
+        >
           {tiles.map((t) => (
             <Link
               key={t.to}
@@ -475,7 +317,7 @@ function JourneySplit() {
                   position: "absolute",
                   inset: 0,
                   background:
-                    "linear-gradient(180deg, rgba(15,12,8,0.05) 0%, rgba(15,12,8,0.55) 70%, rgba(15,12,8,0.85) 100%)",
+                    "linear-gradient(180deg, rgba(15,12,8,0.05) 0%, rgba(15,12,8,0.55) 70%, rgba(15,12,8,0.9) 100%)",
                 }}
               />
               <div
@@ -500,22 +342,25 @@ function JourneySplit() {
                     fontStyle: "italic",
                     fontSize: 42,
                     lineHeight: 1.05,
-                    marginBottom: 10,
+                    marginBottom: 16,
                   }}
                 >
                   {t.title}
                 </h3>
-                <p
+                <span
                   style={{
-                    fontFamily: "var(--font-serif-body)",
-                    fontSize: 15,
-                    lineHeight: 1.6,
-                    color: "rgba(248,241,223,0.85)",
-                    maxWidth: 420,
+                    fontFamily: "var(--font-meta)",
+                    fontSize: 12,
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    color: "#f8f1df",
+                    borderBottom: "1px solid rgba(228,207,140,0.55)",
+                    paddingBottom: 3,
+                    alignSelf: "flex-start",
                   }}
                 >
-                  {t.blurb}
-                </p>
+                  {t.cta}
+                </span>
               </div>
             </Link>
           ))}
@@ -579,39 +424,12 @@ function UpcomingEvents({ events }: { events: EventRow[] }) {
   );
 }
 
-
-
-/* ===================== WATCH & LISTEN ===================== */
-function WatchListen() {
-  const tiles = [
-    {
-      href: "https://www.youtube.com/c/FanTheSpark",
-      external: true,
-      eyebrow: "Watch",
-      title: "Talks on YouTube",
-      blurb: "Class recordings, kirtans, and Q&A sessions on the FanTheSpark channel.",
-      cta: "Visit channel ↗",
-    },
-    {
-      to: "/wisdom/audio-playlists",
-      eyebrow: "Listen",
-      title: "Audio Playlists",
-      blurb: "Curated talks for the commute, the kitchen, the morning walk.",
-      cta: "Browse playlists →",
-    },
-    {
-      href: "https://podcasts.apple.com/us/podcast/fan-the-spark/id1153081672",
-      external: true,
-      eyebrow: "Subscribe",
-      title: "On Apple Podcasts",
-      blurb: "Subscribe to Fan The Spark on iTunes / Apple Podcasts.",
-      cta: "Open in Apple ↗",
-    },
-  ];
+/* ===================== WISDOM & TEACHINGS ===================== */
+function WisdomTeachings({ posts }: { posts: Post[] }) {
   return (
-    <section style={{ padding: "90px 24px" }}>
+    <section style={{ padding: "100px 24px" }}>
       <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <SectionEyebrow text="Hear & See" />
+        <SectionEyebrow text="Wisdom & Teachings" />
         <h2
           style={{
             fontFamily: "var(--font-serif-display)",
@@ -620,223 +438,211 @@ function WatchListen() {
             lineHeight: 1.1,
             color: "var(--foreground)",
             marginTop: 14,
-            marginBottom: 40,
+            marginBottom: 56,
           }}
         >
-          Watch &amp; Listen
+          Wisdom &amp; Teachings
         </h2>
-        <div className="grid gap-px" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", background: "var(--border)" }}>
-          {tiles.map((t) => {
-            const inner = (
-              <>
+
+        {/* WATCH */}
+        <SubsectionHeader
+          label="Watch"
+          ctaLabel="Watch More →"
+          ctaHref={YOUTUBE_URL}
+          external
+        />
+        <div
+          className="grid gap-6"
+          style={{
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            marginBottom: 80,
+          }}
+        >
+          <YouTubeEmbed
+            id="videoseries?list=UULFlKbqEU-IufWUuiBO_Z4FuQ"
+            title="Latest from Fan The Spark on YouTube"
+          />
+        </div>
+
+        {/* LISTEN */}
+        <SubsectionHeader
+          label="Listen"
+          ctaLabel="Listen More →"
+          ctaTo="/wisdom/audio-playlists"
+        />
+        <div style={{ marginBottom: 80 }}>
+          <SoundCloudEmbed url="https://soundcloud.com/fan-the-spark" />
+        </div>
+
+        {/* READ */}
+        <SubsectionHeader
+          label="Read"
+          ctaLabel="Read Articles →"
+          ctaTo="/wisdom/blog"
+        />
+        <div
+          className="grid gap-10"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
+        >
+          {posts.map((p) => (
+            <article key={p.slug}>
+              <Link
+                to="/wisdom/blog/$slug"
+                params={{ slug: p.slug }}
+                className="no-underline block"
+                style={{ borderBottom: "none" }}
+              >
+                <div
+                  style={{
+                    aspectRatio: "4 / 3",
+                    overflow: "hidden",
+                    backgroundColor: "var(--muted)",
+                    marginBottom: 20,
+                  }}
+                >
+                  <img
+                    src={
+                      typeof p.featuredImage.src === "string"
+                        ? p.featuredImage.src
+                        : (p.featuredImage.src as unknown as string)
+                    }
+                    alt={p.featuredImage.alt}
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </div>
                 <p
                   style={{
                     fontFamily: "var(--font-meta)",
-                    fontSize: 10,
-                    letterSpacing: "0.28em",
+                    fontSize: 11,
+                    letterSpacing: "0.22em",
                     textTransform: "uppercase",
                     color: "var(--brand-olive, var(--muted-foreground))",
-                    marginBottom: 14,
+                    marginBottom: 10,
                   }}
                 >
-                  {t.eyebrow}
+                  {p.category} · {formatDate(p.date)}
                 </p>
                 <h3
                   style={{
                     fontFamily: "var(--font-serif-display)",
-                    fontSize: 28,
-                    lineHeight: 1.15,
-                    marginBottom: 12,
+                    fontSize: 24,
+                    lineHeight: 1.2,
                     color: "var(--foreground)",
+                    marginBottom: 12,
                   }}
                 >
-                  {t.title}
+                  {p.title}
                 </h3>
-                <p
-                  style={{
-                    fontFamily: "var(--font-serif-body)",
-                    fontSize: 15,
-                    lineHeight: 1.65,
-                    color: "var(--muted-foreground)",
-                    marginBottom: 20,
-                  }}
-                >
-                  {t.blurb}
-                </p>
-                <span
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 12,
-                    letterSpacing: "0.2em",
-                    textTransform: "uppercase",
-                    color: "var(--primary)",
-                  }}
-                >
-                  {t.cta}
-                </span>
-              </>
-            );
-            const style = {
-              backgroundColor: "var(--background)",
-              padding: "40px 32px",
-              display: "block",
-              borderBottom: "none",
-              height: "100%",
-            } as const;
-            return t.external ? (
-              <a key={t.title} href={t.href} target="_blank" rel="noopener noreferrer" className="no-underline" style={style}>
-                {inner}
-              </a>
-            ) : (
-              <Link key={t.title} to={t.to!} className="no-underline" style={style}>
-                {inner}
+                {p.excerpt ? (
+                  <p
+                    style={{
+                      fontFamily: "var(--font-serif-body)",
+                      fontSize: 15,
+                      lineHeight: 1.65,
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    {p.excerpt}
+                  </p>
+                ) : null}
               </Link>
-            );
-          })}
+            </article>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-/* ===================== BOOKS & RESOURCES ===================== */
-function BooksResources({ allPosts }: { allPosts: Post[] }) {
-  const books = [
-    {
-      slug: "our-family-business",
-      title: "Our Family Business",
-      img: postFamilyBusiness,
-      fallback:
-        "A small book on building a household whose primary trade is devotion — cooking, reading aloud, chanting together, welcoming guests.",
-      buyHref: "https://www.amazon.com/Our-Family-Business-Vaisesika-Dasa/dp/9171499008",
-    },
-    {
-      slug: "the-four-questions",
-      title: "The Four Questions",
-      img: postFourQuestions,
-      fallback:
-        "Four small inquiries the Vedic tradition has handed down for centuries — who am I, where did I come from, what am I to do, where am I going.",
-      buyHref: "https://thefourquestionsbook.com/",
-    },
-  ];
-
+function SubsectionHeader({
+  label,
+  ctaLabel,
+  ctaTo,
+  ctaHref,
+  external,
+}: {
+  label: string;
+  ctaLabel: string;
+  ctaTo?: string;
+  ctaHref?: string;
+  external?: boolean;
+}) {
+  const ctaStyle = {
+    fontFamily: "var(--font-meta)",
+    fontSize: 12,
+    letterSpacing: "0.22em",
+    color: "var(--primary)",
+    borderBottom: "1px solid var(--primary)",
+    paddingBottom: 2,
+  } as const;
   return (
-    <section
-      style={{
-        padding: "100px 24px",
-        backgroundColor: "color-mix(in oklab, var(--brand-olive, var(--muted)) 10%, var(--background))",
-      }}
-    >
-      <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <SectionEyebrow text="Books & Resources" />
-        <h2
-          style={{
-            fontFamily: "var(--font-serif-display)",
-            fontStyle: "italic",
-            fontSize: "clamp(34px, 4vw, 48px)",
-            lineHeight: 1.1,
-            color: "var(--foreground)",
-            marginTop: 14,
-            marginBottom: 48,
-            maxWidth: 720,
-          }}
+    <div className="flex items-end justify-between flex-wrap gap-4" style={{ marginBottom: 24 }}>
+      <h3
+        style={{
+          fontFamily: "var(--font-serif-display)",
+          fontStyle: "italic",
+          fontSize: 28,
+          lineHeight: 1.1,
+          color: "var(--foreground)",
+        }}
+      >
+        {label}
+      </h3>
+      {ctaHref && external ? (
+        <a
+          href={ctaHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="no-underline uppercase"
+          style={ctaStyle}
         >
-          Slow, careful books on a devotional life.
-        </h2>
-        <div className="grid gap-10 md:gap-14" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
-          {books.map((b) => {
-            const post = allPosts.find((p) => p.slug === b.slug);
-            const blurb = post?.excerpt ?? b.fallback;
-            return (
-              <article key={b.slug} className="grid gap-8" style={{ gridTemplateColumns: "minmax(120px, 200px) 1fr", alignItems: "start" }}>
-                <Link to="/wisdom/blog/$slug" params={{ slug: b.slug }} className="no-underline" style={{ borderBottom: "none" }}>
-                  <img
-                    src={b.img}
-                    alt={b.title}
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      display: "block",
-                      boxShadow: "0 12px 32px rgba(0,0,0,0.12)",
-                    }}
-                  />
-                </Link>
-                <div>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-meta)",
-                      fontSize: 10,
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                      color: "var(--brand-olive, var(--muted-foreground))",
-                      marginBottom: 12,
-                    }}
-                  >
-                    Book
-                  </p>
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-serif-display)",
-                      fontStyle: "italic",
-                      fontSize: 32,
-                      lineHeight: 1.1,
-                      color: "var(--foreground)",
-                      marginBottom: 16,
-                    }}
-                  >
-                    {b.title}
-                  </h3>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif-body)",
-                      fontSize: 16,
-                      lineHeight: 1.7,
-                      color: "var(--muted-foreground)",
-                      marginBottom: 22,
-                    }}
-                  >
-                    {blurb}
-                  </p>
-                  <div className="flex flex-wrap gap-5 items-center">
-                    <Link
-                      to="/wisdom/blog/$slug"
-                      params={{ slug: b.slug }}
-                      className="no-underline uppercase"
-                      style={{
-                        fontFamily: "var(--font-meta)",
-                        fontSize: 12,
-                        letterSpacing: "0.22em",
-                        color: "var(--primary)",
-                        borderBottom: "1px solid var(--primary)",
-                        paddingBottom: 2,
-                      }}
-                    >
-                      Reading companion →
-                    </Link>
-                    <a
-                      href={b.buyHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="no-underline uppercase"
-                      style={{
-                        fontFamily: "var(--font-meta)",
-                        fontSize: 12,
-                        letterSpacing: "0.22em",
-                        color: "var(--muted-foreground)",
-                        borderBottom: "1px solid var(--border)",
-                        paddingBottom: 2,
-                      }}
-                    >
-                      Get the book ↗
-                    </a>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+          {ctaLabel}
+        </a>
+      ) : ctaTo ? (
+        <Link to={ctaTo} className="no-underline uppercase" style={ctaStyle}>
+          {ctaLabel}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+function YouTubeEmbed({ id, title }: { id: string; title: string }) {
+  return (
+    <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", backgroundColor: "var(--muted)" }}>
+      <iframe
+        src={`https://www.youtube.com/embed/${id}`}
+        title={title}
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
+      />
+    </div>
+  );
+}
+
+function SoundCloudEmbed({ url }: { url: string }) {
+  const src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(
+    url,
+  )}&color=%23c9a84c&inverse=false&auto_play=false&show_user=true`;
+  return (
+    <iframe
+      title="Fan The Spark on SoundCloud"
+      width="100%"
+      height="300"
+      scrolling="no"
+      frameBorder="no"
+      allow="autoplay"
+      src={src}
+      style={{ display: "block", border: 0 }}
+    />
   );
 }
 
@@ -856,41 +662,17 @@ function ServeBand() {
       }}
     >
       <div className="mx-auto text-center" style={{ maxWidth: 820 }}>
-        <p
-          style={{
-            fontFamily: "var(--font-meta)",
-            fontSize: 11,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "#e4cf8c",
-            marginBottom: 22,
-          }}
-        >
-          How can I be of service?
-        </p>
         <h2
           style={{
             fontFamily: "var(--font-serif-display)",
             fontStyle: "italic",
             fontSize: "clamp(34px, 4.5vw, 54px)",
             lineHeight: 1.1,
-            marginBottom: 28,
+            marginBottom: 40,
           }}
         >
-          Small, daily ways to help the work go forward.
+          How Can I Be Of Service?
         </h2>
-        <p
-          style={{
-            fontFamily: "var(--font-serif-body)",
-            fontSize: 17,
-            lineHeight: 1.75,
-            color: "rgba(248,241,223,0.78)",
-            marginBottom: 36,
-          }}
-        >
-          Whether by giving, volunteering, or leading a small group near you —
-          every quiet act of service fans someone else's spark.
-        </p>
         <div className="flex flex-wrap justify-center gap-x-10 gap-y-4">
           {links.map((l) => (
             <Link
@@ -923,20 +705,23 @@ function ServantStories() {
       img: vaisesikaPortrait,
       eyebrow: "Community",
       title: "Servant Leaders",
-      blurb: "The people quietly carrying the work in their cities and homes.",
+      cta: "Learn more →",
     },
     {
       to: "/serve/transformational-stories",
       img: postServe,
       eyebrow: "Stories",
       title: "Transformational Stories",
-      blurb: "Honest accounts from practitioners whose lives have changed.",
+      cta: "Read stories →",
     },
   ];
   return (
     <section style={{ padding: "100px 24px" }}>
       <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <div className="grid gap-10 md:gap-14" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}>
+        <div
+          className="grid gap-10 md:gap-14"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
+        >
           {tiles.map((t) => (
             <Link
               key={t.to}
@@ -983,22 +768,24 @@ function ServantStories() {
                   fontSize: 32,
                   lineHeight: 1.1,
                   color: "var(--foreground)",
-                  marginBottom: 12,
+                  marginBottom: 16,
                 }}
               >
                 {t.title}
               </h3>
-              <p
+              <span
                 style={{
-                  fontFamily: "var(--font-serif-body)",
-                  fontSize: 16,
-                  lineHeight: 1.7,
-                  color: "var(--muted-foreground)",
-                  maxWidth: 460,
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 12,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--primary)",
+                  borderBottom: "1px solid var(--primary)",
+                  paddingBottom: 2,
                 }}
               >
-                {t.blurb}
-              </p>
+                {t.cta}
+              </span>
             </Link>
           ))}
         </div>
