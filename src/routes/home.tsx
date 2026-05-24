@@ -14,8 +14,11 @@ import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
+import bookPlaceholder from "@/assets/blog-gita-book.jpg";
 
 const YOUTUBE_URL = "https://www.youtube.com/c/FanTheSpark";
+// Placeholder recent video IDs — swap with real latest IDs from the channel.
+const LATEST_VIDEO_IDS = ["yRyiQAVc7yE", "hY7m5jjJ9mM"];
 
 export const Route = createFileRoute("/home")({
   head: () => ({
@@ -67,8 +70,13 @@ function HomePage() {
       <Hero />
       <QuickLinks />
       <JourneySplit />
+      <MyGuruFeature />
+      <LatestVideos />
+      <LatestAudio />
+      <MyStoryFeature />
+      <BooksFeature />
       {upcoming.length > 0 ? <UpcomingEvents events={upcoming} /> : null}
-      <WisdomTeachings posts={latest} />
+      <LatestWritings posts={latest} />
       <ServeBand />
       <ServantStories />
     </SiteLayoutWeb>
@@ -91,7 +99,6 @@ function Hero() {
         overflow: "hidden",
       }}
     >
-      {/* Soften the crowd background so the emblem dominates */}
       <div
         aria-hidden
         style={{
@@ -262,22 +269,24 @@ function QuickLinks() {
 }
 
 
-/* ===================== JOURNEY SPLIT ===================== */
+/* ===================== JOURNEY SPLIT (My Guru | My Story) ===================== */
 function JourneySplit() {
   const tiles = [
-    {
-      to: "/my-journey/my-story",
-      img: storyImg,
-      eyebrow: "My Journey",
-      title: "My Story",
-      cta: "Read →",
-    },
     {
       to: "/my-journey/my-guru",
       img: guruImg,
       eyebrow: "My Journey",
       title: "My Guru",
       cta: "Read →",
+      objectPosition: "center 28%",
+    },
+    {
+      to: "/my-journey/my-story",
+      img: storyImg,
+      eyebrow: "My Journey",
+      title: "My Story",
+      cta: "Read →",
+      objectPosition: "center 30%",
     },
   ];
   return (
@@ -292,7 +301,7 @@ function JourneySplit() {
               key={t.to}
               to={t.to}
               className="no-underline group block relative overflow-hidden"
-              style={{ borderBottom: "none", aspectRatio: "4 / 3", backgroundColor: "#0e0c08" }}
+              style={{ borderBottom: "none", aspectRatio: "5 / 4", backgroundColor: "#0e0c08" }}
             >
               <img
                 src={t.img}
@@ -304,8 +313,8 @@ function JourneySplit() {
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
-                  objectPosition: "center top",
-                  opacity: 0.85,
+                  objectPosition: t.objectPosition,
+                  opacity: 0.88,
                   transition: "transform 700ms ease, opacity 400ms ease",
                 }}
               />
@@ -368,6 +377,395 @@ function JourneySplit() {
   );
 }
 
+/* ===================== FEATURED: MY GURU ===================== */
+function FeatureCTA({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="no-underline inline-block uppercase text-center sm:whitespace-nowrap"
+      style={{
+        backgroundColor: "#faf2e8",
+        color: "#c2542a",
+        border: "1px solid #e8623c",
+        padding: "16px 30px",
+        fontFamily: "var(--font-meta)",
+        fontSize: 12,
+        letterSpacing: "0.22em",
+        fontWeight: 600,
+        transition: "background-color 200ms ease, color 200ms ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = "#e8623c";
+        e.currentTarget.style.color = "#ffffff";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "#faf2e8";
+        e.currentTarget.style.color = "#c2542a";
+      }}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function FeatureBlock({
+  eyebrow,
+  title,
+  body,
+  img,
+  imgAlt,
+  ctaLabel,
+  ctaTo,
+  reverse,
+  background,
+  objectPosition,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  img: string;
+  imgAlt: string;
+  ctaLabel: string;
+  ctaTo: string;
+  reverse?: boolean;
+  background?: string;
+  objectPosition?: string;
+}) {
+  return (
+    <section
+      style={{
+        padding: "100px 24px",
+        backgroundColor: background ?? "var(--background)",
+      }}
+    >
+      <div
+        className="mx-auto grid gap-10 md:gap-16 items-center"
+        style={{
+          maxWidth: 1100,
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        }}
+      >
+        <div
+          style={{
+            order: reverse ? 2 : 1,
+            aspectRatio: "4 / 5",
+            overflow: "hidden",
+            backgroundColor: "var(--muted)",
+          }}
+        >
+          <img
+            src={img}
+            alt={imgAlt}
+            loading="lazy"
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: objectPosition ?? "center center",
+              display: "block",
+            }}
+          />
+        </div>
+        <div style={{ order: reverse ? 1 : 2 }}>
+          <SectionEyebrow text={eyebrow} />
+          <h2
+            style={{
+              fontFamily: "var(--font-serif-display)",
+              fontStyle: "italic",
+              fontSize: "clamp(36px, 4.5vw, 56px)",
+              lineHeight: 1.05,
+              color: "var(--foreground)",
+              marginTop: 18,
+              marginBottom: 24,
+            }}
+          >
+            {title}
+          </h2>
+          <p
+            style={{
+              fontFamily: "var(--font-serif-body)",
+              fontSize: 18,
+              lineHeight: 1.8,
+              color: "var(--muted-foreground)",
+              marginBottom: 36,
+              maxWidth: 520,
+            }}
+          >
+            {body}
+          </p>
+          <FeatureCTA to={ctaTo} label={ctaLabel} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MyGuruFeature() {
+  return (
+    <FeatureBlock
+      eyebrow="My Guru"
+      title="Srila Prabhupada"
+      body="The world's pre-eminent exponent of the teachings and practices of Bhakti-yoga to the Western world — and the shelter from which this life of service began."
+      img={guruImg}
+      imgAlt="Srila Prabhupada"
+      ctaLabel="Read About My Guru"
+      ctaTo="/my-journey/my-guru"
+      objectPosition="center 30%"
+    />
+  );
+}
+
+function MyStoryFeature() {
+  return (
+    <FeatureBlock
+      eyebrow="My Journey"
+      title="My Story"
+      body="When I was a child, I was deeply curious about the mystery of life. That quiet wondering became a lifelong path of bhakti — of hearing, chanting, and remembering Krishna."
+      img={storyImg}
+      imgAlt="Vaisesika Dasa"
+      ctaLabel="Read My Story"
+      ctaTo="/my-journey/my-story"
+      reverse
+      background="color-mix(in oklab, var(--brand-olive, var(--muted)) 6%, var(--background))"
+      objectPosition="center 30%"
+    />
+  );
+}
+
+/* ===================== LATEST VIDEOS ===================== */
+function LatestVideos() {
+  return (
+    <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <div className="flex items-end justify-between flex-wrap gap-4" style={{ marginBottom: 40 }}>
+          <div>
+            <SectionEyebrow text="Watch" />
+            <h2
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontStyle: "italic",
+                fontSize: "clamp(32px, 4vw, 48px)",
+                lineHeight: 1.1,
+                color: "var(--foreground)",
+                marginTop: 14,
+              }}
+            >
+              Latest Videos
+            </h2>
+          </div>
+          <a
+            href={YOUTUBE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="no-underline uppercase"
+            style={{
+              fontFamily: "var(--font-meta)",
+              fontSize: 12,
+              letterSpacing: "0.22em",
+              color: "var(--primary)",
+              borderBottom: "1px solid var(--primary)",
+              paddingBottom: 2,
+            }}
+          >
+            Watch More →
+          </a>
+        </div>
+        <div
+          className="grid gap-6 md:gap-8"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
+        >
+          {LATEST_VIDEO_IDS.map((id) => (
+            <YouTubeEmbed key={id} id={id} title="Fan The Spark video" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===================== LATEST AUDIO ===================== */
+function LatestAudio() {
+  const scUrl =
+    `https://w.soundcloud.com/player/?` +
+    new URLSearchParams({
+      url: "https://api.soundcloud.com/users/192337999",
+      color: "#c9a84c",
+      auto_play: "false",
+      hide_related: "false",
+      show_comments: "false",
+      show_user: "true",
+      show_reposts: "false",
+      show_teaser: "false",
+      visual: "false",
+    }).toString();
+  return (
+    <section
+      style={{
+        padding: "100px 24px",
+        backgroundColor: "color-mix(in oklab, var(--brand-olive, var(--muted)) 6%, var(--background))",
+      }}
+    >
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <div className="flex items-end justify-between flex-wrap gap-4" style={{ marginBottom: 40 }}>
+          <div>
+            <SectionEyebrow text="Listen" />
+            <h2
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontStyle: "italic",
+                fontSize: "clamp(32px, 4vw, 48px)",
+                lineHeight: 1.1,
+                color: "var(--foreground)",
+                marginTop: 14,
+              }}
+            >
+              Latest Audio
+            </h2>
+          </div>
+          <Link
+            to="/wisdom/audio-playlists"
+            className="no-underline uppercase"
+            style={{
+              fontFamily: "var(--font-meta)",
+              fontSize: 12,
+              letterSpacing: "0.22em",
+              color: "var(--primary)",
+              borderBottom: "1px solid var(--primary)",
+              paddingBottom: 2,
+            }}
+          >
+            Listen More →
+          </Link>
+        </div>
+        <div style={{ width: "100%", overflow: "hidden", borderRadius: 4 }}>
+          <iframe
+            title="Latest tracks from Fan The Spark on SoundCloud"
+            width="100%"
+            height={450}
+            scrolling="no"
+            frameBorder={0}
+            allow="autoplay"
+            src={scUrl}
+            style={{ display: "block", border: 0, maxWidth: "100%" }}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ===================== BOOKS FEATURE ===================== */
+function BooksFeature() {
+  const books = [
+    {
+      title: "Our Family Business",
+      desc: "A heartfelt guide to the practice of book distribution as devotional service.",
+      img: bookPlaceholder,
+      to: "/wisdom/blog",
+    },
+    {
+      title: "Bhakti at Home",
+      desc: "Practical wisdom for cultivating sadhana, family, and community in modern life.",
+      img: bookPlaceholder,
+      to: "/wisdom/blog",
+    },
+  ];
+  return (
+    <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <SectionEyebrow text="Read" />
+          <h2
+            style={{
+              fontFamily: "var(--font-serif-display)",
+              fontStyle: "italic",
+              fontSize: "clamp(32px, 4vw, 48px)",
+              lineHeight: 1.1,
+              color: "var(--foreground)",
+              marginTop: 14,
+              display: "inline-block",
+            }}
+          >
+            Books &amp; Teachings
+          </h2>
+        </div>
+        <div
+          className="grid gap-10 md:gap-14"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
+        >
+          {books.map((b) => (
+            <Link
+              key={b.title}
+              to={b.to}
+              className="no-underline block group"
+              style={{ borderBottom: "none" }}
+            >
+              <div
+                style={{
+                  aspectRatio: "3 / 4",
+                  overflow: "hidden",
+                  backgroundColor: "var(--muted)",
+                  marginBottom: 24,
+                  boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
+                }}
+              >
+                <img
+                  src={b.img}
+                  alt={b.title}
+                  loading="lazy"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    display: "block",
+                    transition: "transform 600ms ease",
+                  }}
+                />
+              </div>
+              <h3
+                style={{
+                  fontFamily: "var(--font-serif-display)",
+                  fontStyle: "italic",
+                  fontSize: 28,
+                  lineHeight: 1.15,
+                  color: "var(--foreground)",
+                  marginBottom: 12,
+                }}
+              >
+                {b.title}
+              </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 16,
+                  lineHeight: 1.7,
+                  color: "var(--muted-foreground)",
+                  marginBottom: 16,
+                }}
+              >
+                {b.desc}
+              </p>
+              <span
+                className="uppercase"
+                style={{
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 12,
+                  letterSpacing: "0.22em",
+                  color: "var(--primary)",
+                  borderBottom: "1px solid var(--primary)",
+                  paddingBottom: 2,
+                }}
+              >
+                Learn more →
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ===================== UPCOMING EVENTS ===================== */
 function UpcomingEvents({ events }: { events: EventRow[] }) {
   return (
@@ -422,62 +820,42 @@ function UpcomingEvents({ events }: { events: EventRow[] }) {
   );
 }
 
-/* ===================== WISDOM & TEACHINGS ===================== */
-function WisdomTeachings({ posts }: { posts: Post[] }) {
+/* ===================== LATEST WRITINGS ===================== */
+function LatestWritings({ posts }: { posts: Post[] }) {
   return (
     <section style={{ padding: "100px 24px" }}>
       <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <SectionEyebrow text="Wisdom & Teachings" />
-        <h2
-          style={{
-            fontFamily: "var(--font-serif-display)",
-            fontStyle: "italic",
-            fontSize: "clamp(34px, 4vw, 48px)",
-            lineHeight: 1.1,
-            color: "var(--foreground)",
-            marginTop: 14,
-            marginBottom: 56,
-          }}
-        >
-          Wisdom &amp; Teachings
-        </h2>
-
-        {/* WATCH */}
-        <SubsectionHeader
-          label="Watch"
-          ctaLabel="Watch More →"
-          ctaHref={YOUTUBE_URL}
-          external
-        />
-        <div
-          className="grid gap-6"
-          style={{
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            marginBottom: 80,
-          }}
-        >
-          <YouTubeEmbed
-            id="videoseries?list=UULFlKbqEU-IufWUuiBO_Z4FuQ"
-            title="Latest from Fan The Spark on YouTube"
-          />
+        <div className="flex items-end justify-between flex-wrap gap-4" style={{ marginBottom: 48 }}>
+          <div>
+            <SectionEyebrow text="Read" />
+            <h2
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontStyle: "italic",
+                fontSize: "clamp(32px, 4vw, 48px)",
+                lineHeight: 1.1,
+                color: "var(--foreground)",
+                marginTop: 14,
+              }}
+            >
+              Latest Writings
+            </h2>
+          </div>
+          <Link
+            to="/wisdom/blog"
+            className="no-underline uppercase"
+            style={{
+              fontFamily: "var(--font-meta)",
+              fontSize: 12,
+              letterSpacing: "0.22em",
+              color: "var(--primary)",
+              borderBottom: "1px solid var(--primary)",
+              paddingBottom: 2,
+            }}
+          >
+            Read Articles →
+          </Link>
         </div>
-
-        {/* LISTEN */}
-        <SubsectionHeader
-          label="Listen"
-          ctaLabel="Listen More →"
-          ctaTo="/wisdom/audio-playlists"
-        />
-        <div style={{ marginBottom: 80 }}>
-          <SoundCloudEmbed url="https://soundcloud.com/fan-the-spark" />
-        </div>
-
-        {/* READ */}
-        <SubsectionHeader
-          label="Read"
-          ctaLabel="Read Articles →"
-          ctaTo="/wisdom/blog"
-        />
         <div
           className="grid gap-10"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
@@ -558,59 +936,6 @@ function WisdomTeachings({ posts }: { posts: Post[] }) {
   );
 }
 
-function SubsectionHeader({
-  label,
-  ctaLabel,
-  ctaTo,
-  ctaHref,
-  external,
-}: {
-  label: string;
-  ctaLabel: string;
-  ctaTo?: string;
-  ctaHref?: string;
-  external?: boolean;
-}) {
-  const ctaStyle = {
-    fontFamily: "var(--font-meta)",
-    fontSize: 12,
-    letterSpacing: "0.22em",
-    color: "var(--primary)",
-    borderBottom: "1px solid var(--primary)",
-    paddingBottom: 2,
-  } as const;
-  return (
-    <div className="flex items-end justify-between flex-wrap gap-4" style={{ marginBottom: 24 }}>
-      <h3
-        style={{
-          fontFamily: "var(--font-serif-display)",
-          fontStyle: "italic",
-          fontSize: 28,
-          lineHeight: 1.1,
-          color: "var(--foreground)",
-        }}
-      >
-        {label}
-      </h3>
-      {ctaHref && external ? (
-        <a
-          href={ctaHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="no-underline uppercase"
-          style={ctaStyle}
-        >
-          {ctaLabel}
-        </a>
-      ) : ctaTo ? (
-        <Link to={ctaTo} className="no-underline uppercase" style={ctaStyle}>
-          {ctaLabel}
-        </Link>
-      ) : null}
-    </div>
-  );
-}
-
 function YouTubeEmbed({ id, title }: { id: string; title: string }) {
   return (
     <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", backgroundColor: "var(--muted)" }}>
@@ -623,24 +948,6 @@ function YouTubeEmbed({ id, title }: { id: string; title: string }) {
         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
       />
     </div>
-  );
-}
-
-function SoundCloudEmbed({ url }: { url: string }) {
-  const src = `https://w.soundcloud.com/player/?url=${encodeURIComponent(
-    url,
-  )}&color=%23c9a84c&inverse=false&auto_play=false&show_user=true`;
-  return (
-    <iframe
-      title="Fan The Spark on SoundCloud"
-      width="100%"
-      height="300"
-      scrolling="no"
-      frameBorder="no"
-      allow="autoplay"
-      src={src}
-      style={{ display: "block", border: 0 }}
-    />
   );
 }
 
