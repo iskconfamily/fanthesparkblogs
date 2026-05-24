@@ -188,44 +188,6 @@ function HeroCTA({
   );
 }
 
-function HeroCTA({
-  to,
-  label,
-  primary,
-}: {
-  to: string;
-  label: string;
-  primary?: boolean;
-}) {
-  const style = primary
-    ? {
-        backgroundColor: "#e8623c",
-        color: "#ffffff",
-        border: "1px solid #e8623c",
-      }
-    : {
-        backgroundColor: "transparent",
-        color: "#c2542a",
-        border: "1px solid #c2542a",
-      };
-  return (
-    <Link
-      to={to}
-      className="no-underline inline-block uppercase transition-opacity hover:opacity-90"
-      style={{
-        ...style,
-        padding: "16px 28px",
-        fontFamily: "var(--font-meta)",
-        fontSize: 12,
-        letterSpacing: "0.22em",
-        fontWeight: 600,
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
-
 /* ===================== QUICK LINKS ===================== */
 function QuickLinks() {
   const items = [
