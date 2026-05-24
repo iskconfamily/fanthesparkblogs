@@ -10,7 +10,8 @@ import type { Post } from "@/content/posts";
 
 import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
 import guruImg from "@/assets/my-guru/prabhupada-portrait.jpg";
-import heroStampBg from "@/assets/hero-stamp-background.png";
+import heroCrowdBg from "@/assets/hero-crowd-bg.png";
+import heroStamp from "@/assets/hero-stamp.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
 
@@ -82,19 +83,33 @@ function Hero() {
         position: "relative",
         width: "100%",
         backgroundColor: "#f2f0ea",
-        backgroundImage: `url(${heroStampBg})`,
+        backgroundImage: `url(${heroCrowdBg})`,
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "center top",
+        backgroundPosition: "center bottom",
         backgroundSize: "100% auto",
         paddingBottom: 100,
+        overflow: "hidden",
       }}
     >
+      <div
+        className="mx-auto flex justify-center"
+        style={{ paddingTop: 48 }}
+      >
+        <img
+          src={heroStamp}
+          alt="Fan The Spark"
+          style={{
+            width: "clamp(220px, 26vw, 340px)",
+            height: "auto",
+            display: "block",
+          }}
+        />
+      </div>
       <div
         className="relative mx-auto flex flex-col items-center text-center"
         style={{
           maxWidth: 760,
-          padding: "0 24px",
-          paddingTop: "clamp(280px, 34vw, 440px)",
+          padding: "32px 24px 0",
         }}
       >
         <h1 className="sr-only">Fan The Spark</h1>
