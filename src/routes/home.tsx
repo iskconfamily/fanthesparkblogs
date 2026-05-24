@@ -578,11 +578,8 @@ function UpcomingEvents({ events }: { events: EventRow[] }) {
     </section>
   );
 }
-// helper type alias so the prop type stays readable
-type EventList = Awaited<ReturnType<typeof getUpcomingEvents>>;
-function useEvents(): EventList {
-  return [] as unknown as EventList;
-}
+
+
 
 /* ===================== WATCH & LISTEN ===================== */
 function WatchListen() {
