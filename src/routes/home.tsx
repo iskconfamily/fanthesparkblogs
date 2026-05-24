@@ -5,20 +5,19 @@ import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { EventCard } from "@/components/event-card";
 import { getPublishedDbPosts } from "@/lib/blog.functions";
 import { getUpcomingEvents, type EventRow } from "@/lib/events.functions";
+import { getLatestVideos } from "@/lib/youtube.functions";
 import { getAllPosts, getPostBySlug, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 
-import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
+import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
-import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
 
 
-const YOUTUBE_URL = "https://www.youtube.com/c/FanTheSpark";
-// Placeholder recent video IDs — swap with real latest IDs from the channel.
-const LATEST_VIDEO_IDS = ["yRyiQAVc7yE", "hY7m5jjJ9mM"];
+const YOUTUBE_URL = "https://www.youtube.com/@FanTheSpark";
+const FALLBACK_VIDEO_IDS = ["fgro2YbO8FI", "YYrcIfSkyNw", "oAKRerWbcCw", "brkI26UXWrg"];
 
 export const Route = createFileRoute("/home")({
   head: () => ({
@@ -38,11 +37,12 @@ export const Route = createFileRoute("/home")({
     ],
   }),
   loader: async () => {
-    const [posts, upcoming] = await Promise.all([
+    const [posts, upcoming, videoIds] = await Promise.all([
       getPublishedDbPosts(),
       getUpcomingEvents({ data: { limit: 3 } }),
+      getLatestVideos(),
     ]);
-    return { posts, upcoming };
+    return { posts, upcoming, videoIds: videoIds.length ? videoIds : FALLBACK_VIDEO_IDS };
   },
   component: HomePage,
 });
@@ -71,7 +71,7 @@ function HomePage() {
       <QuickLinks />
       <JourneySplit />
       <MyGuruFeature />
-      <LatestVideos />
+      <LatestVideos videoIds={initial.videoIds} />
       <LatestAudio />
       <LatestWritings posts={latest} />
       <MyStoryFeature />
@@ -535,7 +535,7 @@ function MyStoryFeature() {
 }
 
 /* ===================== LATEST VIDEOS ===================== */
-function LatestVideos() {
+function LatestVideos({ videoIds }: { videoIds: string[] }) {
   return (
     <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
       <div className="mx-auto" style={{ maxWidth: 1100 }}>
@@ -576,7 +576,7 @@ function LatestVideos() {
           className="grid gap-6 md:gap-8"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
         >
-          {LATEST_VIDEO_IDS.map((id) => (
+          {videoIds.map((id) => (
             <YouTubeEmbed key={id} id={id} title="Fan The Spark video" />
           ))}
         </div>
@@ -591,13 +591,13 @@ function LatestAudio() {
     `https://w.soundcloud.com/player/?` +
     new URLSearchParams({
       url: "https://api.soundcloud.com/users/192337999",
-      color: "#c9a84c",
+      color: "#ff5500",
       auto_play: "false",
       hide_related: "false",
-      show_comments: "false",
+      show_comments: "true",
       show_user: "true",
       show_reposts: "false",
-      show_teaser: "false",
+      show_teaser: "true",
       visual: "false",
     }).toString();
   return (
@@ -677,8 +677,8 @@ function BooksFeature() {
 
   return (
     <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
-      <div className="mx-auto" style={{ maxWidth: 1100 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+      <div className="mx-auto" style={{ maxWidth: 920 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
           <SectionEyebrow text="Read" />
           <h2
             style={{
@@ -695,79 +695,81 @@ function BooksFeature() {
           </h2>
         </div>
         <div
-          className="grid gap-10 md:gap-14"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
+          className="grid gap-8 md:gap-12"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}
         >
-          {books.map((b) => (
-            <Link
-              key={b.slug}
-              to="/wisdom/blog/$slug"
-              params={{ slug: b.slug }}
-              className="no-underline block group"
-              style={{ borderBottom: "none" }}
-            >
-
-              <div
-                style={{
-                  aspectRatio: "3 / 4",
-                  overflow: "hidden",
-                  backgroundColor: "var(--muted)",
-                  marginBottom: 24,
-                  boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
-                }}
+          {books.map((b) => {
+            const shortDesc =
+              b.desc && b.desc.length > 140 ? b.desc.slice(0, 137).trimEnd() + "…" : b.desc;
+            return (
+              <Link
+                key={b.slug}
+                to="/wisdom/blog/$slug"
+                params={{ slug: b.slug }}
+                className="no-underline block group"
+                style={{ borderBottom: "none" }}
               >
-                <img
-                  src={b.img}
-                  alt={b.title}
-                  loading="lazy"
+                <div
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                    transition: "transform 600ms ease",
+                    aspectRatio: "1 / 1",
+                    overflow: "hidden",
+                    backgroundColor: "var(--muted)",
+                    marginBottom: 20,
+                    boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
                   }}
-                />
-              </div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-serif-display)",
-                  fontStyle: "italic",
-                  fontSize: 28,
-                  lineHeight: 1.15,
-                  color: "var(--foreground)",
-                  marginBottom: 12,
-                }}
-              >
-                {b.title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-serif-body)",
-                  fontSize: 16,
-                  lineHeight: 1.7,
-                  color: "var(--muted-foreground)",
-                  marginBottom: 16,
-                }}
-              >
-                {b.desc}
-              </p>
-              <span
-                className="uppercase"
-                style={{
-                  fontFamily: "var(--font-meta)",
-                  fontSize: 12,
-                  letterSpacing: "0.22em",
-                  color: "var(--primary)",
-                  borderBottom: "1px solid var(--primary)",
-                  paddingBottom: 2,
-                }}
-              >
-                Read More →
-
-              </span>
-            </Link>
-          ))}
+                >
+                  <img
+                    src={b.img}
+                    alt={b.title}
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                      transition: "transform 600ms ease",
+                    }}
+                  />
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif-display)",
+                    fontStyle: "italic",
+                    fontSize: 24,
+                    lineHeight: 1.15,
+                    color: "var(--foreground)",
+                    marginBottom: 10,
+                  }}
+                >
+                  {b.title}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-serif-body)",
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                    color: "var(--muted-foreground)",
+                    marginBottom: 14,
+                  }}
+                >
+                  {shortDesc}
+                </p>
+                <span
+                  className="uppercase"
+                  style={{
+                    fontFamily: "var(--font-meta)",
+                    fontSize: 12,
+                    letterSpacing: "0.22em",
+                    color: "var(--primary)",
+                    borderBottom: "1px solid var(--primary)",
+                    paddingBottom: 2,
+                  }}
+                >
+                  Read More →
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1010,58 +1012,40 @@ function ServeBand() {
   );
 }
 
-/* ===================== SERVANT LEADERS + STORIES ===================== */
+/* ===================== TRANSFORMATIONAL STORIES ===================== */
 function ServantStories() {
-  const tiles = [
-    {
-      to: "/serve/servant-leaders",
-      img: vaisesikaPortrait,
-      eyebrow: "Community",
-      title: "Servant Leaders",
-      cta: "Learn more →",
-    },
-    {
-      to: "/serve/transformational-stories",
-      img: postServe,
-      eyebrow: "Stories",
-      title: "Transformational Stories",
-      cta: "Read stories →",
-    },
-  ];
   return (
     <section style={{ padding: "100px 24px" }}>
-      <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <div
-          className="grid gap-10 md:gap-14"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <Link
+          to="/serve/transformational-stories"
+          className="no-underline block group"
+          style={{ borderBottom: "none" }}
         >
-          {tiles.map((t) => (
-            <Link
-              key={t.to}
-              to={t.to}
-              className="no-underline block group"
-              style={{ borderBottom: "none" }}
+          <div
+            className="grid gap-10 md:gap-14 items-center"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
+          >
+            <div
+              style={{
+                aspectRatio: "4 / 3",
+                overflow: "hidden",
+                backgroundColor: "var(--muted)",
+              }}
             >
-              <div
+              <img
+                src={postServe}
+                alt="Transformational Stories"
+                loading="lazy"
                 style={{
-                  aspectRatio: "4 / 3",
-                  overflow: "hidden",
-                  backgroundColor: "var(--muted)",
-                  marginBottom: 22,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
                 }}
-              >
-                <img
-                  src={t.img}
-                  alt={t.title}
-                  loading="lazy"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-              </div>
+              />
+            </div>
+            <div>
               <p
                 style={{
                   fontFamily: "var(--font-meta)",
@@ -1069,23 +1053,36 @@ function ServantStories() {
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   color: "var(--brand-olive, var(--muted-foreground))",
-                  marginBottom: 10,
+                  marginBottom: 12,
                 }}
               >
-                {t.eyebrow}
+                Stories
               </p>
               <h3
                 style={{
                   fontFamily: "var(--font-serif-display)",
                   fontStyle: "italic",
-                  fontSize: 32,
+                  fontSize: "clamp(34px, 4vw, 48px)",
                   lineHeight: 1.1,
                   color: "var(--foreground)",
-                  marginBottom: 16,
+                  marginBottom: 20,
                 }}
               >
-                {t.title}
+                Transformational Stories
               </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 17,
+                  lineHeight: 1.7,
+                  color: "var(--muted-foreground)",
+                  marginBottom: 22,
+                  maxWidth: 480,
+                }}
+              >
+                Hear from devotees whose lives have been touched and transformed through the
+                practice of bhakti-yoga.
+              </p>
               <span
                 style={{
                   fontFamily: "var(--font-meta)",
@@ -1097,11 +1094,11 @@ function ServantStories() {
                   paddingBottom: 2,
                 }}
               >
-                {t.cta}
+                Read Stories →
               </span>
-            </Link>
-          ))}
-        </div>
+            </div>
+          </div>
+        </Link>
       </div>
     </section>
   );
