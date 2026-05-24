@@ -182,64 +182,85 @@ function HeroCTA({ to, label }: { to: string; label: string }) {
 }
 
 /* ===================== QUICK LINKS ===================== */
+import { MessageCircle, Users, Sparkles, HandHeart } from "lucide-react";
+
 function QuickLinks() {
   const items = [
-    { to: "/next-steps/ask", title: "Ask Vaisesika Dasa" },
-    { to: "/next-steps/small-groups", title: "Small Groups Near You" },
-    { to: "/next-steps/spiritual-retreat", title: "Spiritual Retreats" },
-    { to: "/serve", title: "Serve Selflessly" },
+    { to: "/next-steps/ask", title: "Ask Vaisesika Dasa", Icon: MessageCircle },
+    { to: "/next-steps/small-groups", title: "Small Groups Near You", Icon: Users },
+    { to: "/next-steps/spiritual-retreat", title: "Spiritual Retreats", Icon: Sparkles },
+    { to: "/serve", title: "Serve Selflessly", Icon: HandHeart },
   ];
+  const gold = "var(--brand-gold, #c9a84c)";
+  const borderCol = "rgba(201,168,76,0.18)";
   return (
     <section style={{ padding: "96px 24px 60px" }}>
       <div className="mx-auto" style={{ maxWidth: 1200 }}>
         <SectionEyebrow text="Start Here" />
         <div
-          className="grid gap-px"
+          className="grid"
           style={{
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            background: "var(--border)",
-            marginTop: 32,
+            marginTop: 40,
+            borderTop: `1px solid ${borderCol}`,
+            borderBottom: `1px solid ${borderCol}`,
           }}
         >
-          {items.map((it) => (
+          {items.map((it, idx) => (
             <Link
               key={it.to}
               to={it.to}
-              className="no-underline group"
+              className="no-underline quick-link-card"
               style={{
-                backgroundColor: "var(--background)",
-                padding: "40px 28px 44px",
-                display: "block",
-                borderBottom: "none",
-                transition: "background-color 200ms ease",
+                padding: "48px 28px 44px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                textAlign: "center",
+                borderLeft: idx === 0 ? "none" : `1px solid ${borderCol}`,
+                transition: "background-color 400ms ease",
               }}
             >
+              <span className="quick-link-icon" style={{ marginBottom: 22, color: gold, display: "inline-flex", transition: "transform 500ms ease" }}>
+                <it.Icon size={32} strokeWidth={1} />
+              </span>
               <h3
+                className="quick-link-title"
                 style={{
                   fontFamily: "var(--font-serif-display)",
-                  fontSize: 24,
-                  lineHeight: 1.2,
+                  fontSize: 22,
+                  lineHeight: 1.25,
                   marginBottom: 18,
                   color: "var(--foreground)",
+                  transition: "color 300ms ease",
                 }}
               >
                 {it.title}
               </h3>
               <span
+                className="quick-link-rule"
                 style={{
                   display: "inline-block",
-                  width: 28,
+                  width: 24,
                   height: 1,
-                  backgroundColor: "var(--brand-gold, #c9a84c)",
+                  backgroundColor: gold,
+                  transition: "width 500ms ease",
                 }}
               />
             </Link>
           ))}
         </div>
       </div>
+      <style>{`
+        .quick-link-card:hover { background-color: rgba(255,255,255,0.55); }
+        .quick-link-card:hover .quick-link-icon { transform: scale(1.1); }
+        .quick-link-card:hover .quick-link-title { color: var(--brand-gold, #c9a84c); }
+        .quick-link-card:hover .quick-link-rule { width: 64px; }
+      `}</style>
     </section>
   );
 }
+
 
 /* ===================== JOURNEY SPLIT ===================== */
 function JourneySplit() {
