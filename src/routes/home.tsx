@@ -8,10 +8,9 @@ import { getUpcomingEvents, type EventRow } from "@/lib/events.functions";
 import { getAllPosts, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 
-import heroImg from "@/assets/my-story/prabhupada-with-devotees.jpg";
 import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
 import guruImg from "@/assets/my-guru/prabhupada-portrait.jpg";
-import stamp from "@/assets/fts-logo-stamp-hero.png";
+import heroStampBg from "@/assets/hero-stamp-background.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
 
@@ -82,121 +81,61 @@ function Hero() {
       style={{
         position: "relative",
         width: "100%",
-        minHeight: "min(90vh, 780px)",
-        overflow: "hidden",
-        backgroundColor: "#0e0c08",
+        backgroundColor: "#f2f0ea",
+        backgroundImage: `url(${heroStampBg})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center top",
+        backgroundSize: "cover",
+        minHeight: "min(86vh, 760px)",
       }}
     >
-      <img
-        src={heroImg}
-        alt="Srila Prabhupada with devotees"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center 30%",
-          opacity: 0.78,
-        }}
-      />
       <div
-        aria-hidden
+        className="relative mx-auto flex flex-col items-center text-center px-6"
         style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(15,12,8,0.55) 0%, rgba(15,12,8,0.25) 35%, rgba(15,12,8,0.85) 100%)",
-        }}
-      />
-      <div
-        className="relative mx-auto flex flex-col justify-end px-6"
-        style={{
-          maxWidth: 1200,
-          minHeight: "min(90vh, 780px)",
-          paddingTop: 120,
-          paddingBottom: 96,
-          color: "#f8f1df",
+          maxWidth: 820,
+          minHeight: "min(86vh, 760px)",
+          paddingTop: "clamp(360px, 46vw, 520px)",
+          paddingBottom: 80,
         }}
       >
-        <img
-          src={stamp}
-          alt=""
-          style={{ width: 84, height: "auto", opacity: 0.92, marginBottom: 28 }}
-        />
-        <p
-          style={{
-            fontFamily: "var(--font-meta)",
-            fontSize: 12,
-            letterSpacing: "0.28em",
-            textTransform: "uppercase",
-            color: "#e4cf8c",
-            marginBottom: 18,
-          }}
-        >
-          Fan The Spark · with Vaisesika Dasa
-        </p>
-        <h1
-          style={{
-            fontFamily: "var(--font-serif-display)",
-            fontSize: "clamp(34px, 5vw, 64px)",
-            lineHeight: 1.1,
-            letterSpacing: "-0.01em",
-            color: "#f8f1df",
-            maxWidth: 900,
-            marginBottom: 26,
-          }}
-        >
-          Welcome to the{" "}
-          <em style={{ fontStyle: "italic", color: "#f0d997" }}>Fan The Spark</em>{" "}
-          website.
-        </h1>
+        <h1 className="sr-only">Fan The Spark</h1>
         <p
           style={{
             fontFamily: "var(--font-serif-body)",
-            fontSize: 18,
-            lineHeight: 1.7,
-            color: "rgba(248,241,223,0.85)",
-            maxWidth: 680,
-            marginBottom: 38,
+            fontSize: "clamp(17px, 1.5vw, 20px)",
+            lineHeight: 1.65,
+            color: "var(--foreground)",
+            maxWidth: 640,
+            marginBottom: 40,
           }}
         >
-          Here you will find encouragement and support for expanding your book
-          distribution, sadhana, and understanding of sastra. Click the links
-          below to learn more.
+          Welcome to the Fan The Spark website where you will find
+          encouragement and support for expanding your book distribution,
+          sadhana, and understanding of sastra. Click the links below to learn
+          more.
         </p>
-        <div className="flex flex-wrap gap-4">
-          <HeroCTA to="/wisdom/blog" label="Read the blog" primary />
-          <HeroCTA to="/my-journey/my-story" label="My story" />
+        <div className="flex flex-wrap justify-center gap-4">
+          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" />
+          <HeroCTA to="/my-journey/my-guru" label="Disciple of Srila Prabhupada" />
         </div>
       </div>
     </section>
   );
 }
 
-function HeroCTA({ to, label, primary }: { to: string; label: string; primary?: boolean }) {
-  const style = primary
-    ? {
-        backgroundColor: "#e4cf8c",
-        color: "#241a08",
-        border: "1px solid #e4cf8c",
-      }
-    : {
-        backgroundColor: "transparent",
-        color: "#f8f1df",
-        border: "1px solid rgba(248,241,223,0.45)",
-      };
+function HeroCTA({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
       className="no-underline inline-block uppercase transition-opacity hover:opacity-90"
       style={{
-        ...style,
-        padding: "16px 28px",
+        backgroundColor: "#e8623c",
+        color: "#ffffff",
+        padding: "18px 30px",
         fontFamily: "var(--font-meta)",
         fontSize: 12,
         letterSpacing: "0.22em",
-        borderBottom: style.border,
+        fontWeight: 600,
       }}
     >
       {label}
