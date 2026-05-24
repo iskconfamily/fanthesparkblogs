@@ -10,7 +10,7 @@ import type { Post } from "@/content/posts";
 
 import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
 import guruImg from "@/assets/my-guru/prabhupada-portrait.jpg";
-import stamp from "@/assets/fts-logo-stamp-hero.png";
+import heroStampBg from "@/assets/hero-stamp-background.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
 
