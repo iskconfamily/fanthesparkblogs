@@ -1,23 +1,12 @@
-## Goal
-Balance the two hero CTAs on mobile so they read as equally important.
+Adjust homepage hero cream overlay opacity to let the raised-hands/kirtan crowd background show through more clearly, matching the original FanTheSpark.com devotional atmosphere.
 
-## Approach
-Match widths rather than resizing text. Two reasons:
-- Shrinking "Disciple of Srila Prabhupada" or enlarging "Lord Chaitanya" would break the equal-weight rule we just established.
-- Equal-width pill buttons stacked on mobile is the standard pattern and keeps typography consistent.
+## What
+- Reduce the cream overlay opacity from `0.55` to `0.25` in `src/routes/home.tsx`.
+- Keep everything else identical: emblem size, centered layout, welcome copy, subtle outline CTAs, background positioning.
+- If text readability suffers after the change, add a soft top-down cream gradient behind the text block only (not a global overlay).
 
-## Change
-In `src/routes/home.tsx` → hero CTA row + `HeroCTA`:
+## Why
+The current hero at opacity 1.55 washes out the crowd background almost completely. The original site shows the crowd as a soft gray silhouette across the full bottom edge, creating emotional devotional atmosphere. Lowering opacity to 1.25 will reveal the crowd while keeping the orange emblem as the focal point and maintaining text readability.
 
-- On mobile: stack the two CTAs vertically, both full-width within a shared max-width column (~300px), centered. Both buttons share identical width and padding.
-- On desktop (≥640px): keep them side-by-side at their natural widths, as today.
-- Keep "Disciple of Srila Prabhupada" on one line on desktop (`whiteSpace: nowrap`). On mobile it may wrap to two lines inside the equal-width button — that's fine because Lord Chaitanya sits in the same-width box.
-- Keep all other styling unchanged: cream bg, orange border, orange text, hover → solid orange.
-
-### Technical details
-- Wrap the CTA row: `flex flex-col w-full max-w-[300px] mx-auto gap-3 sm:flex-row sm:max-w-none sm:w-auto sm:gap-4`.
-- Add `w-full sm:w-auto text-center` to each `HeroCTA`.
-- Add `whiteSpace: "nowrap"` to the desktop style only via a `sm:whitespace-nowrap` class (or apply unconditionally — it only matters on desktop since mobile is full-width).
-
-## Out of scope
-Font sizes, button heights, emblem, background, copy.
+## Files touched
+- `src/routes/home.tsx` — single opacity value change, plus optional text-block gradient if needed.
