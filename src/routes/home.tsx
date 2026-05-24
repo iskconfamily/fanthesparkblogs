@@ -85,27 +85,25 @@ function Hero() {
         backgroundImage: `url(${heroStampBg})`,
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center top",
-        backgroundSize: "cover",
-        minHeight: "min(86vh, 760px)",
+        backgroundSize: "100% auto",
+        paddingBottom: 80,
       }}
     >
       <div
         className="relative mx-auto flex flex-col items-center text-center px-6"
         style={{
-          maxWidth: 820,
-          minHeight: "min(86vh, 760px)",
-          paddingTop: "clamp(360px, 46vw, 520px)",
-          paddingBottom: 80,
+          maxWidth: 760,
+          paddingTop: "clamp(280px, 36vw, 460px)",
         }}
       >
         <h1 className="sr-only">Fan The Spark</h1>
         <p
           style={{
             fontFamily: "var(--font-serif-body)",
-            fontSize: "clamp(17px, 1.5vw, 20px)",
-            lineHeight: 1.65,
-            color: "var(--foreground)",
-            maxWidth: 640,
+            fontSize: "clamp(16px, 1.4vw, 19px)",
+            lineHeight: 1.6,
+            color: "#6b6448",
+            maxWidth: 620,
             marginBottom: 40,
           }}
         >
