@@ -139,7 +139,7 @@ function Hero() {
           sadhana, and understanding of sastra. Click the links below to learn
           more.
         </p>
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-col w-full max-w-[300px] mx-auto gap-3 sm:flex-row sm:max-w-none sm:w-auto sm:gap-4">
           <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" />
           <HeroCTA
             to="/my-journey/my-guru"
