@@ -695,8 +695,8 @@ function BooksFeature() {
           </h2>
         </div>
         <div
-          className="grid gap-8 md:gap-12"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}
+          className="grid gap-8 md:gap-12 justify-center"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 280px))" }}
         >
           {books.map((b) => {
             const shortDesc =
@@ -711,11 +711,14 @@ function BooksFeature() {
               >
                 <div
                   style={{
-                    aspectRatio: "1 / 1",
+                    aspectRatio: "3 / 4",
                     overflow: "hidden",
                     backgroundColor: "var(--muted)",
                     marginBottom: 20,
                     boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
                   <img
@@ -725,12 +728,13 @@ function BooksFeature() {
                     style={{
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
+                      objectFit: "contain",
                       display: "block",
                       transition: "transform 600ms ease",
                     }}
                   />
                 </div>
+
                 <h3
                   style={{
                     fontFamily: "var(--font-serif-display)",
