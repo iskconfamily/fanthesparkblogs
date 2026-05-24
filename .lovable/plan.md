@@ -1,19 +1,23 @@
 ## Goal
 
-Shrink the stamp/crowd background so the eyebrow naturally separates from the image, and fix the "stranded" look of the CTAs.
+Revert the hero to the original full-width layout: crowd silhouette stretches edge-to-edge with the stamp at natural proportion on top. Keep current fonts and alternating CTA colors.
 
 ## Changes — `src/routes/home.tsx` Hero only
 
-1. **Shrink background image**
-   - `backgroundSize: "100% auto"` → `backgroundSize: "min(780px, 78%) auto"` (caps stamp width ~780px, scales down on narrow screens). Matches the original site's smaller, contained stamp.
-   - Reduce `paddingTop` from `clamp(280px, 36vw, 460px)` → `clamp(220px, 26vw, 360px)` so content starts higher (image is now smaller, less clearance needed).
-   - Natural gap between stamp bottom and eyebrow appears automatically.
+1. **Background stretches full width again**
+   - `backgroundSize: "min(780px, 78%) auto"` → `backgroundSize: "100% auto"` (crowd silhouette bleeds to both edges, stamp scales with viewport — same as the original site).
+   - Keep `backgroundPosition: center top`, `backgroundRepeat: no-repeat`, `backgroundColor: #f2f0ea`.
 
-2. **Fix CTA "stranded" feel**
-   - Increase `paddingBottom` from `80` → `120` so CTAs have more breathing room within the same background band.
-   - Bump `marginBottom` on welcome paragraph from `40` → `32` so CTAs sit slightly closer to the text (tighter visual group).
-   - This keeps CTAs inside the silhouette band rather than dropped onto plain cream below it.
+2. **Restore content clearance**
+   - `paddingTop: clamp(220px, 26vw, 360px)` → `clamp(280px, 34vw, 440px)` so the welcome text starts below the stamp at all widths.
+   - `paddingBottom: 120` → `100`.
+
+3. **No changes to**
+   - Eyebrow placement, font, color
+   - Welcome paragraph styling/copy
+   - CTA pair (filled orange + ghost outline alternating)
+   - Any other section
 
 ## Out of scope
 
-No copy changes, no CTA color/style changes, no other sections touched.
+No copy, color, or section changes outside the Hero background sizing and padding.
