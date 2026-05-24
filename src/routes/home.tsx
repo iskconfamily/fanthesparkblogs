@@ -85,8 +85,8 @@ function Hero() {
         backgroundImage: `url(${heroStampBg})`,
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center top",
-        backgroundSize: "100% auto",
-        paddingBottom: 80,
+        backgroundSize: "min(780px, 78%) auto",
+        paddingBottom: 120,
       }}
     >
       <div
@@ -94,7 +94,7 @@ function Hero() {
         style={{
           maxWidth: 760,
           padding: "0 24px",
-          paddingTop: "clamp(280px, 36vw, 460px)",
+          paddingTop: "clamp(220px, 26vw, 360px)",
         }}
       >
         <h1 className="sr-only">Fan The Spark</h1>
@@ -117,7 +117,7 @@ function Hero() {
             lineHeight: 1.6,
             color: "#6b6448",
             maxWidth: 620,
-            margin: "0 auto 40px",
+            margin: "0 auto 32px",
           }}
         >
           Welcome to the Fan The Spark website where you will find
