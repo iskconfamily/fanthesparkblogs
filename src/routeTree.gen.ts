@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SurpriseRouteImport } from './routes/surprise'
 import { Route as RssDotxmlRouteImport } from './routes/rss[.]xml'
 import { Route as NewsletterRouteImport } from './routes/newsletter'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ArchiveRouteImport } from './routes/archive'
@@ -59,6 +60,11 @@ const RssDotxmlRoute = RssDotxmlRouteImport.update({
 const NewsletterRoute = NewsletterRouteImport.update({
   id: '/newsletter',
   path: '/newsletter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EventsRoute = EventsRouteImport.update({
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
+  '/home': typeof HomeRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByTo {
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
+  '/home': typeof HomeRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/archive': typeof ArchiveRoute
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
+  '/home': typeof HomeRoute
   '/newsletter': typeof NewsletterRoute
   '/rss.xml': typeof RssDotxmlRoute
   '/surprise': typeof SurpriseRoute
@@ -352,6 +361,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/contact'
     | '/events'
+    | '/home'
     | '/newsletter'
     | '/rss.xml'
     | '/surprise'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/contact'
     | '/events'
+    | '/home'
     | '/newsletter'
     | '/rss.xml'
     | '/surprise'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/contact'
     | '/events'
+    | '/home'
     | '/newsletter'
     | '/rss.xml'
     | '/surprise'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   ArchiveRoute: typeof ArchiveRoute
   ContactRoute: typeof ContactRoute
   EventsRoute: typeof EventsRoute
+  HomeRoute: typeof HomeRoute
   NewsletterRoute: typeof NewsletterRoute
   RssDotxmlRoute: typeof RssDotxmlRoute
   SurpriseRoute: typeof SurpriseRoute
@@ -512,6 +525,13 @@ declare module '@tanstack/react-router' {
       path: '/newsletter'
       fullPath: '/newsletter'
       preLoaderRoute: typeof NewsletterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/events': {
@@ -787,6 +807,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArchiveRoute: ArchiveRoute,
   ContactRoute: ContactRoute,
   EventsRoute: EventsRoute,
+  HomeRoute: HomeRoute,
   NewsletterRoute: NewsletterRoute,
   RssDotxmlRoute: RssDotxmlRoute,
   SurpriseRoute: SurpriseRoute,
@@ -814,3 +835,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
