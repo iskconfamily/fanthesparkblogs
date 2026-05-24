@@ -535,7 +535,7 @@ function MyStoryFeature() {
 }
 
 /* ===================== LATEST VIDEOS ===================== */
-function LatestVideos() {
+function LatestVideos({ videoIds }: { videoIds: string[] }) {
   return (
     <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
       <div className="mx-auto" style={{ maxWidth: 1100 }}>
@@ -576,7 +576,7 @@ function LatestVideos() {
           className="grid gap-6 md:gap-8"
           style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
         >
-          {LATEST_VIDEO_IDS.map((id) => (
+          {videoIds.map((id) => (
             <YouTubeEmbed key={id} id={id} title="Fan The Spark video" />
           ))}
         </div>
