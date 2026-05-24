@@ -98,7 +98,7 @@ function Hero() {
           position: "absolute",
           inset: 0,
           backgroundColor: "#f2f0ea",
-          opacity: 0.55,
+          opacity: 0.25,
           pointerEvents: "none",
         }}
       />
