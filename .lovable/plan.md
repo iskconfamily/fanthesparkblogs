@@ -1,23 +1,23 @@
 ## Goal
+Balance the two hero CTAs on mobile so they read as equally important.
 
-Revert the hero to the original full-width layout: crowd silhouette stretches edge-to-edge with the stamp at natural proportion on top. Keep current fonts and alternating CTA colors.
+## Approach
+Match widths rather than resizing text. Two reasons:
+- Shrinking "Disciple of Srila Prabhupada" or enlarging "Lord Chaitanya" would break the equal-weight rule we just established.
+- Equal-width pill buttons stacked on mobile is the standard pattern and keeps typography consistent.
 
-## Changes — `src/routes/home.tsx` Hero only
+## Change
+In `src/routes/home.tsx` → hero CTA row + `HeroCTA`:
 
-1. **Background stretches full width again**
-   - `backgroundSize: "min(780px, 78%) auto"` → `backgroundSize: "100% auto"` (crowd silhouette bleeds to both edges, stamp scales with viewport — same as the original site).
-   - Keep `backgroundPosition: center top`, `backgroundRepeat: no-repeat`, `backgroundColor: #f2f0ea`.
+- On mobile: stack the two CTAs vertically, both full-width within a shared max-width column (~300px), centered. Both buttons share identical width and padding.
+- On desktop (≥640px): keep them side-by-side at their natural widths, as today.
+- Keep "Disciple of Srila Prabhupada" on one line on desktop (`whiteSpace: nowrap`). On mobile it may wrap to two lines inside the equal-width button — that's fine because Lord Chaitanya sits in the same-width box.
+- Keep all other styling unchanged: cream bg, orange border, orange text, hover → solid orange.
 
-2. **Restore content clearance**
-   - `paddingTop: clamp(220px, 26vw, 360px)` → `clamp(280px, 34vw, 440px)` so the welcome text starts below the stamp at all widths.
-   - `paddingBottom: 120` → `100`.
-
-3. **No changes to**
-   - Eyebrow placement, font, color
-   - Welcome paragraph styling/copy
-   - CTA pair (filled orange + ghost outline alternating)
-   - Any other section
+### Technical details
+- Wrap the CTA row: `flex flex-col w-full max-w-[300px] mx-auto gap-3 sm:flex-row sm:max-w-none sm:w-auto sm:gap-4`.
+- Add `w-full sm:w-auto text-center` to each `HeroCTA`.
+- Add `whiteSpace: "nowrap"` to the desktop style only via a `sm:whitespace-nowrap` class (or apply unconditionally — it only matters on desktop since mobile is full-width).
 
 ## Out of scope
-
-No copy, color, or section changes outside the Hero background sizing and padding.
+Font sizes, button heights, emblem, background, copy.
