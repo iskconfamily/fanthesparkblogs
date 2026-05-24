@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { EventCard } from "@/components/event-card";
 import { getPublishedDbPosts } from "@/lib/blog.functions";
-import { getUpcomingEvents } from "@/lib/events.functions";
+import { getUpcomingEvents, type EventRow } from "@/lib/events.functions";
 import { getAllPosts, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 
@@ -526,7 +526,7 @@ function JourneySplit() {
 }
 
 /* ===================== UPCOMING EVENTS ===================== */
-function UpcomingEvents({ events }: { events: ReturnType<typeof useEvents> }) {
+function UpcomingEvents({ events }: { events: EventRow[] }) {
   return (
     <section
       style={{
