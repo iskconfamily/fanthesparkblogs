@@ -5,20 +5,19 @@ import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { EventCard } from "@/components/event-card";
 import { getPublishedDbPosts } from "@/lib/blog.functions";
 import { getUpcomingEvents, type EventRow } from "@/lib/events.functions";
+import { getLatestVideos } from "@/lib/youtube.functions";
 import { getAllPosts, getPostBySlug, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 
-import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
+import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
-import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
 
 
-const YOUTUBE_URL = "https://www.youtube.com/c/FanTheSpark";
-// Placeholder recent video IDs — swap with real latest IDs from the channel.
-const LATEST_VIDEO_IDS = ["yRyiQAVc7yE", "hY7m5jjJ9mM"];
+const YOUTUBE_URL = "https://www.youtube.com/@FanTheSpark";
+const FALLBACK_VIDEO_IDS = ["fgro2YbO8FI", "YYrcIfSkyNw", "oAKRerWbcCw", "brkI26UXWrg"];
 
 export const Route = createFileRoute("/home")({
   head: () => ({
