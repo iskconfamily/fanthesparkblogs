@@ -155,7 +155,7 @@ function HeroCTA({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
-      className="no-underline inline-block uppercase"
+      className="no-underline inline-block uppercase w-full sm:w-auto text-center sm:whitespace-nowrap"
       style={{
         backgroundColor: "#faf2e8",
         color: "#c2542a",
