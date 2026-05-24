@@ -5,16 +5,16 @@ import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { EventCard } from "@/components/event-card";
 import { getPublishedDbPosts } from "@/lib/blog.functions";
 import { getUpcomingEvents, type EventRow } from "@/lib/events.functions";
-import { getAllPosts, formatDate } from "@/content/queries";
+import { getAllPosts, getPostBySlug, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 
 import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
-import guruImg from "@/assets/my-guru/prabhupada-portrait.jpg";
+import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
-import bookPlaceholder from "@/assets/blog-gita-book.jpg";
+
 
 const YOUTUBE_URL = "https://www.youtube.com/c/FanTheSpark";
 // Placeholder recent video IDs — swap with real latest IDs from the channel.
@@ -73,10 +73,11 @@ function HomePage() {
       <MyGuruFeature />
       <LatestVideos />
       <LatestAudio />
+      <LatestWritings posts={latest} />
       <MyStoryFeature />
       <BooksFeature />
       {upcoming.length > 0 ? <UpcomingEvents events={upcoming} /> : null}
-      <LatestWritings posts={latest} />
+
       <ServeBand />
       <ServantStories />
     </SiteLayoutWeb>
@@ -503,17 +504,18 @@ function FeatureBlock({
 function MyGuruFeature() {
   return (
     <FeatureBlock
-      eyebrow="My Guru"
-      title="Srila Prabhupada"
-      body="The world's pre-eminent exponent of the teachings and practices of Bhakti-yoga to the Western world — and the shelter from which this life of service began."
+      eyebrow="My Journey"
+      title="My Guru"
+      body="Vaisesika Dasa is a disciple of His Divine Grace A.C. Bhaktivedanta Srila Prabhupada Swami. His Divine Grace A. C. Bhaktivedanta Swami Prabhupada was born in 1896 in Calcutta, India. He first met his spiritual master, Srila Bhaktisiddhanta Sarasvati Gosvami, in Calcutta in 1922. Bhaktisiddhanta Sarasvati, a prominent bhakti-yoga scholar and the founder of sixty-four branches of Gaudiya Mathas (Vedic institutes), requested His Divine Grace Srila Prabhupada to broadcast Vedic knowledge through the English language. In the years that followed, His Divine Grace Srila Prabhupada wrote a commentary on the Bhagavad-gita and in 1944, without assistance, started an English fortnightly magazine."
       img={guruImg}
-      imgAlt="Srila Prabhupada"
-      ctaLabel="Read About My Guru"
+      imgAlt="Srila Prabhupada surrounded by his disciples"
+      ctaLabel="Read About Srila Prabhupada Swami"
       ctaTo="/my-journey/my-guru"
       objectPosition="center 30%"
     />
   );
 }
+
 
 function MyStoryFeature() {
   return (
@@ -656,20 +658,23 @@ function LatestAudio() {
 
 /* ===================== BOOKS FEATURE ===================== */
 function BooksFeature() {
+  const family = getPostBySlug("our-family-business");
+  const four = getPostBySlug("the-four-questions");
   const books = [
     {
-      title: "Our Family Business",
-      desc: "A heartfelt guide to the practice of book distribution as devotional service.",
-      img: bookPlaceholder,
-      to: "/wisdom/blog",
+      slug: "our-family-business",
+      title: family?.title ?? "Our Family Business",
+      desc: family?.excerpt ?? "",
+      img: family?.featuredImage?.src ?? "",
     },
     {
-      title: "Bhakti at Home",
-      desc: "Practical wisdom for cultivating sadhana, family, and community in modern life.",
-      img: bookPlaceholder,
-      to: "/wisdom/blog",
+      slug: "the-four-questions",
+      title: four?.title ?? "The Four Questions",
+      desc: four?.excerpt ?? "",
+      img: four?.featuredImage?.src ?? "",
     },
   ];
+
   return (
     <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
       <div className="mx-auto" style={{ maxWidth: 1100 }}>
@@ -695,11 +700,13 @@ function BooksFeature() {
         >
           {books.map((b) => (
             <Link
-              key={b.title}
-              to={b.to}
+              key={b.slug}
+              to="/wisdom/blog/$slug"
+              params={{ slug: b.slug }}
               className="no-underline block group"
               style={{ borderBottom: "none" }}
             >
+
               <div
                 style={{
                   aspectRatio: "3 / 4",
@@ -756,7 +763,8 @@ function BooksFeature() {
                   paddingBottom: 2,
                 }}
               >
-                Learn more →
+                Read More →
+
               </span>
             </Link>
           ))}
