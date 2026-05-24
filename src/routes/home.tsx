@@ -677,8 +677,8 @@ function BooksFeature() {
 
   return (
     <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
-      <div className="mx-auto" style={{ maxWidth: 1100 }}>
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+      <div className="mx-auto" style={{ maxWidth: 920 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
           <SectionEyebrow text="Read" />
           <h2
             style={{
@@ -695,79 +695,81 @@ function BooksFeature() {
           </h2>
         </div>
         <div
-          className="grid gap-10 md:gap-14"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))" }}
+          className="grid gap-8 md:gap-12"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}
         >
-          {books.map((b) => (
-            <Link
-              key={b.slug}
-              to="/wisdom/blog/$slug"
-              params={{ slug: b.slug }}
-              className="no-underline block group"
-              style={{ borderBottom: "none" }}
-            >
-
-              <div
-                style={{
-                  aspectRatio: "3 / 4",
-                  overflow: "hidden",
-                  backgroundColor: "var(--muted)",
-                  marginBottom: 24,
-                  boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
-                }}
+          {books.map((b) => {
+            const shortDesc =
+              b.desc && b.desc.length > 140 ? b.desc.slice(0, 137).trimEnd() + "…" : b.desc;
+            return (
+              <Link
+                key={b.slug}
+                to="/wisdom/blog/$slug"
+                params={{ slug: b.slug }}
+                className="no-underline block group"
+                style={{ borderBottom: "none" }}
               >
-                <img
-                  src={b.img}
-                  alt={b.title}
-                  loading="lazy"
+                <div
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                    transition: "transform 600ms ease",
+                    aspectRatio: "1 / 1",
+                    overflow: "hidden",
+                    backgroundColor: "var(--muted)",
+                    marginBottom: 20,
+                    boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
                   }}
-                />
-              </div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-serif-display)",
-                  fontStyle: "italic",
-                  fontSize: 28,
-                  lineHeight: 1.15,
-                  color: "var(--foreground)",
-                  marginBottom: 12,
-                }}
-              >
-                {b.title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-serif-body)",
-                  fontSize: 16,
-                  lineHeight: 1.7,
-                  color: "var(--muted-foreground)",
-                  marginBottom: 16,
-                }}
-              >
-                {b.desc}
-              </p>
-              <span
-                className="uppercase"
-                style={{
-                  fontFamily: "var(--font-meta)",
-                  fontSize: 12,
-                  letterSpacing: "0.22em",
-                  color: "var(--primary)",
-                  borderBottom: "1px solid var(--primary)",
-                  paddingBottom: 2,
-                }}
-              >
-                Read More →
-
-              </span>
-            </Link>
-          ))}
+                >
+                  <img
+                    src={b.img}
+                    alt={b.title}
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                      transition: "transform 600ms ease",
+                    }}
+                  />
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif-display)",
+                    fontStyle: "italic",
+                    fontSize: 24,
+                    lineHeight: 1.15,
+                    color: "var(--foreground)",
+                    marginBottom: 10,
+                  }}
+                >
+                  {b.title}
+                </h3>
+                <p
+                  style={{
+                    fontFamily: "var(--font-serif-body)",
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                    color: "var(--muted-foreground)",
+                    marginBottom: 14,
+                  }}
+                >
+                  {shortDesc}
+                </p>
+                <span
+                  className="uppercase"
+                  style={{
+                    fontFamily: "var(--font-meta)",
+                    fontSize: 12,
+                    letterSpacing: "0.22em",
+                    color: "var(--primary)",
+                    borderBottom: "1px solid var(--primary)",
+                    paddingBottom: 2,
+                  }}
+                >
+                  Read More →
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
