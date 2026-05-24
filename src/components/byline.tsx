@@ -1,4 +1,4 @@
-import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
+import vaisesikaPortrait from "@/assets/vaisesika-portrait.jpg";
 
 export function Byline({
   author = "Vaisesika Dasa",
