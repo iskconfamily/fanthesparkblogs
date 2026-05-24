@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PlaceholderPage } from "@/components/placeholder-page";
 import { Para } from "@/components/editorial";
+import { TestimonialsRow } from "@/components/testimonials-row";
 
 export const Route = createFileRoute("/serve/transformational-stories")({
   head: () => ({
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/serve/transformational-stories")({
           <Para>
             If a teaching, a conversation, a retreat, or a moment of seva has shifted something in you, we would love to hear about it. Use the form below to share your transformational story. With your permission, we may share it here so that others can take heart from your experience.
           </Para>
+          <TestimonialsRow heading="In Their Own Words" />
         </>
       }
       contactCategory="Transformational Stories"
