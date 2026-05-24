@@ -117,7 +117,7 @@ function Hero() {
             lineHeight: 1.6,
             color: "#6b6448",
             maxWidth: 620,
-            margin: "0 auto 40px",
+            margin: "0 auto 32px",
           }}
         >
           Welcome to the Fan The Spark website where you will find
