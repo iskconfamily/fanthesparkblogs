@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PlaceholderPage } from "@/components/placeholder-page";
 import { Para } from "@/components/editorial";
+import { TestimonialsRow } from "@/components/testimonials-row";
 
 export const Route = createFileRoute("/serve/transformational-stories")({
   head: () => ({
