@@ -1,51 +1,46 @@
-## Files I'll edit
+## Scope
 
-Only one file: **`src/routes/home.tsx`**. No changes to header, menu, footer, blog, or shared components.
+Single-file edit: `src/routes/home.tsx`. No header/footer/shared component changes.
 
-## New Home page section order
+## 1. My Guru featured section — real content + image
+
+- Copy the uploaded `user-uploads://Prabhupada3-4.png` into `src/assets/my-story/prabhupada-group.jpg` and import it.
+- Replace the placeholder image in `MyGuruFeature` with this new asset. Use `object-cover` with `objectPosition: "center 30%"` so Prabhupada's face stays centered on all aspect ratios; crop is handled by the container (no manual resize needed — CSS does it).
+- Replace the teaser paragraph with the exact copy from the screenshot:
+  > "Vaisesika Dasa is a disciple of His Divine Grace A.C. Bhaktivedanta Srila Prabhupada Swami. His Divine Grace A. C. Bhaktivedanta Swami Prabhupada was born in 1896 in Calcutta, India. He first met his spiritual master, Srila Bhaktisiddhanta Sarasvati Gosvami, in Calcutta in 1922. Bhaktisiddhanta Sarasvati, a prominent bhakti-yoga scholar and the founder of sixty-four branches of Gaudiya Mathas (Vedic institutes), requested His Divine Grace Srila Prabhupada to broadcast Vedic knowledge through the English language. In the years that followed, His Divine Grace Srila Prabhupada wrote a commentary on the Bhagavad-gita and in 1944, without assistance, started an English fortnightly magazine."
+- CTA label → **"Read About Srila Prabhupada Swami"**, link stays `/my-journey/my-guru`.
+- Eyebrow stays "My Journey", heading stays italic serif **"My Guru"**.
+
+## 2. Books & Teachings — wire real books
+
+Use the two existing blog posts as the books:
+
+| Card | Title | Cover (existing asset) | Excerpt source | CTA link |
+|---|---|---|---|---|
+| 1 | Our Family Business | `@/assets/post-family-business.jpg` | post excerpt (line 449-450) | `/wisdom/blog/our-family-business` |
+| 2 | The Four Questions | `@/assets/post-four-questions.jpg` | post excerpt (line 477-478) | `/wisdom/blog/the-four-questions` |
+
+Pull data via `getPostBySlug("our-family-business")` / `getPostBySlug("the-four-questions")` from `@/content/queries` so titles/excerpts/covers stay in sync with the posts. CTA button: "Read More →". Remove the `blog-gita-book.jpg` placeholder.
+
+## 3. Section order — move Latest Writings up
+
+New order after Hero + Start Here:
 
 ```
-Hero (unchanged)
-Start Here row (swap order, fix image)
-My Guru — featured section (NEW)
-Latest Videos (NEW)
-Latest Audio (NEW)
-My Story — featured section (NEW)
-Books & Teachings (NEW)
-Upcoming events (unchanged, if any)
-Wisdom & Teachings — Read articles only (trim Watch + Listen, since they move up)
-How Can I Be Of Service (ServeBand — kept)
-Servant Leaders + Stories (kept)
+My Guru featured
+Latest Videos
+Latest Audio
+Latest Writings        ← moved here (from below Books)
+My Story featured
+Books & Teachings
+Upcoming Events
+How Can I Be Of Service (ServeBand)
+Servant Stories
 ```
 
-## Section-by-section
+No design/styling changes to those sections — just reordering the JSX.
 
-**1. Start Here row** — In `QuickLinks`/`JourneySplit` area. Note: the current "Start Here" row is the 4 icon tiles (Ask / Small Groups / Retreats / Serve). The image cards (My Story / My Guru) live in a separate `JourneySplit` row right below. I'll treat `JourneySplit` as the "Start Here row with cards" you mean:
-- Reorder tiles: **My Guru left, My Story right**.
-- Fix My Guru image cropping: change `objectPosition` from `center top` to a value that shows the subject's face (around `center 30%`) and increase the card aspect ratio slightly so it doesn't crop tightly.
+## Out of scope
 
-**2. My Guru featured section (NEW)** — Full-width band, inner container `max-w-[1100px]`. Two-column on desktop (image left ~5/12, text right ~7/12), stacked on mobile. Uses `guruImg`, eyebrow "My Journey", italic serif heading "My Guru", short paragraph teaser, primary CTA button "Read About My Guru" → `/my-journey/my-guru` (note: your spec said `/my-guru`, but the actual route is `/my-journey/my-guru` — I'll use the real route).
-
-**3. Latest Videos (NEW)** — Section titled "Latest Videos", eyebrow "Watch". 2-up responsive grid of YouTube embeds using the responsive `YouTubeEmbed` wrapper (already in file). Since the channel's uploads playlist (`UULFlKbqEU-IufWUuiBO_Z4FuQ`) currently fails to load, I'll embed **two hardcoded recent video IDs** as placeholders that you can swap out, plus a "Watch More →" link to the channel. (If you want me to fetch the real latest IDs, I'd need the YouTube Data API key — let me know.)
-
-**4. Latest Audio (NEW)** — Section titled "Latest Audio", eyebrow "Listen". One responsive SoundCloud embed pointing at the latest tracks (using the existing user `192337999` "Latest Tracks" feed from `wisdom.audio-playlists.tsx`, which is known-good) wrapped so it can't overflow on mobile. CTA "Listen More →" → `/wisdom/audio-playlists`.
-
-**5. My Story featured section (NEW)** — Mirror of the My Guru section but image right / text left for visual rhythm. Uses `storyImg`, CTA "Read My Story" → `/my-journey/my-story`.
-
-**6. Books & Teachings (NEW)** — Section title "Books & Teachings". Two book cards side-by-side on desktop, stacked on mobile. **I don't have book cover assets or titles in the project** (`src/assets` has no book imagery beyond `blog-gita-book.jpg`). I'll scaffold the section with two placeholder cards (cover image slot using `blog-gita-book.jpg` as a stand-in, title, one-line description, "Learn more" link). You can hand me the covers + titles + links and I'll wire them in afterward.
-
-**7. Wisdom & Teachings trim** — Since Watch and Listen are promoted into their own sections above, I'll reduce the existing `WisdomTeachings` to just the **Read** column (latest 3 articles) so content isn't duplicated. The eyebrow becomes "Read" and heading "Latest Writings". If you'd rather keep Watch/Listen duplicated inside this section too, say the word.
-
-**8. How Can I Be Of Service** — `ServeBand` + `ServantStories` kept exactly as is, just repositioned after the books section. Spacing left untouched.
-
-## Design notes
-
-- Reuse existing tokens: `--font-serif-display` italic for headings, `--font-meta` uppercase eyebrows, `--brand-gold` rules, warm cream/olive palette.
-- Featured sections alternate background: My Guru on `var(--background)`, My Story on the soft cream band (`color-mix(... olive 6%, background)`) for editorial rhythm.
-- Generous vertical padding (`90–110px`), inner containers `max-w-[1100px]`, natural image crops (no heavy darkening overlays on the featured sections — those overlays stay only on the small `JourneySplit` cards).
-- CTAs in featured sections use the same outlined/filled button style as the Hero CTAs for consistency.
-
-## Open items I'll need from you after this lands
-
-- Book titles, covers, and links for the Books & Teachings section.
-- Confirm whether to fetch real "latest" YouTube IDs via API, or you'll hand me 2 video IDs.
+- No changes to header, footer, sidebar, blog pages, shared components, or styles.
+- No new design tokens; reuse existing `--font-serif-display`, `--brand-gold`, etc.
