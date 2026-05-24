@@ -1012,58 +1012,40 @@ function ServeBand() {
   );
 }
 
-/* ===================== SERVANT LEADERS + STORIES ===================== */
+/* ===================== TRANSFORMATIONAL STORIES ===================== */
 function ServantStories() {
-  const tiles = [
-    {
-      to: "/serve/servant-leaders",
-      img: vaisesikaPortrait,
-      eyebrow: "Community",
-      title: "Servant Leaders",
-      cta: "Learn more →",
-    },
-    {
-      to: "/serve/transformational-stories",
-      img: postServe,
-      eyebrow: "Stories",
-      title: "Transformational Stories",
-      cta: "Read stories →",
-    },
-  ];
   return (
     <section style={{ padding: "100px 24px" }}>
-      <div className="mx-auto" style={{ maxWidth: 1200 }}>
-        <div
-          className="grid gap-10 md:gap-14"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        <Link
+          to="/serve/transformational-stories"
+          className="no-underline block group"
+          style={{ borderBottom: "none" }}
         >
-          {tiles.map((t) => (
-            <Link
-              key={t.to}
-              to={t.to}
-              className="no-underline block group"
-              style={{ borderBottom: "none" }}
+          <div
+            className="grid gap-10 md:gap-14 items-center"
+            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
+          >
+            <div
+              style={{
+                aspectRatio: "4 / 3",
+                overflow: "hidden",
+                backgroundColor: "var(--muted)",
+              }}
             >
-              <div
+              <img
+                src={postServe}
+                alt="Transformational Stories"
+                loading="lazy"
                 style={{
-                  aspectRatio: "4 / 3",
-                  overflow: "hidden",
-                  backgroundColor: "var(--muted)",
-                  marginBottom: 22,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
                 }}
-              >
-                <img
-                  src={t.img}
-                  alt={t.title}
-                  loading="lazy"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
-                  }}
-                />
-              </div>
+              />
+            </div>
+            <div>
               <p
                 style={{
                   fontFamily: "var(--font-meta)",
@@ -1071,23 +1053,36 @@ function ServantStories() {
                   letterSpacing: "0.24em",
                   textTransform: "uppercase",
                   color: "var(--brand-olive, var(--muted-foreground))",
-                  marginBottom: 10,
+                  marginBottom: 12,
                 }}
               >
-                {t.eyebrow}
+                Stories
               </p>
               <h3
                 style={{
                   fontFamily: "var(--font-serif-display)",
                   fontStyle: "italic",
-                  fontSize: 32,
+                  fontSize: "clamp(34px, 4vw, 48px)",
                   lineHeight: 1.1,
                   color: "var(--foreground)",
-                  marginBottom: 16,
+                  marginBottom: 20,
                 }}
               >
-                {t.title}
+                Transformational Stories
               </h3>
+              <p
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 17,
+                  lineHeight: 1.7,
+                  color: "var(--muted-foreground)",
+                  marginBottom: 22,
+                  maxWidth: 480,
+                }}
+              >
+                Hear from devotees whose lives have been touched and transformed through the
+                practice of bhakti-yoga.
+              </p>
               <span
                 style={{
                   fontFamily: "var(--font-meta)",
@@ -1099,11 +1094,11 @@ function ServantStories() {
                   paddingBottom: 2,
                 }}
               >
-                {t.cta}
+                Read Stories →
               </span>
-            </Link>
-          ))}
-        </div>
+            </div>
+          </div>
+        </Link>
       </div>
     </section>
   );
