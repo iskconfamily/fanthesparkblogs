@@ -591,13 +591,13 @@ function LatestAudio() {
     `https://w.soundcloud.com/player/?` +
     new URLSearchParams({
       url: "https://api.soundcloud.com/users/192337999",
-      color: "#c9a84c",
+      color: "#ff5500",
       auto_play: "false",
       hide_related: "false",
-      show_comments: "false",
+      show_comments: "true",
       show_user: "true",
       show_reposts: "false",
-      show_teaser: "false",
+      show_teaser: "true",
       visual: "false",
     }).toString();
   return (
