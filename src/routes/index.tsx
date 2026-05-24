@@ -44,6 +44,7 @@ function Home() {
       {posts.map((p) => (
         <PostPreview key={p.slug} post={p} />
       ))}
+      <TestimonialsRow heading="Kind Words" />
     </SiteLayout>
   );
 }
