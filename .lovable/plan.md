@@ -1,34 +1,30 @@
-## Goal
+## Problem
+The current background image (`FTS_LogoStamp_WithBackground`) has the FTS circular stamp baked into the center of the PNG. Any attempt to push it "right" just crops the image — the stamp stays where it was drawn. That's why the welcome text is sitting on top of the stamp.
 
-Keep the current **light FTS stamp background image** and the approved **welcome copy** — only change the layout around them. Move from centered → left-aligned editorial composition inspired by image-121 (eyebrow, large headline-style text block, CTA row, all flush left).
+## Fix — separate the stamp from the background
+
+Use the already-imported transparent stamp asset (`@/assets/fts-logo-stamp-hero.png`) as its own element, and use a plain warm-cream section background (no baked-in stamp). This lets the stamp live cleanly on the right of the hero while text stays on the left.
 
 ## Changes — `src/routes/home.tsx`, `Hero` only
 
-### Background (unchanged)
-- Keep `heroStampBg` (FTS_LogoStamp_WithBackground) as the section background.
-- Switch positioning so the stamp sits on the **right** side instead of dead center, freeing the left half for the text column. Use `background-position: right top` (or `right 5% top`) with `background-size: contain` so the stamp renders at a controlled size (~520–620px wide) and the soft crowd silhouette still bleeds across the section.
-- Keep `background-color: #f2f0ea`.
-- Section `min-height: min(80vh, 720px)`.
+### Background
+- Remove the `heroStampBg` background-image. Section becomes a flat `backgroundColor: #f2f0ea` (warm cream that matches the live site).
+- Drop the `heroStampBg` import (we'll keep the asset on disk in case we want it later).
+- Re-import the transparent stamp: `import stamp from "@/assets/fts-logo-stamp-hero.png";`
 
-### Layout (new)
-- Container: `max-width: 1200px`, centered, `padding: 0 32px`.
-- Two-column flex on desktop (≥900px): left column ~52% holds text + CTAs; right column ~48% is empty space that lets the stamp (in the background) show through.
-- Mobile (<900px): single column, text stacks below the stamp. Use `background-position: center top` and `padding-top` large enough to clear the stamp.
+### Layout (two-column, content left / stamp right)
+Container: `max-width: 1200px`, padded `48px 32px`, vertically centered with `min-height: min(78vh, 680px)`.
 
-### Left text column (top → bottom, all left-aligned)
-1. **Eyebrow**: `FAN THE SPARK` — uppercase, tracked `0.28em`, 12px, orange `#c2542a`, `var(--font-meta)`.
-2. **Welcome paragraph** (approved copy, used as the hero statement):
-   > "Welcome to the Fan The Spark website where you will find encouragement and support for expanding your book distribution, sadhana, and understanding of sastra. Click the links below to learn more."
-   - Rendered large: `var(--font-serif-display)`, `clamp(26px, 3vw, 38px)`, line-height ~1.3, color `#3a3623` (dark warm), max-width ~520px.
-   - SEO `<h1 className="sr-only">Fan The Spark</h1>` retained.
-3. **CTA row** (live-site pair, unchanged routes):
-   - **Lord Chaitanya** → `/wisdom/lord` — solid orange filled (current style kept).
-   - **Disciple of Srila Prabhupada** → `/my-journey/my-guru` — outlined ghost variant (1px solid `#c2542a`, transparent bg, orange text) to give visual hierarchy between primary and secondary.
+Desktop (≥900px) — CSS Grid `grid-template-columns: 1.1fr 1fr`, `gap: 48px`, `align-items: center`:
+- **Left cell**: text column (eyebrow + welcome paragraph + CTA pair), all left-aligned. Same content/styles as now, `max-width: 540px`.
+- **Right cell**: the stamp `<img>` only, rendered at `width: 100%, max-width: 460px, height: auto`, centered within the cell.
 
-### Vertical alignment
-- Left column vertically centered within the section (`align-items: center` on the flex row) so the text sits roughly at the stamp's vertical midpoint.
+Mobile (<900px) — single column: stamp first (centered, `max-width: 320px`), then text/CTAs left-aligned below. Use a Tailwind responsive class on the grid (`grid-cols-1 md:grid-cols-[1.1fr_1fr]`) for the switch.
+
+### Optional polish
+Add a very soft radial fade behind the stamp (`background: radial-gradient(circle, rgba(232,98,60,0.06), transparent 70%)`) to give it a subtle halo on the flat cream, since we're no longer using the crowd-silhouette plate. Skip this if it adds visual noise — flat cream is fine.
 
 ## Out of scope
-- No copy changes beyond removing the centered layout.
+- No copy changes.
+- No CTA route/style changes.
 - No other section changes.
-- No routing/nav changes.
