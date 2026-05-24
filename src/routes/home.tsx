@@ -10,7 +10,7 @@ import type { Post } from "@/content/posts";
 
 import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
 import guruImg from "@/assets/my-guru/prabhupada-portrait.jpg";
-import heroStampBg from "@/assets/hero-stamp-background.png";
+import stamp from "@/assets/fts-logo-stamp-hero.png";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.png";
 import postServe from "@/assets/post-serve.jpg";
 
@@ -82,22 +82,19 @@ function Hero() {
         position: "relative",
         width: "100%",
         backgroundColor: "#f2f0ea",
-        backgroundImage: `url(${heroStampBg})`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "right -40px top",
-        backgroundSize: "auto 100%",
-        minHeight: "min(80vh, 720px)",
+        minHeight: "min(78vh, 680px)",
       }}
     >
       <div
-        className="relative mx-auto flex items-center"
+        className="relative mx-auto grid items-center grid-cols-1 md:grid-cols-[1.1fr_1fr]"
         style={{
           maxWidth: 1200,
-          minHeight: "min(80vh, 720px)",
-          padding: "80px 32px",
+          minHeight: "min(78vh, 680px)",
+          padding: "48px 32px",
+          gap: 48,
         }}
       >
-        <div style={{ maxWidth: 560, width: "100%" }}>
+        <div style={{ maxWidth: 540, width: "100%", order: 2 }} className="md:!order-1">
           <h1 className="sr-only">Fan The Spark</h1>
           <p
             style={{
@@ -114,10 +111,10 @@ function Hero() {
           <p
             style={{
               fontFamily: "var(--font-serif-display)",
-              fontSize: "clamp(26px, 3vw, 38px)",
+              fontSize: "clamp(24px, 2.7vw, 34px)",
               lineHeight: 1.3,
               color: "#3a3623",
-              marginBottom: 40,
+              marginBottom: 36,
             }}
           >
             Welcome to the Fan The Spark website where you will find
@@ -132,6 +129,21 @@ function Hero() {
               label="Disciple of Srila Prabhupada"
             />
           </div>
+        </div>
+        <div
+          className="flex justify-center md:justify-end"
+          style={{ order: 1 }}
+        >
+          <img
+            src={stamp}
+            alt="Fan The Spark"
+            style={{
+              width: "100%",
+              maxWidth: 440,
+              height: "auto",
+              display: "block",
+            }}
+          />
         </div>
       </div>
     </section>
