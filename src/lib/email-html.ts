@@ -210,13 +210,19 @@ export function buildBlogEmailHtml(post: EmailHtmlPost): string {
   if (post.title) {
     parts.push(`<h1 style="${TITLE}">${esc(post.title)}</h1>`);
   }
-  if (post.date) {
-    const d = formatEmailDate(post.date);
-    if (d) parts.push(`<div style="${DATE_META}">${esc(d)}</div>`);
-  }
-  if (post.author) {
+  if (post.author || post.date) {
     parts.push(`<hr style="${HR_HEAD}" />`);
-    parts.push(`<div style="${BYLINE}">By ${esc(post.author)}</div>`);
+    const dateStr = post.date ? formatEmailDate(post.date) : "";
+    const authorText = post.author ? `By ${esc(post.author)}` : "";
+    const sep = post.author && dateStr ? ` <span style="opacity:0.5;margin:0 6px;">&middot;</span> ` : "";
+    parts.push(
+      `<table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;border-collapse:collapse;"><tr>` +
+        (post.author
+          ? `<td width="40" style="width:40px;padding:0;vertical-align:middle;"><img src="${PORTRAIT_URL}" alt="${esc(post.author)}" width="40" height="40" style="display:block;width:40px;height:40px;border-radius:9999px;border:0;outline:none;text-decoration:none;" /></td>`
+          : "") +
+        `<td style="padding:0 0 0 ${post.author ? "12px" : "0"};vertical-align:middle;${BYLINE}">${authorText}${sep}${esc(dateStr)}</td>` +
+        `</tr></table>`,
+    );
   }
 
 
