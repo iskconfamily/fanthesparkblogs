@@ -3,9 +3,11 @@ import type { Post } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
 import { postToBlocks } from "@/lib/post-to-blocks";
+import vaisesikaPortrait from "@/assets/vaisesika-portrait.jpg";
 
 export function PostMinimal({ post }: { post: Post }) {
   const blocks = postToBlocks(post);
+  const author = post.author ?? "Vaisesika Dasa";
 
   return (
     <div className="post-minimal-page py-10 md:py-16">
@@ -16,9 +18,17 @@ export function PostMinimal({ post }: { post: Post }) {
           {post.title}
         </h1>
 
-        <p className="post-minimal-byline mb-12">
-          By {post.author ?? "Vaisesika Dasa"} <span className="mx-2 opacity-60">•</span> {formatDate(post.date)}
-        </p>
+        <div className="mb-12 flex items-center gap-3">
+          <img
+            src={vaisesikaPortrait}
+            alt={author}
+            loading="lazy"
+            className="h-10 w-10 rounded-full object-cover"
+          />
+          <p className="post-minimal-byline">
+            By {author} <span className="mx-2 opacity-60">•</span> {formatDate(post.date)}
+          </p>
+        </div>
 
         <ArticleBody blocks={blocks} />
 
