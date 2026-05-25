@@ -14,7 +14,7 @@ import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
-import transformationStoriesImg from "@/assets/transformational-stories-v2.jpg";
+import transformationStoriesImg from "@/assets/transformational-stories-v3.jpg";
 
 
 const YOUTUBE_URL = "https://www.youtube.com/@FanTheSpark";
