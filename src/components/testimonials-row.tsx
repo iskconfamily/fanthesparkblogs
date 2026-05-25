@@ -1,7 +1,7 @@
 export const TESTIMONIALS: { quote: string; author: string }[] = [
   {
     quote:
-      "Vaisesika Dasa is a treasure - if you ever have the opportunity to hear him, take it!",
+      "Vaisesika Dasa is a treasure — if you ever have the opportunity to hear him, take it!",
     author: "Paul, Silicon Valley — USA",
   },
   {
@@ -16,50 +16,61 @@ export const TESTIMONIALS: { quote: string; author: string }[] = [
   },
 ];
 
-export function TestimonialsRow({ heading }: { heading?: string }) {
+export function TestimonialsRow({
+  heading = "In Their Own Words",
+}: {
+  heading?: string;
+}) {
   return (
-    <section className="my-12">
-      {heading ? (
+    <section
+      className="w-full"
+      style={{
+        backgroundColor: "var(--brand-header-bg, var(--muted))",
+        borderTop: "1px solid var(--brand-header-border, var(--border))",
+        borderBottom: "1px solid var(--brand-header-border, var(--border))",
+      }}
+    >
+      <div className="mx-auto max-w-[1200px] px-6 py-16 sm:py-20">
         <p
-          className="mb-6 text-center"
+          className="mb-10 sm:mb-14 text-center"
           style={{
             fontFamily: "var(--font-meta)",
             fontSize: 12,
-            letterSpacing: "0.32em",
+            letterSpacing: "0.36em",
             textTransform: "uppercase",
             color: "var(--brand-olive, var(--muted-foreground))",
           }}
         >
           {heading}
         </p>
-      ) : null}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-        {TESTIMONIALS.map((t, i) => (
-          <figure key={i} className="flex flex-col">
-            <blockquote
-              style={{
-                fontFamily: "var(--font-serif-body)",
-                fontSize: 15,
-                lineHeight: 1.6,
-                color: "var(--foreground)",
-              }}
-            >
-              {t.quote}
-            </blockquote>
-            <figcaption
-              className="mt-4"
-              style={{
-                fontFamily: "var(--font-serif-body)",
-                fontStyle: "italic",
-                fontWeight: 700,
-                fontSize: 13,
-                color: "var(--brand-orange, #e85d3a)",
-              }}
-            >
-              {t.author}
-            </figcaption>
-          </figure>
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-12">
+          {TESTIMONIALS.map((t, i) => (
+            <figure key={i} className="flex flex-col">
+              <blockquote
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 17,
+                  lineHeight: 1.65,
+                  color: "var(--brand-title-color, var(--foreground))",
+                }}
+              >
+                {t.quote}
+              </blockquote>
+              <figcaption
+                className="mt-5"
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontStyle: "italic",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  color: "var(--brand-orange, #d96a4a)",
+                }}
+              >
+                {t.author}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   );
