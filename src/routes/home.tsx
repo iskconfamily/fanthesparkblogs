@@ -1042,7 +1042,7 @@ function StoriesAndTestimonials() {
           >
             <img
               src={transformationStoriesImg}
-              alt="Hands cradling a small oil lamp at dawn — a symbol of transformation through service"
+              alt="A warm gathering of diverse people sharing joy and connection — a symbol of transformation through community"
               loading="lazy"
               style={{
                 width: "100%",
