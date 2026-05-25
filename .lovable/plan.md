@@ -1,19 +1,28 @@
-## Scope
-Small mobile UX fix for `/blog2/:slug` individual post layout (PostMinimal component).
+# Add portrait to /blog2 post byline
 
-## Changes
-1. **PostMinimal title sizing**: Change from `text-5xl md:text-6xl` to `text-3xl md:text-6xl` so the large serif italic title fits comfortably on mobile.
-2. **PostMinimal card padding**: Reduce horizontal padding slightly on mobile from `px-6 md:px-16` to `px-5 md:px-16` to reclaim a bit of horizontal breathing room.
+## What changes
 
-## Files affected
-- `src/components/blog-layouts/PostMinimal.tsx`
+In `src/components/blog-layouts/PostMinimal.tsx`, replace the text-only byline with a version that includes the Vaisesika portrait — styled to match the `/blog2` minimal aesthetic (cream card, blue eyebrow, serif body).
 
-## Out of scope
-- No changes to /blog, /blog3, or /post routes
-- No email template work
-- No color, typography, or layout changes beyond mobile sizing
+**Before:**
+```tsx
+<p className="post-minimal-byline mb-12">
+  By {post.author} • {formatDate(post.date)}
+</p>
+```
 
-## Verification
-- Screenshot `/blog2/faq-bhakti` at 390×844 after fix
-- Confirm title renders at 3xl, comfortable reading, no overflow
-- Confirm desktop unchanged (6xl, px-16)
+**After:** small circular portrait (40px) on the left, author + date to the right, keeping the existing `post-minimal-byline` typography (uppercase eyebrow style). Same vertical rhythm (`mb-12`).
+
+Use the existing `@/assets/vaisesika-portrait.jpg` asset (already used by the shared `<Byline>` component). Add `loading="lazy"` and `alt={author}`.
+
+No style-token changes; no other files touched.
+
+## Should it go in the email too?
+
+**Recommendation: yes, but as a small inline portrait — not a Gravatar lookup.**
+
+- **Local image (recommended):** host the portrait at a public URL (e.g. published site `/assets/...`) and reference it via absolute `<img src="https://…">` in the email. Works in every client, no privacy prompts, matches the web byline 1-to-1.
+- **Gravatar:** technically works (it's just an `<img>`), but: (1) requires the author's email hash, (2) some corporate mail clients block third-party images until the user clicks "show images", (3) gives a generic fallback if no Gravatar exists. Not worth it for a single known author.
+- **Sizing:** keep it 40×40 with `border-radius: 9999px` inline. Gmail strips `border-radius` on some Android clients, so the image will appear square there — acceptable fallback.
+
+Not building the email now (per earlier decision) — this is just the answer.
