@@ -43,9 +43,6 @@ export const Route = createFileRoute("/blog2/$slug")({
 
 function PostPage() {
   const { post } = Route.useLoaderData();
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <PostMinimal post={post} />
-    </div>
-  );
+  return <PostMinimal post={post} />;
 }
+
