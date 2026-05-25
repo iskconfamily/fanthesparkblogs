@@ -26,6 +26,9 @@ import { Route as WisdomIndexRouteImport } from './routes/wisdom.index'
 import { Route as ServeIndexRouteImport } from './routes/serve.index'
 import { Route as NextStepsIndexRouteImport } from './routes/next-steps.index'
 import { Route as MyJourneyIndexRouteImport } from './routes/my-journey.index'
+import { Route as Blog3IndexRouteImport } from './routes/blog3.index'
+import { Route as Blog2IndexRouteImport } from './routes/blog2.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WisdomLordRouteImport } from './routes/wisdom.lord'
 import { Route as WisdomBlogRouteImport } from './routes/wisdom.blog'
@@ -137,6 +140,21 @@ const MyJourneyIndexRoute = MyJourneyIndexRouteImport.update({
   id: '/my-journey/',
   path: '/my-journey/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const Blog3IndexRoute = Blog3IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Blog3Route,
+} as any)
+const Blog2IndexRoute = Blog2IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => Blog2Route,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -308,6 +326,9 @@ export interface FileRoutesByFullPath {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/lord': typeof WisdomLordRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
+  '/blog2/': typeof Blog2IndexRoute
+  '/blog3/': typeof Blog3IndexRoute
   '/my-journey/': typeof MyJourneyIndexRoute
   '/next-steps/': typeof NextStepsIndexRoute
   '/serve/': typeof ServeIndexRoute
@@ -320,9 +341,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/archive': typeof ArchiveRoute
-  '/blog': typeof BlogRouteWithChildren
-  '/blog2': typeof Blog2RouteWithChildren
-  '/blog3': typeof Blog3RouteWithChildren
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
   '/home': typeof HomeRoute
@@ -352,6 +370,9 @@ export interface FileRoutesByTo {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/lord': typeof WisdomLordRoute
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
+  '/blog2': typeof Blog2IndexRoute
+  '/blog3': typeof Blog3IndexRoute
   '/my-journey': typeof MyJourneyIndexRoute
   '/next-steps': typeof NextStepsIndexRoute
   '/serve': typeof ServeIndexRoute
@@ -398,6 +419,9 @@ export interface FileRoutesById {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/lord': typeof WisdomLordRoute
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
+  '/blog2/': typeof Blog2IndexRoute
+  '/blog3/': typeof Blog3IndexRoute
   '/my-journey/': typeof MyJourneyIndexRoute
   '/next-steps/': typeof NextStepsIndexRoute
   '/serve/': typeof ServeIndexRoute
@@ -445,6 +469,9 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/lord'
     | '/admin/'
+    | '/blog/'
+    | '/blog2/'
+    | '/blog3/'
     | '/my-journey/'
     | '/next-steps/'
     | '/serve/'
@@ -457,9 +484,6 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/archive'
-    | '/blog'
-    | '/blog2'
-    | '/blog3'
     | '/contact'
     | '/events'
     | '/home'
@@ -489,6 +513,9 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/lord'
     | '/admin'
+    | '/blog'
+    | '/blog2'
+    | '/blog3'
     | '/my-journey'
     | '/next-steps'
     | '/serve'
@@ -534,6 +561,9 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/lord'
     | '/admin/'
+    | '/blog/'
+    | '/blog2/'
+    | '/blog3/'
     | '/my-journey/'
     | '/next-steps/'
     | '/serve/'
@@ -699,6 +729,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/my-journey/'
       preLoaderRoute: typeof MyJourneyIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog3/': {
+      id: '/blog3/'
+      path: '/'
+      fullPath: '/blog3/'
+      preLoaderRoute: typeof Blog3IndexRouteImport
+      parentRoute: typeof Blog3Route
+    }
+    '/blog2/': {
+      id: '/blog2/'
+      path: '/'
+      fullPath: '/blog2/'
+      preLoaderRoute: typeof Blog2IndexRouteImport
+      parentRoute: typeof Blog2Route
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -907,30 +958,36 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface BlogRouteChildren {
   BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
 }
 
 const BlogRouteChildren: BlogRouteChildren = {
   BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
 }
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
 interface Blog2RouteChildren {
   Blog2SlugRoute: typeof Blog2SlugRoute
+  Blog2IndexRoute: typeof Blog2IndexRoute
 }
 
 const Blog2RouteChildren: Blog2RouteChildren = {
   Blog2SlugRoute: Blog2SlugRoute,
+  Blog2IndexRoute: Blog2IndexRoute,
 }
 
 const Blog2RouteWithChildren = Blog2Route._addFileChildren(Blog2RouteChildren)
 
 interface Blog3RouteChildren {
   Blog3SlugRoute: typeof Blog3SlugRoute
+  Blog3IndexRoute: typeof Blog3IndexRoute
 }
 
 const Blog3RouteChildren: Blog3RouteChildren = {
   Blog3SlugRoute: Blog3SlugRoute,
+  Blog3IndexRoute: Blog3IndexRoute,
 }
 
 const Blog3RouteWithChildren = Blog3Route._addFileChildren(Blog3RouteChildren)
