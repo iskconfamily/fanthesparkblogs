@@ -8,6 +8,7 @@ import { getUpcomingEvents, type EventRow } from "@/lib/events.functions";
 import { getLatestVideos } from "@/lib/youtube.functions";
 import { getAllPosts, getPostBySlug, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
+import { TestimonialsRow } from "@/components/testimonials-row";
 
 import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
@@ -80,6 +81,7 @@ function HomePage() {
 
       <ServeBand />
       <ServantStories />
+      <TestimonialsRow heading="Kind Words" />
     </SiteLayoutWeb>
   );
 }
