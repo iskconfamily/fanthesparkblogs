@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { SiteLayout } from "@/components/site-layout";
 import { PostPreview } from "@/components/post-preview";
-import { TestimonialsRow } from "@/components/testimonials-row";
+
 import { getAllPosts } from "@/content/queries";
 import { getPublishedDbPosts } from "@/lib/blog.functions";
 import type { Post } from "@/content/posts";
