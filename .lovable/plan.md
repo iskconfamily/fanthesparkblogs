@@ -1,41 +1,35 @@
-# Experimental Blog Layout Routes
+## Goal
+Redesign `/blog2/:slug` individual post layout to match the uploaded reference: clean editorial article on a cream/white card, blue uppercase category eyebrow, large serif italic title, minimal byline, roomy body text, and quotes with a gold left border + small muted citation.
 
-Add three parallel sets of blog routes for layout experimentation. All routes read from the existing data source (`getPublishedDbPosts` / `getPublishedDbPostBySlug` in `src/lib/blog.functions.ts`, merged with static posts via `getAllPosts`). No data duplication, no menu changes, no changes to `/`.
+Scope: visual only. No data/route changes. Only `/blog2/:slug` is affected — `/blog`, `/blog3`, and the existing `/post/:slug` layouts stay as they are.
 
-## New route files
+## Changes
 
-Each pair mirrors the existing `wisdom.blog.tsx` + `wisdom.blog.$slug.tsx` pattern (loader → merge with static posts → render).
+### 1. `src/components/blog-layouts/PostMinimal.tsx` (rewrite layout)
+- Outer page: warm cream background (`bg-[oklch(...)]` token already in theme, or a subtle off-white). Center an article "card" with white background, subtle border, rounded corners, generous padding, max-width ~960px.
+- Eyebrow: category in **blue**, uppercase, wide tracking (`text-[11px] tracking-[0.22em]`), using a blue token (add `--accent-blue` to `styles.css` if not present).
+- Title: large serif italic (`var(--font-serif-display)`, italic, ~`text-5xl md:text-6xl`), warm dark brown/black color.
+- Byline: simple muted line "BY {AUTHOR} · {DATE}" in uppercase tracked meta font. No portrait avatar in this layout (matches reference). Pass a `variant="minimal"` style — render inline instead of using the existing `<Byline>` which includes the portrait.
+- Body: serif body text at comfortable size (`text-lg md:text-xl`, leading-relaxed), paragraph spacing generous.
+- Quote block (reference's gold-bordered quote): override the default `ArticleBody` quote style for this layout. Two options:
+  - (a) Add a `variant` prop to `ArticleBody` / quote renderer, or
+  - (b) Pass a `className` wrapper and let local CSS scope override quote styles via a wrapping class like `.post-minimal-v2 blockquote { border-left: 3px solid var(--accent-gold); ... }`.
+  - Going with (b) — scoped CSS class wrapper — to avoid touching shared `ArticleBody` API.
+- Signature line at end ("Vaisesika Dasa" in serif italic) — render author name in serif italic below the body, matching reference.
+- Footer "← Back to index" link stays, but restyled subtle.
 
-1. `src/routes/blog.tsx` — listing (Layout v1)
-2. `src/routes/blog.$slug.tsx` — post detail (Layout v1)
-3. `src/routes/blog2.tsx` — listing (Layout v2)
-4. `src/routes/blog2.$slug.tsx` — post detail (Layout v2)
-5. `src/routes/blog3.tsx` — listing (Layout v3)
-6. `src/routes/blog3.$slug.tsx` — post detail (Layout v3)
+### 2. `src/styles.css` (additive tokens only)
+- Add (if missing): `--accent-blue` (the bright blue used for "REFLECTIONS"), `--accent-gold` (the olive-gold quote border), `--surface-card` (white card on cream), `--surface-page-cream` (warm page background).
+- Add scoped CSS rules for `.post-minimal-card blockquote` to style quotes per reference (gold left border, italic serif body, small muted cite line).
 
-All slug routes fall back to `getPostBySlug` (static posts) if the DB lookup returns null, matching current behavior.
+### 3. `src/routes/blog2.$slug.tsx` (no change needed)
+- Already renders `<PostMinimal post={post} />`. The route stays the same.
 
-## Layout directions (visual only — same data, same blocks)
+## Out of scope
+- `/blog` (editorial layout) — untouched.
+- `/blog3/:slug` (PostSplit) — untouched.
+- `/post/:slug` (main site) — untouched.
+- Data fetching, routing, navigation — untouched.
 
-- **v1 `/blog`** — Editorial magazine grid. Large featured post on top, 2-column card grid below. Serif display titles, generous whitespace. Detail page: wide single-column reading view with hero image.
-- **v2 `/blog2`** — Minimal list. No images in the listing — just title, date, excerpt, and a thin divider per post (think Craig Mod / Substack reader). Detail page: narrow centered column, smaller hero, focus on typography.
-- **v3 `/blog3`** — Bento / asymmetric grid. Mixed tile sizes with featured image overlays and category chips. Detail page: split-screen with sticky meta sidebar (author, date, tags) and scrolling content.
-
-Each layout reuses the existing `ArticleBody` / `PostBlock` renderer for post bodies so block content stays consistent — only the page chrome, listing cards, and detail wrapper differ.
-
-## Shared building blocks
-
-- Reuse `SiteLayout` (or wrap in a minimal local layout where v2/v3 want less chrome).
-- Reuse `mergePosts` logic from `wisdom.blog.tsx` — extract into a small helper `src/lib/merge-posts.ts` to avoid copy-paste across 3 listings.
-- Reuse `PostArticle` for v1 detail; v2 and v3 details get their own thin wrapper components in `src/components/blog-layouts/` (e.g. `PostMinimal.tsx`, `PostSplit.tsx`) that consume `post.blocks` + `ArticleBody`.
-
-## Out of scope (per request)
-
-- No nav/menu changes.
-- No redirects, canonicals, or SEO indexing controls.
-- `/` page untouched.
-- Existing `/post/:slug`, `/wisdom/blog`, `/wisdom/blog/:slug` untouched.
-
-## Confirm before I build
-
-Want me to proceed with all three layout variants (v1 editorial, v2 minimal, v3 bento) as described, or skip v3 for now?
+## Verification
+- Visit `/blog2/fresh-and-easy` and `/blog2/overnight-success` in preview, screenshot, compare to reference (title style, eyebrow color, quote border, byline simplicity, page cream background).
