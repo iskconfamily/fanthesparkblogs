@@ -198,9 +198,9 @@ function formatEmailDate(iso: string): string {
 }
 
 const TITLE = `margin:0 0 6px 0;font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:36px;line-height:1.15;color:${C_FOREGROUND};`;
-const DATE_META = `margin:0 0 18px 0;font-family:${FONT_META};font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:${C_MUTED_FG};`;
-const HR_HEAD = `border:0;border-top:1px solid ${C_BORDER};margin:0 0 12px 0;`;
-const BYLINE = `margin:0 0 28px 0;font-family:${FONT_META};font-weight:600;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:${C_MUTED_FG};`;
+const HR_HEAD = `border:0;border-top:1px solid ${C_BORDER};margin:18px 0 16px 0;`;
+const BYLINE = `font-family:${FONT_META};font-weight:600;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:${C_MUTED_FG};vertical-align:middle;`;
+const PORTRAIT_URL = `https://ghifedcfmauydlmexrxc.supabase.co/storage/v1/object/public/email-assets/vaisesika-portrait.jpg`;
 
 /** Build the inner blog content as email-safe HTML. No outer template chrome. */
 export function buildBlogEmailHtml(post: EmailHtmlPost): string {
