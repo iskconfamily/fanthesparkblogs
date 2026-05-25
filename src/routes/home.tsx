@@ -14,7 +14,7 @@ import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
-import transformationStoriesImg from "@/assets/transformational-stories.jpg";
+import transformationStoriesImg from "@/assets/transformational-stories-v2.jpg";
 
 
 const YOUTUBE_URL = "https://www.youtube.com/@FanTheSpark";
@@ -1042,7 +1042,7 @@ function StoriesAndTestimonials() {
           >
             <img
               src={transformationStoriesImg}
-              alt="A warm gathering of diverse people sharing joy and connection — a symbol of transformation through community"
+              alt="A multicultural group walking arm in arm through a sunlit woodland path — a symbol of shared journey and companionship"
               loading="lazy"
               style={{
                 width: "100%",
