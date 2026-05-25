@@ -81,6 +81,7 @@ function HomePage() {
 
       <ServeBand />
       <ServantStories />
+      <TestimonialsRow heading="Kind Words" />
     </SiteLayoutWeb>
   );
 }
