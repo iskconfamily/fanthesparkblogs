@@ -507,7 +507,7 @@ function MyGuruFeature() {
     <FeatureBlock
       eyebrow="My Journey"
       title="My Guru"
-      body="Vaisesika Dasa is a disciple of His Divine Grace A.C. Bhaktivedanta Srila Prabhupada Swami. His Divine Grace A. C. Bhaktivedanta Swami Prabhupada was born in 1896 in Calcutta, India. He first met his spiritual master, Srila Bhaktisiddhanta Sarasvati Gosvami, in Calcutta in 1922. Bhaktisiddhanta Sarasvati, a prominent bhakti-yoga scholar and the founder of sixty-four branches of Gaudiya Mathas (Vedic institutes), requested His Divine Grace Srila Prabhupada to broadcast Vedic knowledge through the English language. In the years that followed, His Divine Grace Srila Prabhupada wrote a commentary on the Bhagavad-gita and in 1944, without assistance, started an English fortnightly magazine."
+      body="His Divine Grace A.C. Bhaktivedanta Swami Prabhupada (1896–1977), guru of Vaisesika Dasa, is widely regarded as the world's pre-eminent exponent of the teachings and practices of Bhakti-yoga to the Western world. He is the Founder-Acarya of the International Society for Krishna Consciousness (ISKCON)."
       img={guruImg}
       imgAlt="Srila Prabhupada surrounded by his disciples"
       ctaLabel="Read About Srila Prabhupada Swami"
@@ -523,7 +523,7 @@ function MyStoryFeature() {
     <FeatureBlock
       eyebrow="My Journey"
       title="My Story"
-      body="When I was a child, I was deeply curious about the mystery of life. That quiet wondering became a lifelong path of bhakti — of hearing, chanting, and remembering Krishna."
+      body="When I was a child, I was deeply curious about the mystery of life. Trying to wrap my mind around it, I would sometimes ask my parents about the reasons for death. They thought that because I was so young, I shouldn't worry about it. But, I did."
       img={storyImg}
       imgAlt="Vaisesika Dasa"
       ctaLabel="Read My Story"
@@ -1087,8 +1087,7 @@ function StoriesAndTestimonials() {
                 maxWidth: 480,
               }}
             >
-              Hear from devotees whose lives have been touched and transformed through the
-              practice of bhakti-yoga.
+              Every life touched by bhakti tells its own quiet story. Here we gather those stories — from kindred spirits who walked into a small group, asked a question, attended a retreat, or simply began to chant — and found something steady underneath the noise of daily life.
             </p>
             <div className="flex flex-wrap gap-x-8 gap-y-3">
               <Link
