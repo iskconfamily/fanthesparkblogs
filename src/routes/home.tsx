@@ -1017,78 +1017,83 @@ function ServeBand() {
   );
 }
 
-/* ===================== TRANSFORMATIONAL STORIES ===================== */
-function ServantStories() {
+/* ===================== TRANSFORMATIONAL STORIES + KIND WORDS ===================== */
+function StoriesAndTestimonials() {
   return (
-    <section style={{ padding: "100px 24px" }}>
-      <div className="mx-auto" style={{ maxWidth: 1100 }}>
-        <Link
-          to="/serve/transformational-stories"
-          className="no-underline block group"
-          style={{ borderBottom: "none" }}
+    <section
+      style={{
+        backgroundColor: "var(--brand-header-bg, var(--muted))",
+        borderTop: "1px solid var(--brand-header-border, var(--border))",
+        borderBottom: "1px solid var(--brand-header-border, var(--border))",
+      }}
+    >
+      {/* Top: Transformational Stories teaser */}
+      <div className="mx-auto" style={{ maxWidth: 1100, padding: "100px 24px 60px" }}>
+        <div
+          className="grid gap-10 md:gap-14 items-center"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
         >
           <div
-            className="grid gap-10 md:gap-14 items-center"
-            style={{ gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))" }}
+            style={{
+              aspectRatio: "4 / 3",
+              overflow: "hidden",
+              backgroundColor: "var(--muted)",
+            }}
           >
-            <div
+            <img
+              src={postServe}
+              alt="Transformational Stories"
+              loading="lazy"
               style={{
-                aspectRatio: "4 / 3",
-                overflow: "hidden",
-                backgroundColor: "var(--muted)",
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          </div>
+          <div>
+            <p
+              style={{
+                fontFamily: "var(--font-meta)",
+                fontSize: 11,
+                letterSpacing: "0.24em",
+                textTransform: "uppercase",
+                color: "var(--brand-olive, var(--muted-foreground))",
+                marginBottom: 12,
               }}
             >
-              <img
-                src={postServe}
-                alt="Transformational Stories"
-                loading="lazy"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-meta)",
-                  fontSize: 11,
-                  letterSpacing: "0.24em",
-                  textTransform: "uppercase",
-                  color: "var(--brand-olive, var(--muted-foreground))",
-                  marginBottom: 12,
-                }}
-              >
-                Stories
-              </p>
-              <h3
-                style={{
-                  fontFamily: "var(--font-serif-display)",
-                  fontStyle: "italic",
-                  fontSize: "clamp(34px, 4vw, 48px)",
-                  lineHeight: 1.1,
-                  color: "var(--foreground)",
-                  marginBottom: 20,
-                }}
-              >
-                Transformational Stories
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-serif-body)",
-                  fontSize: 17,
-                  lineHeight: 1.7,
-                  color: "var(--muted-foreground)",
-                  marginBottom: 22,
-                  maxWidth: 480,
-                }}
-              >
-                Hear from devotees whose lives have been touched and transformed through the
-                practice of bhakti-yoga.
-              </p>
-              <span
+              Stories
+            </p>
+            <h3
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontStyle: "italic",
+                fontSize: "clamp(34px, 4vw, 48px)",
+                lineHeight: 1.1,
+                color: "var(--foreground)",
+                marginBottom: 20,
+              }}
+            >
+              Transformational Stories
+            </h3>
+            <p
+              style={{
+                fontFamily: "var(--font-serif-body)",
+                fontSize: 17,
+                lineHeight: 1.7,
+                color: "var(--muted-foreground)",
+                marginBottom: 28,
+                maxWidth: 480,
+              }}
+            >
+              Hear from devotees whose lives have been touched and transformed through the
+              practice of bhakti-yoga.
+            </p>
+            <div className="flex flex-wrap gap-x-8 gap-y-3">
+              <Link
+                to="/serve/transformational-stories"
+                className="no-underline uppercase"
                 style={{
                   fontFamily: "var(--font-meta)",
                   fontSize: 12,
@@ -1100,10 +1105,81 @@ function ServantStories() {
                 }}
               >
                 Read Stories →
-              </span>
+              </Link>
+              <Link
+                to="/contact"
+                className="no-underline uppercase"
+                style={{
+                  fontFamily: "var(--font-meta)",
+                  fontSize: 12,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "var(--brand-orange, #d96a4a)",
+                  borderBottom: "1px solid var(--brand-orange, #d96a4a)",
+                  paddingBottom: 2,
+                }}
+              >
+                Share Your Story →
+              </Link>
             </div>
           </div>
-        </Link>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="mx-auto" style={{ maxWidth: 1100, padding: "0 24px" }}>
+        <div
+          style={{
+            height: 1,
+            backgroundColor: "var(--brand-header-border, var(--border))",
+            opacity: 0.6,
+          }}
+        />
+      </div>
+
+      {/* Bottom: Kind Words (testimonials) */}
+      <div className="mx-auto" style={{ maxWidth: 1100, padding: "60px 24px 100px" }}>
+        <p
+          className="text-center"
+          style={{
+            fontFamily: "var(--font-meta)",
+            fontSize: 12,
+            letterSpacing: "0.36em",
+            textTransform: "uppercase",
+            color: "var(--brand-olive, var(--muted-foreground))",
+            marginBottom: 48,
+          }}
+        >
+          Kind Words
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-12">
+          {TESTIMONIALS.map((t, i) => (
+            <figure key={i} className="flex flex-col">
+              <blockquote
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 17,
+                  lineHeight: 1.65,
+                  color: "var(--brand-title-color, var(--foreground))",
+                }}
+              >
+                {t.quote}
+              </blockquote>
+              <figcaption
+                className="mt-5"
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontStyle: "italic",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  color: "var(--brand-orange, #d96a4a)",
+                }}
+              >
+                {t.author}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
       </div>
     </section>
   );
