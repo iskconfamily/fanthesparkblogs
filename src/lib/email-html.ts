@@ -198,9 +198,9 @@ function formatEmailDate(iso: string): string {
 }
 
 const TITLE = `margin:0 0 6px 0;font-family:${FONT_DISPLAY};font-style:italic;font-weight:500;font-size:36px;line-height:1.15;color:${C_FOREGROUND};`;
-const DATE_META = `margin:0 0 18px 0;font-family:${FONT_META};font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:${C_MUTED_FG};`;
-const HR_HEAD = `border:0;border-top:1px solid ${C_BORDER};margin:0 0 12px 0;`;
-const BYLINE = `margin:0 0 28px 0;font-family:${FONT_META};font-weight:600;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:${C_MUTED_FG};`;
+const HR_HEAD = `border:0;border-top:1px solid ${C_BORDER};margin:18px 0 16px 0;`;
+const BYLINE = `font-family:${FONT_META};font-weight:600;font-size:11px;letter-spacing:0.28em;text-transform:uppercase;color:${C_MUTED_FG};vertical-align:middle;`;
+const PORTRAIT_URL = `https://ghifedcfmauydlmexrxc.supabase.co/storage/v1/object/public/email-assets/vaisesika-portrait.jpg`;
 
 /** Build the inner blog content as email-safe HTML. No outer template chrome. */
 export function buildBlogEmailHtml(post: EmailHtmlPost): string {
@@ -210,13 +210,19 @@ export function buildBlogEmailHtml(post: EmailHtmlPost): string {
   if (post.title) {
     parts.push(`<h1 style="${TITLE}">${esc(post.title)}</h1>`);
   }
-  if (post.date) {
-    const d = formatEmailDate(post.date);
-    if (d) parts.push(`<div style="${DATE_META}">${esc(d)}</div>`);
-  }
-  if (post.author) {
+  if (post.author || post.date) {
     parts.push(`<hr style="${HR_HEAD}" />`);
-    parts.push(`<div style="${BYLINE}">By ${esc(post.author)}</div>`);
+    const dateStr = post.date ? formatEmailDate(post.date) : "";
+    const authorText = post.author ? `By ${esc(post.author)}` : "";
+    const sep = post.author && dateStr ? ` <span style="opacity:0.5;margin:0 6px;">&middot;</span> ` : "";
+    parts.push(
+      `<table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:0 0 28px 0;border-collapse:collapse;"><tr>` +
+        (post.author
+          ? `<td width="40" style="width:40px;padding:0;vertical-align:middle;"><img src="${PORTRAIT_URL}" alt="${esc(post.author)}" width="40" height="40" style="display:block;width:40px;height:40px;border-radius:9999px;border:0;outline:none;text-decoration:none;" /></td>`
+          : "") +
+        `<td style="padding:0 0 0 ${post.author ? "12px" : "0"};vertical-align:middle;${BYLINE}">${authorText}${sep}${esc(dateStr)}</td>` +
+        `</tr></table>`,
+    );
   }
 
 
