@@ -2,10 +2,10 @@ import { Link } from "@tanstack/react-router";
 import type { Post } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
-import type { PostBlock } from "@/lib/post-blocks";
+import { postToBlocks } from "@/lib/post-to-blocks";
 
 export function PostSplit({ post }: { post: Post }) {
-  const blocks: PostBlock[] = post.blocks && post.blocks.length ? post.blocks : [];
+  const blocks = postToBlocks(post);
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-12">
