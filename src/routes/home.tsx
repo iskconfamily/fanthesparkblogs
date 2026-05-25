@@ -1042,7 +1042,7 @@ function StoriesAndTestimonials() {
           >
             <img
               src={transformationStoriesImg}
-              alt="A multicultural group walking arm in arm through a sunlit woodland path — a symbol of shared journey and companionship"
+              alt="A joyful multicultural group with arms raised on a hilltop at sunset — a symbol of triumph, hope, and shared celebration"
               loading="lazy"
               style={{
                 width: "100%",
