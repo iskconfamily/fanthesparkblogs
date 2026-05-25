@@ -14,7 +14,7 @@ import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
-import postServe from "@/assets/post-serve.jpg";
+import transformationStoriesImg from "@/assets/transformational-stories.jpg";
 
 
 const YOUTUBE_URL = "https://www.youtube.com/@FanTheSpark";
@@ -1041,8 +1041,8 @@ function StoriesAndTestimonials() {
             }}
           >
             <img
-              src={postServe}
-              alt="Transformational Stories"
+              src={transformationStoriesImg}
+              alt="Hands cradling a small oil lamp at dawn — a symbol of transformation through service"
               loading="lazy"
               style={{
                 width: "100%",
@@ -1150,7 +1150,7 @@ function StoriesAndTestimonials() {
             marginBottom: 48,
           }}
         >
-          Kind Words
+          Voices from the Journey
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 sm:gap-12">
           {TESTIMONIALS.map((t, i) => (
