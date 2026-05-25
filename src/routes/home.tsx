@@ -80,8 +80,7 @@ function HomePage() {
       {upcoming.length > 0 ? <UpcomingEvents events={upcoming} /> : null}
 
       <ServeBand />
-      <ServantStories />
-      <TestimonialsRow heading="Kind Words" />
+      <StoriesAndTestimonials />
     </SiteLayoutWeb>
   );
 }
