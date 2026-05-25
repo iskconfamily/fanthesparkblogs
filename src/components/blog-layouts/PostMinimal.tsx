@@ -3,21 +3,10 @@ import type { Post } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
 import { Byline } from "@/components/byline";
-import type { PostBlock } from "@/lib/post-blocks";
+import { postToBlocks } from "@/lib/post-to-blocks";
 
 export function PostMinimal({ post }: { post: Post }) {
-  const blocks: PostBlock[] =
-    post.blocks && post.blocks.length
-      ? post.blocks
-      : post.body
-          .filter((b) => b.type === "p" || b.type === "h2" || b.type === "quote")
-          .map((b, i) =>
-            b.type === "p"
-              ? { id: `m-p-${i}`, type: "paragraph" as const, text: b.text }
-              : b.type === "h2"
-              ? { id: `m-h-${i}`, type: "heading" as const, level: 2 as const, text: b.text }
-              : { id: `m-q-${i}`, type: "quote" as const, text: b.text, cite: b.cite },
-          );
+  const blocks = postToBlocks(post);
 
   return (
     <article className="mx-auto max-w-[640px] px-6 py-16">
