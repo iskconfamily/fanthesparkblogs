@@ -292,7 +292,7 @@ export const sendBlogAnnouncement = createServerFn({ method: "POST" })
 // Mailchimp Marketing (Campaigns)
 // ============================================================
 
-const MC_AUDIENCE_ID = "a97040f5e0";
+const MC_AUDIENCE_ID = "69c3886b32";
 const MC_FROM_NAME = "Fan The Spark";
 const MC_FROM_EMAIL = "newsletter@fanthespark.com";
 const MC_REPLY_TO = "newsletter@fanthespark.com";
