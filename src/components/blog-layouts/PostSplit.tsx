@@ -3,6 +3,7 @@ import type { Post } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
 import { postToBlocks } from "@/lib/post-to-blocks";
+import vaisesikaPortrait from "@/assets/vaisesika-portrait.jpg";
 
 export function PostSplit({ post }: { post: Post }) {
   const blocks = postToBlocks(post);
