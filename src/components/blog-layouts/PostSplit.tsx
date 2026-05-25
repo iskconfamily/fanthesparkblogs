@@ -3,6 +3,7 @@ import type { Post } from "@/content/posts";
 import { formatDate } from "@/content/queries";
 import { ArticleBody } from "@/components/article-body";
 import { postToBlocks } from "@/lib/post-to-blocks";
+import vaisesikaPortrait from "@/assets/vaisesika-portrait.jpg";
 
 export function PostSplit({ post }: { post: Post }) {
   const blocks = postToBlocks(post);
@@ -34,7 +35,15 @@ export function PostSplit({ post }: { post: Post }) {
               >
                 Author
               </p>
-              <p className="mt-1 text-sm">{post.author}</p>
+              <div className="mt-2 flex items-center gap-3">
+                <img
+                  src={vaisesikaPortrait}
+                  alt={post.author}
+                  loading="lazy"
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+                <p className="text-sm">{post.author}</p>
+              </div>
             </>
           )}
 
