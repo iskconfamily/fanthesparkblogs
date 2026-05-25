@@ -9,10 +9,10 @@ export function PostMinimal({ post }: { post: Post }) {
 
   return (
     <div className="post-minimal-page py-10 md:py-16">
-      <article className="post-minimal-card mx-auto max-w-[960px] px-6 md:px-16 py-12 md:py-16">
+      <article className="post-minimal-card mx-auto max-w-[960px] px-5 md:px-16 py-12 md:py-16">
         <p className="post-minimal-eyebrow mb-6">{post.category}</p>
 
-        <h1 className="post-minimal-title text-5xl md:text-6xl mb-6">
+        <h1 className="post-minimal-title text-3xl md:text-6xl mb-6">
           {post.title}
         </h1>
 
