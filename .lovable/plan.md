@@ -1,37 +1,31 @@
-# Add author portrait to email byline
+## Add tile sidebar to blog2 post pages
 
-## Goal
-Mirror the web byline (small circular portrait + author name + date) inside the email HTML produced by `buildBlogEmailHtml` in `src/lib/email-html.ts`, so emails match `/blog2` and `/blog3`.
+Right now `/blog/$slug` uses `SiteLayout`, which renders the full `Sidebar` (article tiles, books, newsletter, recent, tags) on the left. `/blog2/$slug` uses `PostMinimal` standalone — centered card, no sidebar.
 
-## Approach
+The user wants just the **article tiles** (the top section of `Sidebar` — one image + italic title per row, randomized on mount) added to the left of blog2 posts. Everything else about blog2 stays the same: the cream card, typography, byline with portrait, back link, no header/footer chrome, no books/newsletter/recent/tags.
 
-1. **Host the portrait at a public URL.** Email clients can't load `@/assets/...` bundle URLs — they need an absolute `https://` src. Upload `src/assets/vaisesika-portrait.jpg` to a public Cloud storage bucket (e.g. `email-assets/vaisesika-portrait.jpg`) and use the returned public URL as a constant in `email-html.ts`.
+### Changes
 
-2. **Update the byline block in `buildBlogEmailHtml`.** Replace the current text-only byline:
-   ```
-   <div style="${BYLINE}">By ${esc(post.author)}</div>
-   ```
-   with an email-safe table layout (tables are the only reliable way to align an image next to text across Gmail, Outlook, Apple Mail):
-   ```
-   <table><tr>
-     <td width="40"><img src="<public url>" width="40" height="40"
-          style="display:block;border-radius:9999px;" /></td>
-     <td style="padding-left:12px;">By {author} • {DATE}</td>
-   </tr></table>
-   ```
-   Keep the existing `BYLINE` typography tokens. Move the date into the byline row (it's currently a separate `DATE_META` block above) so the layout matches the web exactly — one portrait, one line with name + date.
+1. **New component `src/components/blog-layouts/PostTilesSidebar.tsx`**
+   - Extract just the "Article tiles" `<section>` from `src/components/sidebar.tsx` (the `tiles` array, the `useEffect` shuffle, the `Link` + `img` + italic title markup).
+   - Same imports, same styling — no other sections.
 
-3. **No other changes.** Templates, sending pipeline, web bylines all stay as-is.
+2. **Update `src/routes/blog2.$slug.tsx`**
+   - Replace `<PostMinimal post={post} />` with a 2-col grid wrapper:
+     ```
+     <div className="post-minimal-page py-10 md:py-16">
+       <div className="mx-auto max-w-[1240px] px-5 md:px-8 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
+         <aside className="order-2 lg:order-1"><PostTilesSidebar /></aside>
+         <div className="order-1 lg:order-2"><PostMinimal post={post} /></div>
+       </div>
+     </div>
+     ```
+   - To avoid double background/padding, add a `bare` (or `noFrame`) prop to `PostMinimal` that skips the outer `post-minimal-page py-10 md:py-16` wrapper when rendered inside the grid. The inner `post-minimal-card` and all content stay identical.
 
-## Caveats (already discussed, just noting)
-- Some Android Gmail builds strip `border-radius` → portrait appears square. Acceptable fallback.
-- Recipients who don't click "show images" see alt text (`Vaisesika Dasa`) instead of the portrait — the author name is also in the adjacent text cell, so the byline is never broken.
+3. **No changes** to `/blog2` index, `PostSplit`, `/blog`, or the shared `Sidebar` component.
 
-## Files touched
-- `src/lib/email-html.ts` — add `PORTRAIT_URL` constant, rewrite the byline section inside `buildBlogEmailHtml`, drop the separate `DATE_META` block (date moves into byline row).
-- One-time upload of `src/assets/vaisesika-portrait.jpg` to a public bucket (no code change beyond using the returned URL).
+### Notes / caveats
 
-## Not in scope
-- Wiring actual email sending (no email infra exists yet).
-- Changing web bylines.
-- Gravatar lookup.
+- On mobile (`<lg`), tiles stack **below** the article (via `order-1`/`order-2`) so the reading experience isn't pushed down. If you'd rather hide them on mobile, say the word and I'll add `hidden lg:block` to the aside instead.
+- Tiles link to `/post/$slug` (same as on `/blog`), not `/blog2/$slug`. Want me to repoint them to `/blog2/$slug` so users stay in the blog2 reading experience? Default: keep as-is.
+- Max width grows from 960px (current blog2 card) to ~1240px to fit the 240px tile column + card. Card itself stays the same width.
