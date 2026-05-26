@@ -48,6 +48,10 @@ export function PostMinimal({ post, bare = false }: { post: Post; bare?: boolean
           </Link>
         </div>
       </article>
-    </div>
   );
+
+  if (bare) return article;
+
+  return <div className="post-minimal-page py-10 md:py-16">{article}</div>;
 }
+

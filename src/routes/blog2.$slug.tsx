@@ -1,5 +1,6 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { PostMinimal } from "@/components/blog-layouts/PostMinimal";
+import { PostTilesSidebar } from "@/components/blog-layouts/PostTilesSidebar";
 import { getPostBySlug } from "@/content/queries";
 import { getPublishedDbPostBySlug } from "@/lib/blog.functions";
 import type { Post } from "@/content/posts";
@@ -43,6 +44,17 @@ export const Route = createFileRoute("/blog2/$slug")({
 
 function PostPage() {
   const { post } = Route.useLoaderData();
-  return <PostMinimal post={post} />;
+  return (
+    <div className="post-minimal-page py-10 md:py-16">
+      <div className="mx-auto max-w-[1240px] px-5 md:px-8 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="order-2 lg:order-1">
+          <PostTilesSidebar />
+        </div>
+        <div className="order-1 lg:order-2">
+          <PostMinimal post={post} bare />
+        </div>
+      </div>
+    </div>
+  );
 }
 
