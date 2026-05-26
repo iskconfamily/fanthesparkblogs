@@ -5,13 +5,12 @@ import { ArticleBody } from "@/components/article-body";
 import { postToBlocks } from "@/lib/post-to-blocks";
 import vaisesikaPortrait from "@/assets/vaisesika-portrait.jpg";
 
-export function PostMinimal({ post }: { post: Post }) {
+export function PostMinimal({ post, bare = false }: { post: Post; bare?: boolean }) {
   const blocks = postToBlocks(post);
   const author = post.author ?? "Vaisesika Dasa";
 
-  return (
-    <div className="post-minimal-page py-10 md:py-16">
-      <article className="post-minimal-card mx-auto max-w-[960px] px-5 md:px-16 py-12 md:py-16">
+  const article = (
+    <article className={`post-minimal-card mx-auto ${bare ? "" : "max-w-[960px]"} px-5 md:px-16 py-12 md:py-16`}>
         <p className="post-minimal-eyebrow mb-6">{post.category}</p>
 
         <h1 className="post-minimal-title text-3xl md:text-6xl mb-6">
