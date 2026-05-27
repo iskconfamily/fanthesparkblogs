@@ -573,10 +573,7 @@ function LatestVideos({ videoIds }: { videoIds: string[] }) {
             Watch More →
           </a>
         </div>
-        <div
-          className="grid gap-6 md:gap-8"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))" }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {videoIds.map((id) => (
             <YouTubeEmbed key={id} id={id} title="Fan The Spark video" />
           ))}
