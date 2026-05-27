@@ -13,7 +13,7 @@ export function PostPreview({ post }: { post: Post }) {
       />
       <p className="mt-10">
         <Link
-          to="/post/$slug"
+          to="/wisdom/blog/$slug"
           params={{ slug: post.slug }}
           className="text-xs uppercase tracking-[0.22em] text-muted-foreground hover:text-primary"
           style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
