@@ -1,59 +1,33 @@
-# Image Optimization Plan
+## Goal
 
-Several assets are large (1–3 MB each), dominating page weight and slowing first paint. Goal: dramatically reduce bytes shipped without visible quality loss, serve modern formats with responsive sizes, and let the browser load non-critical images later.
-
-## What's heavy today
-
-Worst offenders in `src/assets/`:
-- `my-story/vaisesika-meditation.png` — 3.0 MB (home + my-story hero)
-- `my-guru/prabhupada-hero.png` — 2.6 MB
-- `my-story/vaisesika-portico.png` — 2.1 MB
-- `my-story/hero-forest.jpg` — 2.2 MB
-- `my-story/temple-namaste.jpg` — 1.7 MB
-- `my-story/prabhupada-group.jpg` — 1.4 MB (home)
-- `my-guru/prabhupada-laughing.png` — 1.4 MB
-- `hero-crowd-bg.png` — 679 KB (home hero background)
-- Various 200–500 KB PNGs/JPGs
-
-None of the heavy PNGs need transparency — they're photographs saved as PNG.
+Refine the page headers on `/next-steps/small-groups`, `/serve/volunteer`, and `/serve/give` so each gets a modest, page-appropriate visual accent — not a heavy hero image — while staying consistent with the rest of the site (warm soft background, rounded corners, existing typography).
 
 ## Approach
 
-1. **Install `vite-imagetools` + `sharp`** and register the plugin in `vite.config.ts` (via the `vite.plugins` passthrough on `@lovable.dev/vite-tanstack-config`). This lets us request format and size variants at import time, producing hashed, cached, properly sized outputs.
+Currently all three pages use `PlaceholderPage`, which renders a centered type-only hero band (eyebrow + italic serif title) on the warm header bg. We'll extend `PlaceholderPage` to accept an optional `headerAccent` prop and render an asymmetric two-column hero (text left, accent right) when provided. When `headerAccent` is omitted, behavior is unchanged (Give keeps clean type-only header).
 
-2. **Convert heavy photographic PNG sources to JPG/WebP** once at the source (one-off `sharp` script) and resize anything wider than ~2000 px down to a max width of 2000 px (full-bleed retina) or 1200 px for inline content. Re-encode large JPGs at quality 78–82. Keep true logos/marks (`fts-logo*.png`, `dots.png`) as PNG/WebP-with-alpha.
+### `src/components/placeholder-page.tsx`
+- Add optional `headerAccent?: React.ReactNode` prop.
+- When present, render hero as a `lg:grid-cols-[1.2fr_1fr]` layout: left column keeps left-aligned eyebrow + title; right column renders `headerAccent` inside a rounded (`borderRadius: 12`), soft warm card with the existing border. On mobile the accent stacks below.
+- When absent, keep the current centered type-only hero exactly as-is.
 
-3. **Serve responsive, modern formats via `<picture>` + `srcset`** for hero and large content images. Default to AVIF for the heaviest heroes, falling back to WebP and then the original. Using `vite-imagetools` query syntax:
+### `src/routes/next-steps/small-groups.tsx`
+- Pass a `headerAccent` showing a warm community/small-group image. Use one of the existing community-themed assets already in `src/assets/` (prefer `hero-crowd-bg` or a temple-namaste/community image; pick the warmest small-group-feeling one after a quick `ls src/assets`). Image rendered inside a rounded card with `aspect-[4/5]` or `aspect-square`, `object-cover`, soft inner border, plus a small italic caption underneath ("Kindred spirits, monthly circles") in the meta font.
+- Use `?format=webp&w=900&quality=78` import suffix and `loading="eager"`, `decoding="async"` (header-visible).
 
-   ```tsx
-   import heroAvif from "./hero.jpg?w=600;1200;2000&format=avif&as=srcset"
-   import heroWebp from "./hero.jpg?w=600;1200;2000&format=webp&as=srcset"
-   import heroFallback from "./hero.jpg?w=1600&format=jpg"
+### `src/routes/serve/volunteer.tsx`
+- Pass a `headerAccent` rendering a 2×2 icon grid of the five service areas (collapsed to four representative ones, or 2×3 with five tiles + one accent). Each tile: rounded square card, warm header bg, 1px border, lucide-react icon centered (already a project dep) in `--brand-olive`, and a tiny uppercase meta label below. Icons: `Laptop` (Digital), `Sparkles` (Mindfulness), `Mountain` (Retreat), `BookOpen` (Books), `UtensilsCrossed` (Cooking).
+- No image — purely typographic + iconographic accent so it stays subtle.
 
-   <picture>
-     <source type="image/avif" srcSet={heroAvif} sizes="(max-width: 2000px) 100vw, 2000px" />
-     <source type="image/webp" srcSet={heroWebp} sizes="(max-width: 2000px) 100vw, 2000px" />
-     <img src={heroFallback} alt="…" />
-   </picture>
-   ```
+### `src/routes/serve/give.tsx`
+- Do NOT pass `headerAccent`. Keep the clean type-only header so the donor-level cards below remain the visual focus. (Per request.)
 
-   Apply to: home hero (`hero-crowd-bg`, `hero-stamp`, `transformational-stories-v3`), my-story hero (`vaisesika-meditation`), my-guru hero (`prabhupada-hero`), and the largest inline images on my-story / my-guru.
-
-4. **Preload the LCP image** on the home route via TanStack `head().links` (`rel="preload" as="image" href=... imagesrcset=... imagesizes=... fetchpriority="high"`) so the hero appears immediately.
-
-5. **Lazy-load below-the-fold images** by adding `loading="lazy"` + `decoding="async"` to non-hero `<img>` tags (post tiles, sidebar thumbnails, my-guru gallery, story tiles on `/my-journey`). Already present on some — extend to the rest. Hero images stay eager with `fetchpriority="high"`.
-
-6. **Spot-check after**: load home, /my-journey, /my-journey/my-story, /my-journey/my-guru, and a blog post in the preview; confirm images still look right and the network panel shows the smaller AVIF/WebP transfers.
+## Consistency
+- All accents reuse existing tokens: `var(--brand-header-bg)`, `var(--brand-header-border)`, `var(--brand-olive)`, `var(--font-meta)`, `var(--font-serif-display)`.
+- Rounded corners: `borderRadius: 12` for the accent card, `8` for inner tiles — slightly softer than the rest of the site's `4` to feel like a gentle accent without breaking the system.
+- Hero band keeps the same warm bg and bottom border; only the inner layout changes when an accent is present.
 
 ## Out of scope
-
-- No layout, copy, or design changes.
-- No CMS/dynamic image pipeline — all images are bundled assets, so build-time optimization is enough.
-- Won't touch `src/integrations/supabase/*`, routing, or unrelated components.
-
-## Technical notes
-
-- `bun add -D vite-imagetools sharp`.
-- Register plugin: pass `vite.plugins: [imagetools()]` through `@lovable.dev/vite-tanstack-config`'s `defineConfig`. Verify no duplicate plugin conflict at build time.
-- Expected savings on the heaviest routes: ~15 MB → ~2–3 MB of image transfer.
-- A small `tools/optimize-source-images.ts` `sharp` script (run once) overwrites the worst PNG sources as resized JPG/WebP and we update those imports. Combined with `?format=…&w=…` query-param variants, we get both smaller sources and per-viewport delivery.
+- No copy changes to intros/body.
+- No changes to the donor level cards or volunteer level cards.
+- No new routes, no CMS, no design system token changes.
