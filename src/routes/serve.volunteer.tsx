@@ -1,6 +1,56 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PlaceholderPage } from "@/components/placeholder-page";
 import { Para } from "@/components/editorial";
+import { Laptop, Sparkles, Mountain, BookOpen, UtensilsCrossed } from "lucide-react";
+
+const ACCENT_TILES = [
+  { Icon: Laptop, label: "Digital" },
+  { Icon: Sparkles, label: "Mindfulness" },
+  { Icon: Mountain, label: "Retreats" },
+  { Icon: BookOpen, label: "Books" },
+  { Icon: UtensilsCrossed, label: "Cooking" },
+];
+
+function VolunteerAccent() {
+  return (
+    <div
+      className="mx-auto lg:mx-0 max-w-[420px] grid grid-cols-3 gap-3"
+      style={{ padding: 4 }}
+    >
+      {ACCENT_TILES.map(({ Icon, label }) => (
+        <div
+          key={label}
+          className="flex flex-col items-center justify-center text-center"
+          style={{
+            aspectRatio: "1 / 1",
+            border: "1px solid var(--brand-header-border, var(--border))",
+            borderRadius: 8,
+            backgroundColor: "var(--brand-header-bg, var(--card))",
+            padding: 12,
+          }}
+        >
+          <Icon
+            size={28}
+            strokeWidth={1.4}
+            style={{ color: "var(--brand-olive, var(--muted-foreground))" }}
+          />
+          <span
+            className="mt-2"
+            style={{
+              fontFamily: "var(--font-meta)",
+              fontSize: 10,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--brand-olive, var(--muted-foreground))",
+            }}
+          >
+            {label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/serve/volunteer")({
   head: () => ({
@@ -51,6 +101,7 @@ function VolunteerPage() {
     <PlaceholderPage
       eyebrow="Serve"
       title="Volunteer"
+      headerAccent={<VolunteerAccent />}
       intro="Have you benefited from hanging out with Vaisesika Dasa, hearing one of his talks, or attending one of his retreats or local circles? Want to find a way of giving something back?"
       body={
         <>
