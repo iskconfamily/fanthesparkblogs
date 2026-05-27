@@ -70,7 +70,7 @@ function HomePage() {
     <SiteLayoutWeb>
       <Hero />
       <QuickLinks />
-      <JourneySplit />
+      {/* <JourneySplit /> */}
       <MyGuruFeature />
       <LatestVideos videoIds={initial.videoIds} />
       <LatestAudio />
