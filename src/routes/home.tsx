@@ -674,31 +674,59 @@ function BooksFeature() {
   ];
 
   return (
-    <section style={{ padding: "100px 24px", backgroundColor: "var(--background)" }}>
-      <div className="mx-auto" style={{ maxWidth: 920 }}>
-        <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <SectionEyebrow text="Read" />
+    <section style={{ padding: "120px 24px 130px", backgroundColor: "var(--background)" }}>
+      <div className="mx-auto" style={{ maxWidth: 1100 }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 88 }}>
+          <div className="flex items-center justify-center gap-4" style={{ marginBottom: 22 }}>
+            <span
+              style={{
+                display: "inline-block",
+                height: 1,
+                width: 48,
+                backgroundColor: "color-mix(in oklab, var(--foreground) 22%, transparent)",
+              }}
+            />
+            <span
+              className="uppercase"
+              style={{
+                fontFamily: "var(--font-meta)",
+                fontSize: 11,
+                letterSpacing: "0.4em",
+                fontWeight: 600,
+                color: "color-mix(in oklab, var(--foreground) 70%, transparent)",
+              }}
+            >
+              Read
+            </span>
+            <span
+              style={{
+                display: "inline-block",
+                height: 1,
+                width: 48,
+                backgroundColor: "color-mix(in oklab, var(--foreground) 22%, transparent)",
+              }}
+            />
+          </div>
           <h2
             style={{
               fontFamily: "var(--font-serif-display)",
               fontStyle: "italic",
-              fontSize: "clamp(32px, 4vw, 48px)",
-              lineHeight: 1.1,
+              fontSize: "clamp(40px, 6vw, 72px)",
+              lineHeight: 1.05,
               color: "var(--foreground)",
-              marginTop: 14,
               display: "inline-block",
             }}
           >
             Books &amp; Teachings
           </h2>
         </div>
-        <div
-          className="grid gap-8 md:gap-12 justify-center"
-          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 280px))" }}
-        >
+
+        {/* Featured showcase grid */}
+        <div className="grid md:grid-cols-2 items-start w-full" style={{ gap: 64 }}>
           {books.map((b) => {
             const shortDesc =
-              b.desc && b.desc.length > 140 ? b.desc.slice(0, 137).trimEnd() + "…" : b.desc;
+              b.desc && b.desc.length > 220 ? b.desc.slice(0, 217).trimEnd() + "…" : b.desc;
             return (
               <Link
                 key={b.slug}
@@ -708,67 +736,93 @@ function BooksFeature() {
                 style={{ borderBottom: "none" }}
               >
                 <div
-                  style={{
-                    aspectRatio: "3 / 4",
-                    overflow: "hidden",
-                    backgroundColor: "var(--muted)",
-                    marginBottom: 20,
-                    boxShadow: "0 14px 40px -18px rgba(20,16,8,0.35)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
+                  className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2"
+                  style={{ marginBottom: 44 }}
                 >
-                  <img
-                    src={b.img}
-                    alt={b.title}
-                    loading="lazy"
+                  <div
+                    aria-hidden
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      display: "block",
-                      transition: "transform 600ms ease",
+                      position: "absolute",
+                      inset: "-24px",
+                      backgroundColor: "color-mix(in oklab, var(--foreground) 6%, var(--background))",
+                      borderRadius: 2,
+                      zIndex: -1,
+                      opacity: 0.55,
                     }}
                   />
+                  <div
+                    style={{
+                      position: "relative",
+                      aspectRatio: "3 / 4.5",
+                      overflow: "hidden",
+                      backgroundColor: "var(--muted)",
+                      boxShadow:
+                        "25px 25px 60px -15px rgba(20,16,8,0.22), 5px 5px 15px rgba(20,16,8,0.08)",
+                      outline: "1px solid color-mix(in oklab, var(--foreground) 8%, transparent)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      src={b.img}
+                      alt={b.title}
+                      loading="lazy"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                  </div>
                 </div>
 
-                <h3
-                  style={{
-                    fontFamily: "var(--font-serif-display)",
-                    fontStyle: "italic",
-                    fontSize: 24,
-                    lineHeight: 1.15,
-                    color: "var(--foreground)",
-                    marginBottom: 10,
-                  }}
-                >
-                  {b.title}
-                </h3>
-                <p
-                  style={{
-                    fontFamily: "var(--font-serif-body)",
-                    fontSize: 15,
-                    lineHeight: 1.6,
-                    color: "var(--muted-foreground)",
-                    marginBottom: 14,
-                  }}
-                >
-                  {shortDesc}
-                </p>
-                <span
-                  className="uppercase"
-                  style={{
-                    fontFamily: "var(--font-meta)",
-                    fontSize: 12,
-                    letterSpacing: "0.22em",
-                    color: "var(--primary)",
-                    borderBottom: "1px solid var(--primary)",
-                    paddingBottom: 2,
-                  }}
-                >
-                  Read More →
-                </span>
+                <div style={{ maxWidth: 460 }}>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-serif-display)",
+                      fontSize: "clamp(26px, 2.4vw, 32px)",
+                      lineHeight: 1.15,
+                      color: "var(--foreground)",
+                      marginBottom: 18,
+                    }}
+                  >
+                    {b.title}
+                  </h3>
+                  <p
+                    style={{
+                      fontFamily: "var(--font-serif-body)",
+                      fontSize: 16,
+                      lineHeight: 1.7,
+                      color: "color-mix(in oklab, var(--foreground) 78%, transparent)",
+                      marginBottom: 36,
+                    }}
+                  >
+                    {shortDesc}
+                  </p>
+                  <span
+                    className="uppercase inline-flex items-center"
+                    style={{
+                      fontFamily: "var(--font-meta)",
+                      fontSize: 12,
+                      letterSpacing: "0.22em",
+                      fontWeight: 700,
+                      color: "var(--primary)",
+                      borderBottom:
+                        "1.5px solid color-mix(in oklab, var(--primary) 45%, transparent)",
+                      paddingBottom: 3,
+                    }}
+                  >
+                    Read More
+                    <span
+                      className="transition-transform duration-300 group-hover:translate-x-1.5"
+                      style={{ marginLeft: 10, display: "inline-block" }}
+                    >
+                      →
+                    </span>
+                  </span>
+                </div>
               </Link>
             );
           })}
@@ -777,6 +831,7 @@ function BooksFeature() {
     </section>
   );
 }
+
 
 /* ===================== UPCOMING EVENTS ===================== */
 function UpcomingEvents({ events }: { events: EventRow[] }) {
