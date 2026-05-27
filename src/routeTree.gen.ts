@@ -43,6 +43,10 @@ import { Route as MyJourneyMyGuruRouteImport } from './routes/my-journey.my-guru
 import { Route as AdminSetupRouteImport } from './routes/admin.setup'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as WisdomBlog2IndexRouteImport } from './routes/wisdom.blog2.index'
+import { Route as WisdomBlog1IndexRouteImport } from './routes/wisdom.blog1.index'
+import { Route as WisdomBlog2SlugRouteImport } from './routes/wisdom.blog2.$slug'
+import { Route as WisdomBlog1SlugRouteImport } from './routes/wisdom.blog1.$slug'
 import { Route as WisdomBlogSlugRouteImport } from './routes/wisdom.blog.$slug'
 import { Route as AdminEditIdRouteImport } from './routes/admin.edit.$id'
 import { Route as AdminDesignIdRouteImport } from './routes/admin.design.$id'
@@ -219,6 +223,26 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AdminRoute,
 } as any)
+const WisdomBlog2IndexRoute = WisdomBlog2IndexRouteImport.update({
+  id: '/wisdom/blog2/',
+  path: '/wisdom/blog2/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WisdomBlog1IndexRoute = WisdomBlog1IndexRouteImport.update({
+  id: '/wisdom/blog1/',
+  path: '/wisdom/blog1/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WisdomBlog2SlugRoute = WisdomBlog2SlugRouteImport.update({
+  id: '/wisdom/blog2/$slug',
+  path: '/wisdom/blog2/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WisdomBlog1SlugRoute = WisdomBlog1SlugRouteImport.update({
+  id: '/wisdom/blog1/$slug',
+  path: '/wisdom/blog1/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WisdomBlogSlugRoute = WisdomBlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -273,6 +297,10 @@ export interface FileRoutesByFullPath {
   '/admin/design/$id': typeof AdminDesignIdRoute
   '/admin/edit/$id': typeof AdminEditIdRoute
   '/wisdom/blog/$slug': typeof WisdomBlogSlugRoute
+  '/wisdom/blog1/$slug': typeof WisdomBlog1SlugRoute
+  '/wisdom/blog2/$slug': typeof WisdomBlog2SlugRoute
+  '/wisdom/blog1/': typeof WisdomBlog1IndexRoute
+  '/wisdom/blog2/': typeof WisdomBlog2IndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -311,6 +339,10 @@ export interface FileRoutesByTo {
   '/admin/design/$id': typeof AdminDesignIdRoute
   '/admin/edit/$id': typeof AdminEditIdRoute
   '/wisdom/blog/$slug': typeof WisdomBlogSlugRoute
+  '/wisdom/blog1/$slug': typeof WisdomBlog1SlugRoute
+  '/wisdom/blog2/$slug': typeof WisdomBlog2SlugRoute
+  '/wisdom/blog1': typeof WisdomBlog1IndexRoute
+  '/wisdom/blog2': typeof WisdomBlog2IndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -351,6 +383,10 @@ export interface FileRoutesById {
   '/admin/design/$id': typeof AdminDesignIdRoute
   '/admin/edit/$id': typeof AdminEditIdRoute
   '/wisdom/blog/$slug': typeof WisdomBlogSlugRoute
+  '/wisdom/blog1/$slug': typeof WisdomBlog1SlugRoute
+  '/wisdom/blog2/$slug': typeof WisdomBlog2SlugRoute
+  '/wisdom/blog1/': typeof WisdomBlog1IndexRoute
+  '/wisdom/blog2/': typeof WisdomBlog2IndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -392,6 +428,10 @@ export interface FileRouteTypes {
     | '/admin/design/$id'
     | '/admin/edit/$id'
     | '/wisdom/blog/$slug'
+    | '/wisdom/blog1/$slug'
+    | '/wisdom/blog2/$slug'
+    | '/wisdom/blog1/'
+    | '/wisdom/blog2/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -430,6 +470,10 @@ export interface FileRouteTypes {
     | '/admin/design/$id'
     | '/admin/edit/$id'
     | '/wisdom/blog/$slug'
+    | '/wisdom/blog1/$slug'
+    | '/wisdom/blog2/$slug'
+    | '/wisdom/blog1'
+    | '/wisdom/blog2'
   id:
     | '__root__'
     | '/'
@@ -469,6 +513,10 @@ export interface FileRouteTypes {
     | '/admin/design/$id'
     | '/admin/edit/$id'
     | '/wisdom/blog/$slug'
+    | '/wisdom/blog1/$slug'
+    | '/wisdom/blog2/$slug'
+    | '/wisdom/blog1/'
+    | '/wisdom/blog2/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -502,6 +550,10 @@ export interface RootRouteChildren {
   NextStepsIndexRoute: typeof NextStepsIndexRoute
   ServeIndexRoute: typeof ServeIndexRoute
   WisdomIndexRoute: typeof WisdomIndexRoute
+  WisdomBlog1SlugRoute: typeof WisdomBlog1SlugRoute
+  WisdomBlog2SlugRoute: typeof WisdomBlog2SlugRoute
+  WisdomBlog1IndexRoute: typeof WisdomBlog1IndexRoute
+  WisdomBlog2IndexRoute: typeof WisdomBlog2IndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -744,6 +796,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/wisdom/blog2/': {
+      id: '/wisdom/blog2/'
+      path: '/wisdom/blog2'
+      fullPath: '/wisdom/blog2/'
+      preLoaderRoute: typeof WisdomBlog2IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wisdom/blog1/': {
+      id: '/wisdom/blog1/'
+      path: '/wisdom/blog1'
+      fullPath: '/wisdom/blog1/'
+      preLoaderRoute: typeof WisdomBlog1IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wisdom/blog2/$slug': {
+      id: '/wisdom/blog2/$slug'
+      path: '/wisdom/blog2/$slug'
+      fullPath: '/wisdom/blog2/$slug'
+      preLoaderRoute: typeof WisdomBlog2SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/wisdom/blog1/$slug': {
+      id: '/wisdom/blog1/$slug'
+      path: '/wisdom/blog1/$slug'
+      fullPath: '/wisdom/blog1/$slug'
+      preLoaderRoute: typeof WisdomBlog1SlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/wisdom/blog/$slug': {
       id: '/wisdom/blog/$slug'
       path: '/$slug'
@@ -831,6 +911,10 @@ const rootRouteChildren: RootRouteChildren = {
   NextStepsIndexRoute: NextStepsIndexRoute,
   ServeIndexRoute: ServeIndexRoute,
   WisdomIndexRoute: WisdomIndexRoute,
+  WisdomBlog1SlugRoute: WisdomBlog1SlugRoute,
+  WisdomBlog2SlugRoute: WisdomBlog2SlugRoute,
+  WisdomBlog1IndexRoute: WisdomBlog1IndexRoute,
+  WisdomBlog2IndexRoute: WisdomBlog2IndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
