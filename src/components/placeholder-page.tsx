@@ -10,6 +10,7 @@ interface PlaceholderPageProps {
   body?: React.ReactNode;
   contactCategory?: string;
   contactTitle?: string;
+  headerAccent?: React.ReactNode;
 }
 
 export function PlaceholderPage({
@@ -19,10 +20,11 @@ export function PlaceholderPage({
   body,
   contactCategory,
   contactTitle,
+  headerAccent,
 }: PlaceholderPageProps) {
   return (
     <SiteLayoutWeb>
-      {/* HERO BAND — type only */}
+      {/* HERO BAND — type only, or with optional accent */}
       <section
         className="w-full"
         style={{
@@ -30,32 +32,66 @@ export function PlaceholderPage({
           borderBottom: "1px solid var(--brand-header-border, var(--border))",
         }}
       >
-        <div className="mx-auto max-w-[1200px] px-6 py-20 sm:py-28 text-center">
-          <p
-            className="mb-4"
-            style={{
-              fontFamily: "var(--font-meta)",
-              fontSize: 12,
-              letterSpacing: "0.32em",
-              textTransform: "uppercase",
-              color: "var(--brand-olive, var(--muted-foreground))",
-            }}
-          >
-            {eyebrow}
-          </p>
-          <h1
-            style={{
-              fontFamily: "var(--font-serif-display)",
-              fontSize: "clamp(44px, 6.5vw, 80px)",
-              fontStyle: "italic",
-              fontWeight: 500,
-              lineHeight: 1.05,
-              color: "var(--brand-title-color, var(--foreground))",
-            }}
-          >
-            {title}
-          </h1>
-        </div>
+        {headerAccent ? (
+          <div className="mx-auto max-w-[1200px] px-6 py-16 sm:py-20 lg:py-24">
+            <div className="grid gap-10 lg:gap-14 lg:grid-cols-[1.2fr_1fr] items-center">
+              <div className="text-center lg:text-left">
+                <p
+                  className="mb-4"
+                  style={{
+                    fontFamily: "var(--font-meta)",
+                    fontSize: 12,
+                    letterSpacing: "0.32em",
+                    textTransform: "uppercase",
+                    color: "var(--brand-olive, var(--muted-foreground))",
+                  }}
+                >
+                  {eyebrow}
+                </p>
+                <h1
+                  style={{
+                    fontFamily: "var(--font-serif-display)",
+                    fontSize: "clamp(40px, 5.5vw, 72px)",
+                    fontStyle: "italic",
+                    fontWeight: 500,
+                    lineHeight: 1.05,
+                    color: "var(--brand-title-color, var(--foreground))",
+                  }}
+                >
+                  {title}
+                </h1>
+              </div>
+              <div className="w-full">{headerAccent}</div>
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto max-w-[1200px] px-6 py-20 sm:py-28 text-center">
+            <p
+              className="mb-4"
+              style={{
+                fontFamily: "var(--font-meta)",
+                fontSize: 12,
+                letterSpacing: "0.32em",
+                textTransform: "uppercase",
+                color: "var(--brand-olive, var(--muted-foreground))",
+              }}
+            >
+              {eyebrow}
+            </p>
+            <h1
+              style={{
+                fontFamily: "var(--font-serif-display)",
+                fontSize: "clamp(44px, 6.5vw, 80px)",
+                fontStyle: "italic",
+                fontWeight: 500,
+                lineHeight: 1.05,
+                color: "var(--brand-title-color, var(--foreground))",
+              }}
+            >
+              {title}
+            </h1>
+          </div>
+        )}
       </section>
 
       {/* LEAD */}
