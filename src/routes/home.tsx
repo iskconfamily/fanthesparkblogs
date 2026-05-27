@@ -36,6 +36,10 @@ export const Route = createFileRoute("/home")({
           "Encouragement and support for expanding your book distribution, sadhana, and understanding of sastra.",
       },
     ],
+    links: [
+      { rel: "preload", as: "image", href: heroStamp, fetchpriority: "high" },
+      { rel: "preload", as: "image", href: heroCrowdBg, fetchpriority: "high" },
+    ],
   }),
   loader: async () => {
     const [posts, upcoming, videoIds] = await Promise.all([
@@ -118,6 +122,8 @@ function Hero() {
         <img
           src={heroStamp}
           alt="Fan The Spark"
+          fetchPriority="high"
+          decoding="async"
           style={{
             width: "clamp(255px, 32.3vw, 391px)",
             height: "auto",

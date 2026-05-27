@@ -67,6 +67,8 @@ function MyStoryPage() {
           src={heroForest}
           alt="Vaisesika Dasa in meditation in a forest clearing"
           className="my-story-hero-image"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-[1200px] px-6 pb-8 sm:pb-12">
@@ -232,6 +234,8 @@ function MyStoryPage() {
           src={vaisesikaArchway}
           alt="Vaisesika Dasa in pranam pose beneath an ornate temple archway"
           className="block w-full h-auto"
+          loading="lazy"
+          decoding="async"
           style={{
             maxHeight: "88vh",
             objectFit: "cover",

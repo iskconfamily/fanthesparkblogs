@@ -62,6 +62,8 @@ function MyGuruPage() {
           src={heroUrl}
           alt="Srila Prabhupada seated in a forest, garlanded with marigolds"
           className="my-guru-hero-image"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-[1200px] px-6 pb-8 sm:pb-12">
@@ -190,6 +192,8 @@ function MyGuruPage() {
           src={speakingUrl}
           alt="Srila Prabhupada speaking, garlanded with marigolds"
           className="block w-full h-auto"
+          loading="lazy"
+          decoding="async"
           style={{ maxHeight: "82vh", objectFit: "cover", objectPosition: "center 30%" }}
         />
       </section>
@@ -220,12 +224,16 @@ function MyGuruPage() {
               src={laughingUrl}
               alt="Srila Prabhupada laughing among disciples"
               className="block w-full h-auto"
+              loading="lazy"
+              decoding="async"
               style={{ maxHeight: 560, objectFit: "cover", borderRadius: 2 }}
             />
             <img
               src={darshanUrl}
               alt="Srila Prabhupada giving darshan, seated amid rose petals"
               className="block w-full h-auto"
+              loading="lazy"
+              decoding="async"
               style={{ maxHeight: 560, objectFit: "cover", borderRadius: 2 }}
             />
           </div>
@@ -264,6 +272,8 @@ function MyGuruPage() {
           src={initiationUrl}
           alt="Srila Prabhupada offering initiation beads to a disciple, surrounded by devotees"
           className="block w-full h-auto"
+          loading="lazy"
+          decoding="async"
           style={{ maxHeight: "88vh", objectFit: "cover", objectPosition: "center 35%" }}
         />
       </section>
