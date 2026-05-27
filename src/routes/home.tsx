@@ -10,7 +10,7 @@ import { getAllPosts, getPostBySlug, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 import { TestimonialsRow, TESTIMONIALS } from "@/components/testimonials-row";
 
-import storyImg from "@/assets/my-story/vaisesika-archway.jpg";
+import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
 import guruImg from "@/assets/my-story/prabhupada-group.jpg";
 import heroCrowdBg from "@/assets/hero-crowd-bg.png";
 import heroStamp from "@/assets/hero-stamp.png";
@@ -70,7 +70,7 @@ function HomePage() {
     <SiteLayoutWeb>
       <Hero />
       <QuickLinks />
-      {/* <JourneySplit /> */}
+      <JourneySplit />
       <MyGuruFeature />
       <LatestVideos videoIds={initial.videoIds} />
       <LatestAudio />
