@@ -1,27 +1,42 @@
-Make the Books & Teachings section on `/home` feel like a featured, premium showcase instead of two small covers floating in whitespace. Implement the chosen "Editorial showcase" direction.
+## Goal
 
-## Changes (single file: `src/routes/home.tsx`, `BooksFeature` component, lines 657–779)
+1. The `/blog` index and `/blog/$slug` detail pages should look like the `/blog2` versions (minimal reader layout with sidebar of post tiles).
+2. The site's default URL `/` should serve the current `/home` page.
 
-1. Section padding bumped to `120px 24px 130px`; container maxWidth raised from 920 → 1100.
+## Changes
 
-2. Header restyled:
-   - Eyebrow "READ" centered between two short 48px hairlines (1px lines in foreground/22%) instead of the existing `<SectionEyebrow>`.
-   - Heading scaled up to `clamp(40px, 6vw, 72px)`, still italic serif display.
+### 1. `src/routes/blog.$slug.tsx` — adopt blog2 detail style
+Replace the current `SiteLayout` + `PostArticle` + `RelatedArticles` component body with the same shell used in `blog2.$slug.tsx`:
+- Outer `div.post-minimal-page py-10 md:py-16`
+- Inner grid `max-w-[1240px] ... lg:grid-cols-[240px_minmax(0,1fr)]`
+- Left: `<PostTilesSidebar />`
+- Right: `<PostMinimal post={post} bare />`
+- Drop `RelatedArticles` and the related posts query in the loader (blog2 doesn't show them).
+- Keep `notFoundComponent` / `errorComponent` but restyle them to match blog2's minimal `<main>` wrapper, with the "back" link still pointing to `/blog`.
+- Keep the route path `/blog/$slug` and the existing `head()` meta unchanged.
 
-3. Two-up book grid (`md:grid-cols-2`), gap 64px, items aligned to top — books become the centerpiece.
+### 2. `src/routes/blog.index.tsx` — adopt blog2 listing style
+Replace the current editorial featured-card + grid layout with the blog2 listing style:
+- Plain `<main className="min-h-screen bg-background text-foreground">` wrapper (no `SiteLayout`, matching blog2).
+- Header eyebrow + serif "Essays" title.
+- Vertical `divide-y` list of posts linking to `/blog/$slug` (not `/blog2/$slug`) — date, title, excerpt.
+- Drop the `Card` helper, the featured post split, and the image grid.
+- Keep route path `/blog/`, loader, and head meta unchanged (title can stay or be updated to "Blog — Fan The Spark").
 
-4. Each book card:
-   - Cover wrapper with atmospheric framing: a soft `-24px` inset panel behind the cover using `color-mix(foreground 6%, background)`.
-   - Cover itself: aspect 3/4.5, deep editorial shadow `25px 25px 60px -15px rgba(20,16,8,0.22), 5px 5px 15px rgba(20,16,8,0.08)`, 1px hairline outline, `objectFit: cover`.
-   - Hover: whole group lifts `-translate-y-2` over 700ms; CTA arrow nudges right 1.5.
-   - Title scales to `clamp(26px, 2.4vw, 32px)`, removed forced italic (cleaner hierarchy with italic heading above).
-   - Description allowed up to 220 chars (was 140) with `font-serif-body`, line-height 1.7, color foreground/78%.
-   - "READ MORE →" CTA: uppercase, letter-spacing 0.22em, bold, primary color, underlined with primary/45%, arrow in a separate span that translates on hover.
+### 3. Default home → `/home`
+The `/home` route already exists with the full landing page. Update `src/routes/index.tsx` so visiting `/` lands on the same content as `/home`. Two reasonable options:
 
-5. All colors come from existing tokens (`--foreground`, `--background`, `--muted`, `--primary`, `--font-serif-display`, `--font-serif-body`, `--font-meta`) — no hardcoded hex values, palette stays locked.
+- **Option A (recommended): redirect.** Change `index.tsx` to a route that `throw redirect({ to: "/home" })` from `beforeLoad`. Simple, keeps a single source of truth, but the URL becomes `/home`.
+- **Option B: render home at `/`.** Re-export `HomePage` (and its loader) from `home.tsx` so `/` renders the full home page while `/home` keeps working. URL stays `/`.
 
-6. No changes to data fetching, routing, links, or any other section.
+Going with **Option A** unless you prefer the URL to remain `/`.
 
-## Technical notes
-- Drops the `SectionEyebrow` usage inside this component only; everywhere else still uses it.
-- Pure presentational refactor — no new imports, no new files, no dependency changes.
+### Not in scope
+- `/blog2`, `/blog3`, and `wisdom/blog/*` routes are left untouched.
+- Header navigation links elsewhere in the site are not retargeted; only the routes above change.
+- The hydration warning on `/blog` originates from the LastPass browser extension injecting nodes into the newsletter form — not a code bug, no change.
+
+## Files touched
+- `src/routes/blog.$slug.tsx` (rewrite component + loader)
+- `src/routes/blog.index.tsx` (rewrite component)
+- `src/routes/index.tsx` (replace with redirect to `/home`)
