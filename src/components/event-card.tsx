@@ -129,7 +129,6 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
           {days} Days
         </p>
         <h3
-          className="mb-3"
           style={{
             fontFamily: "var(--font-serif-display)",
             fontStyle: "italic",
@@ -140,28 +139,6 @@ export function EventCard({ event, compact = false }: { event: EventRow; compact
         >
           {event.title}
         </h3>
-        <p
-          style={{
-            fontFamily: "var(--font-serif-body)",
-            fontSize: 14,
-            color: "var(--muted-foreground)",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}
-        >
-          <span
-            aria-hidden
-            style={{
-              display: "inline-block",
-              width: 18,
-              height: 1,
-              backgroundColor: "var(--brand-olive, var(--muted-foreground))",
-              opacity: 0.5,
-            }}
-          />
-          {event.location}
-        </p>
         {event.short_note ? (
           <p
             style={{
