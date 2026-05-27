@@ -101,6 +101,7 @@ function VolunteerPage() {
     <PlaceholderPage
       eyebrow="Serve"
       title="Volunteer"
+      headerAccent={<VolunteerAccent />}
       intro="Have you benefited from hanging out with Vaisesika Dasa, hearing one of his talks, or attending one of his retreats or local circles? Want to find a way of giving something back?"
       body={
         <>
