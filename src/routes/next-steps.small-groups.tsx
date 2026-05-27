@@ -17,6 +17,43 @@ export const Route = createFileRoute("/next-steps/small-groups")({
     <PlaceholderPage
       eyebrow="Next Steps"
       title="Small Groups Near You"
+      headerAccent={
+        <figure
+          className="mx-auto lg:mx-0 max-w-[420px]"
+          style={{
+            border: "1px solid var(--brand-header-border, var(--border))",
+            borderRadius: 12,
+            overflow: "hidden",
+            backgroundColor: "var(--brand-header-bg, var(--card))",
+            boxShadow: "0 1px 2px rgba(60, 50, 20, 0.04)",
+          }}
+        >
+          <img
+            src={smallGroupsImg}
+            alt="A circle of seekers gathered in warm spiritual community"
+            loading="eager"
+            decoding="async"
+            style={{
+              width: "100%",
+              aspectRatio: "4 / 5",
+              objectFit: "cover",
+              display: "block",
+            }}
+          />
+          <figcaption
+            className="px-5 py-4 text-center"
+            style={{
+              fontFamily: "var(--font-serif-display)",
+              fontStyle: "italic",
+              fontSize: 16,
+              color: "var(--brand-olive, var(--muted-foreground))",
+              borderTop: "1px solid var(--brand-header-border, var(--border))",
+            }}
+          >
+            Kindred spirits, monthly circles
+          </figcaption>
+        </figure>
+      }
       intro="If we want to personally evolve and find lasting happiness, then the truth is that we need more than just knowledge and techniques. We also need real friends and real spiritual community."
       body={
         <>
