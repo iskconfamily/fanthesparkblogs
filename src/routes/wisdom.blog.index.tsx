@@ -6,7 +6,7 @@ import { PostPreview } from "@/components/post-preview";
 import { getPublishedDbPosts } from "@/lib/blog.functions";
 import { mergePosts } from "@/lib/merge-posts";
 
-export const Route = createFileRoute("/wisdom/blog")({
+export const Route = createFileRoute("/wisdom/blog/")({
   head: () => ({
     meta: [
       { title: "Blog — Wisdom · Fan The Spark" },
