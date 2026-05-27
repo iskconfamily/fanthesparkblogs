@@ -1,10 +1,11 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { PostSplit } from "@/components/blog-layouts/PostSplit";
+import { PostMinimal } from "@/components/blog-layouts/PostMinimal";
+import { PostTilesSidebar } from "@/components/blog-layouts/PostTilesSidebar";
 import { getPostBySlug } from "@/content/queries";
 import { getPublishedDbPostBySlug } from "@/lib/blog.functions";
 import type { Post } from "@/content/posts";
 
-export const Route = createFileRoute("/blog3/$slug")({
+export const Route = createFileRoute("/wisdom/blog1/$slug")({
   head: ({ params }) => {
     const post = getPostBySlug(params.slug);
     return {
@@ -22,17 +23,17 @@ export const Route = createFileRoute("/blog3/$slug")({
   },
   component: PostPage,
   notFoundComponent: () => (
-    <main className="mx-auto max-w-[1200px] px-6 py-20">
+    <main className="mx-auto max-w-[640px] px-6 py-20">
       <h1 className="text-3xl italic mb-4" style={{ fontFamily: "var(--font-serif-display)" }}>
         Not found
       </h1>
-      <Link to="/blog3" className="text-muted-foreground">
+      <Link to="/wisdom/blog1" className="text-muted-foreground">
         ← Back
       </Link>
     </main>
   ),
   errorComponent: ({ error }) => (
-    <main className="mx-auto max-w-[1200px] px-6 py-20">
+    <main className="mx-auto max-w-[640px] px-6 py-20">
       <h1 className="text-3xl italic" style={{ fontFamily: "var(--font-serif-display)" }}>
         Something went wrong
       </h1>
@@ -44,8 +45,15 @@ export const Route = createFileRoute("/blog3/$slug")({
 function PostPage() {
   const { post } = Route.useLoaderData();
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <PostSplit post={post} />
+    <div className="post-minimal-page py-10 md:py-16">
+      <div className="mx-auto max-w-[1240px] px-5 md:px-8 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="order-2 lg:order-1">
+          <PostTilesSidebar />
+        </div>
+        <div className="order-1 lg:order-2">
+          <PostMinimal post={post} bare />
+        </div>
+      </div>
     </div>
   );
 }

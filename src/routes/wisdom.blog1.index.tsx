@@ -5,7 +5,7 @@ import { getPublishedDbPosts } from "@/lib/blog.functions";
 import { mergePosts } from "@/lib/merge-posts";
 import { formatDate } from "@/content/queries";
 
-export const Route = createFileRoute("/blog2/")({
+export const Route = createFileRoute("/wisdom/blog1/")({
   head: () => ({
     meta: [
       { title: "Blog (v2 minimal) — Fan The Spark" },
@@ -48,7 +48,7 @@ function BlogIndex() {
           {posts.map((p) => (
             <li key={p.slug} className="py-8">
               <Link
-                to="/blog2/$slug"
+                to="/wisdom/blog1/$slug"
                 params={{ slug: p.slug }}
                 className="block no-underline group"
                 style={{ borderBottom: "none" }}

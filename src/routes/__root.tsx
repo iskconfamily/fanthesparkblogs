@@ -10,6 +10,8 @@ import {
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SiteHeaderWeb } from "@/components/site-header-web";
+import { SiteFooter } from "@/components/site-footer";
 
 function NotFoundComponent() {
   return (
@@ -122,7 +124,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Outlet />
+        <div className="min-h-screen bg-background text-foreground flex flex-col">
+          <SiteHeaderWeb />
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <SiteFooter />
+        </div>
       </ThemeProvider>
     </QueryClientProvider>
   );

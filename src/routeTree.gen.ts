@@ -15,9 +15,6 @@ import { Route as NewsletterRouteImport } from './routes/newsletter'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as Blog3RouteImport } from './routes/blog3'
-import { Route as Blog2RouteImport } from './routes/blog2'
-import { Route as BlogRouteImport } from './routes/blog'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
@@ -26,9 +23,6 @@ import { Route as WisdomIndexRouteImport } from './routes/wisdom.index'
 import { Route as ServeIndexRouteImport } from './routes/serve.index'
 import { Route as NextStepsIndexRouteImport } from './routes/next-steps.index'
 import { Route as MyJourneyIndexRouteImport } from './routes/my-journey.index'
-import { Route as Blog3IndexRouteImport } from './routes/blog3.index'
-import { Route as Blog2IndexRouteImport } from './routes/blog2.index'
-import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as WisdomLordRouteImport } from './routes/wisdom.lord'
 import { Route as WisdomBlogRouteImport } from './routes/wisdom.blog'
@@ -46,9 +40,6 @@ import { Route as NextStepsOtherProjectsRouteImport } from './routes/next-steps.
 import { Route as NextStepsAskRouteImport } from './routes/next-steps.ask'
 import { Route as MyJourneyMyStoryRouteImport } from './routes/my-journey.my-story'
 import { Route as MyJourneyMyGuruRouteImport } from './routes/my-journey.my-guru'
-import { Route as Blog3SlugRouteImport } from './routes/blog3.$slug'
-import { Route as Blog2SlugRouteImport } from './routes/blog2.$slug'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminSetupRouteImport } from './routes/admin.setup'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
@@ -84,21 +75,6 @@ const EventsRoute = EventsRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Blog3Route = Blog3RouteImport.update({
-  id: '/blog3',
-  path: '/blog3',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Blog2Route = Blog2RouteImport.update({
-  id: '/blog2',
-  path: '/blog2',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArchiveRoute = ArchiveRouteImport.update({
@@ -140,21 +116,6 @@ const MyJourneyIndexRoute = MyJourneyIndexRouteImport.update({
   id: '/my-journey/',
   path: '/my-journey/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const Blog3IndexRoute = Blog3IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => Blog3Route,
-} as any)
-const Blog2IndexRoute = Blog2IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => Blog2Route,
-} as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => BlogRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
@@ -243,21 +204,6 @@ const MyJourneyMyGuruRoute = MyJourneyMyGuruRouteImport.update({
   path: '/my-journey/my-guru',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Blog3SlugRoute = Blog3SlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => Blog3Route,
-} as any)
-const Blog2SlugRoute = Blog2SlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => Blog2Route,
-} as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BlogRoute,
-} as any)
 const AdminSetupRoute = AdminSetupRouteImport.update({
   id: '/setup',
   path: '/setup',
@@ -294,9 +240,6 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
-  '/blog': typeof BlogRouteWithChildren
-  '/blog2': typeof Blog2RouteWithChildren
-  '/blog3': typeof Blog3RouteWithChildren
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
   '/home': typeof HomeRoute
@@ -306,9 +249,6 @@ export interface FileRoutesByFullPath {
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/setup': typeof AdminSetupRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/blog2/$slug': typeof Blog2SlugRoute
-  '/blog3/$slug': typeof Blog3SlugRoute
   '/my-journey/my-guru': typeof MyJourneyMyGuruRoute
   '/my-journey/my-story': typeof MyJourneyMyStoryRoute
   '/next-steps/ask': typeof NextStepsAskRoute
@@ -326,9 +266,6 @@ export interface FileRoutesByFullPath {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/lord': typeof WisdomLordRoute
   '/admin/': typeof AdminIndexRoute
-  '/blog/': typeof BlogIndexRoute
-  '/blog2/': typeof Blog2IndexRoute
-  '/blog3/': typeof Blog3IndexRoute
   '/my-journey/': typeof MyJourneyIndexRoute
   '/next-steps/': typeof NextStepsIndexRoute
   '/serve/': typeof ServeIndexRoute
@@ -350,9 +287,6 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/setup': typeof AdminSetupRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/blog2/$slug': typeof Blog2SlugRoute
-  '/blog3/$slug': typeof Blog3SlugRoute
   '/my-journey/my-guru': typeof MyJourneyMyGuruRoute
   '/my-journey/my-story': typeof MyJourneyMyStoryRoute
   '/next-steps/ask': typeof NextStepsAskRoute
@@ -370,9 +304,6 @@ export interface FileRoutesByTo {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/lord': typeof WisdomLordRoute
   '/admin': typeof AdminIndexRoute
-  '/blog': typeof BlogIndexRoute
-  '/blog2': typeof Blog2IndexRoute
-  '/blog3': typeof Blog3IndexRoute
   '/my-journey': typeof MyJourneyIndexRoute
   '/next-steps': typeof NextStepsIndexRoute
   '/serve': typeof ServeIndexRoute
@@ -387,9 +318,6 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/archive': typeof ArchiveRoute
-  '/blog': typeof BlogRouteWithChildren
-  '/blog2': typeof Blog2RouteWithChildren
-  '/blog3': typeof Blog3RouteWithChildren
   '/contact': typeof ContactRoute
   '/events': typeof EventsRoute
   '/home': typeof HomeRoute
@@ -399,9 +327,6 @@ export interface FileRoutesById {
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRoute
   '/admin/setup': typeof AdminSetupRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/blog2/$slug': typeof Blog2SlugRoute
-  '/blog3/$slug': typeof Blog3SlugRoute
   '/my-journey/my-guru': typeof MyJourneyMyGuruRoute
   '/my-journey/my-story': typeof MyJourneyMyStoryRoute
   '/next-steps/ask': typeof NextStepsAskRoute
@@ -419,9 +344,6 @@ export interface FileRoutesById {
   '/wisdom/blog': typeof WisdomBlogRouteWithChildren
   '/wisdom/lord': typeof WisdomLordRoute
   '/admin/': typeof AdminIndexRoute
-  '/blog/': typeof BlogIndexRoute
-  '/blog2/': typeof Blog2IndexRoute
-  '/blog3/': typeof Blog3IndexRoute
   '/my-journey/': typeof MyJourneyIndexRoute
   '/next-steps/': typeof NextStepsIndexRoute
   '/serve/': typeof ServeIndexRoute
@@ -437,9 +359,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/archive'
-    | '/blog'
-    | '/blog2'
-    | '/blog3'
     | '/contact'
     | '/events'
     | '/home'
@@ -449,9 +368,6 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/new'
     | '/admin/setup'
-    | '/blog/$slug'
-    | '/blog2/$slug'
-    | '/blog3/$slug'
     | '/my-journey/my-guru'
     | '/my-journey/my-story'
     | '/next-steps/ask'
@@ -469,9 +385,6 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/lord'
     | '/admin/'
-    | '/blog/'
-    | '/blog2/'
-    | '/blog3/'
     | '/my-journey/'
     | '/next-steps/'
     | '/serve/'
@@ -493,9 +406,6 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/new'
     | '/admin/setup'
-    | '/blog/$slug'
-    | '/blog2/$slug'
-    | '/blog3/$slug'
     | '/my-journey/my-guru'
     | '/my-journey/my-story'
     | '/next-steps/ask'
@@ -513,9 +423,6 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/lord'
     | '/admin'
-    | '/blog'
-    | '/blog2'
-    | '/blog3'
     | '/my-journey'
     | '/next-steps'
     | '/serve'
@@ -529,9 +436,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/archive'
-    | '/blog'
-    | '/blog2'
-    | '/blog3'
     | '/contact'
     | '/events'
     | '/home'
@@ -541,9 +445,6 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/new'
     | '/admin/setup'
-    | '/blog/$slug'
-    | '/blog2/$slug'
-    | '/blog3/$slug'
     | '/my-journey/my-guru'
     | '/my-journey/my-story'
     | '/next-steps/ask'
@@ -561,9 +462,6 @@ export interface FileRouteTypes {
     | '/wisdom/blog'
     | '/wisdom/lord'
     | '/admin/'
-    | '/blog/'
-    | '/blog2/'
-    | '/blog3/'
     | '/my-journey/'
     | '/next-steps/'
     | '/serve/'
@@ -578,9 +476,6 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   ArchiveRoute: typeof ArchiveRoute
-  BlogRoute: typeof BlogRouteWithChildren
-  Blog2Route: typeof Blog2RouteWithChildren
-  Blog3Route: typeof Blog3RouteWithChildren
   ContactRoute: typeof ContactRoute
   EventsRoute: typeof EventsRoute
   HomeRoute: typeof HomeRoute
@@ -653,27 +548,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog3': {
-      id: '/blog3'
-      path: '/blog3'
-      fullPath: '/blog3'
-      preLoaderRoute: typeof Blog3RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog2': {
-      id: '/blog2'
-      path: '/blog2'
-      fullPath: '/blog2'
-      preLoaderRoute: typeof Blog2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/archive': {
       id: '/archive'
       path: '/archive'
@@ -729,27 +603,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/my-journey/'
       preLoaderRoute: typeof MyJourneyIndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/blog3/': {
-      id: '/blog3/'
-      path: '/'
-      fullPath: '/blog3/'
-      preLoaderRoute: typeof Blog3IndexRouteImport
-      parentRoute: typeof Blog3Route
-    }
-    '/blog2/': {
-      id: '/blog2/'
-      path: '/'
-      fullPath: '/blog2/'
-      preLoaderRoute: typeof Blog2IndexRouteImport
-      parentRoute: typeof Blog2Route
-    }
-    '/blog/': {
-      id: '/blog/'
-      path: '/'
-      fullPath: '/blog/'
-      preLoaderRoute: typeof BlogIndexRouteImport
-      parentRoute: typeof BlogRoute
     }
     '/admin/': {
       id: '/admin/'
@@ -870,27 +723,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyJourneyMyGuruRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog3/$slug': {
-      id: '/blog3/$slug'
-      path: '/$slug'
-      fullPath: '/blog3/$slug'
-      preLoaderRoute: typeof Blog3SlugRouteImport
-      parentRoute: typeof Blog3Route
-    }
-    '/blog2/$slug': {
-      id: '/blog2/$slug'
-      path: '/$slug'
-      fullPath: '/blog2/$slug'
-      preLoaderRoute: typeof Blog2SlugRouteImport
-      parentRoute: typeof Blog2Route
-    }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof BlogRoute
-    }
     '/admin/setup': {
       id: '/admin/setup'
       path: '/setup'
@@ -956,42 +788,6 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
-interface BlogRouteChildren {
-  BlogSlugRoute: typeof BlogSlugRoute
-  BlogIndexRoute: typeof BlogIndexRoute
-}
-
-const BlogRouteChildren: BlogRouteChildren = {
-  BlogSlugRoute: BlogSlugRoute,
-  BlogIndexRoute: BlogIndexRoute,
-}
-
-const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
-
-interface Blog2RouteChildren {
-  Blog2SlugRoute: typeof Blog2SlugRoute
-  Blog2IndexRoute: typeof Blog2IndexRoute
-}
-
-const Blog2RouteChildren: Blog2RouteChildren = {
-  Blog2SlugRoute: Blog2SlugRoute,
-  Blog2IndexRoute: Blog2IndexRoute,
-}
-
-const Blog2RouteWithChildren = Blog2Route._addFileChildren(Blog2RouteChildren)
-
-interface Blog3RouteChildren {
-  Blog3SlugRoute: typeof Blog3SlugRoute
-  Blog3IndexRoute: typeof Blog3IndexRoute
-}
-
-const Blog3RouteChildren: Blog3RouteChildren = {
-  Blog3SlugRoute: Blog3SlugRoute,
-  Blog3IndexRoute: Blog3IndexRoute,
-}
-
-const Blog3RouteWithChildren = Blog3Route._addFileChildren(Blog3RouteChildren)
-
 interface WisdomBlogRouteChildren {
   WisdomBlogSlugRoute: typeof WisdomBlogSlugRoute
 }
@@ -1009,9 +805,6 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   ArchiveRoute: ArchiveRoute,
-  BlogRoute: BlogRouteWithChildren,
-  Blog2Route: Blog2RouteWithChildren,
-  Blog3Route: Blog3RouteWithChildren,
   ContactRoute: ContactRoute,
   EventsRoute: EventsRoute,
   HomeRoute: HomeRoute,

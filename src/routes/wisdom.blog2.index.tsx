@@ -6,7 +6,7 @@ import { mergePosts } from "@/lib/merge-posts";
 import { formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 
-export const Route = createFileRoute("/blog3/")({
+export const Route = createFileRoute("/wisdom/blog2/")({
   head: () => ({
     meta: [
       { title: "Blog (v3 bento) — Fan The Spark" },
@@ -30,7 +30,7 @@ function Tile({
     size === "lg" ? "text-2xl md:text-3xl" : size === "sm" ? "text-base" : "text-lg md:text-xl";
   return (
     <Link
-      to="/blog3/$slug"
+      to="/wisdom/blog2/$slug"
       params={{ slug: post.slug }}
       className={`relative block overflow-hidden rounded-xl group no-underline border border-border ${className}`}
       style={{ borderBottom: undefined }}
