@@ -95,8 +95,8 @@ function Hero() {
         backgroundColor: "#f2f0ea",
         backgroundImage: `url(${heroCrowdBg})`,
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "center bottom",
-        backgroundSize: "100% auto",
+        backgroundPosition: "center 78%",
+        backgroundSize: "112% auto",
         paddingBottom: 100,
         overflow: "hidden",
       }}
@@ -106,8 +106,8 @@ function Hero() {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#f2f0ea",
-          opacity: 0,
+          background:
+            "linear-gradient(180deg, rgba(242,240,234,0.85) 0%, rgba(242,240,234,0.35) 55%, rgba(242,240,234,0.15) 100%)",
           pointerEvents: "none",
         }}
       />
@@ -119,7 +119,7 @@ function Hero() {
           src={heroStamp}
           alt="Fan The Spark"
           style={{
-            width: "clamp(300px, 38vw, 460px)",
+            width: "clamp(240px, 30vw, 360px)",
             height: "auto",
             display: "block",
           }}
@@ -129,30 +129,29 @@ function Hero() {
         className="relative mx-auto flex flex-col items-center text-center"
         style={{
           maxWidth: 760,
-          padding: "32px 24px 0",
+          padding: "24px 24px 0",
         }}
       >
         <h1 className="sr-only">Fan The Spark</h1>
         <p
           style={{
             fontFamily: "var(--font-serif-body)",
-            fontSize: "clamp(16px, 1.4vw, 19px)",
-            lineHeight: 1.6,
+            fontSize: "clamp(15px, 1.25vw, 17px)",
+            lineHeight: 1.55,
             color: "#6b6448",
-            maxWidth: 620,
-            margin: "0 auto 32px",
+            maxWidth: 560,
+            margin: "0 auto 26px",
           }}
         >
-          Welcome to the Fan The Spark website where you will find
-          encouragement and support for expanding your book distribution,
-          sadhana, and understanding of sastra. Click the links below to learn
-          more.
+          Welcome to Fan The Spark — encouragement and support for expanding
+          your book distribution, sadhana, and understanding of sastra.
         </p>
         <div className="flex flex-col w-full max-w-[300px] mx-auto gap-3 sm:flex-row sm:max-w-none sm:w-auto sm:gap-4">
-          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" />
+          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" variant="filled" />
           <HeroCTA
             to="/my-journey/my-guru"
             label="Disciple of Srila Prabhupada"
+            variant="outline"
           />
         </div>
       </div>
@@ -160,35 +159,48 @@ function Hero() {
   );
 }
 
-function HeroCTA({ to, label }: { to: string; label: string }) {
+function HeroCTA({
+  to,
+  label,
+  variant = "filled",
+}: {
+  to: string;
+  label: string;
+  variant?: "filled" | "outline";
+}) {
+  const orange = "#e8623c";
+  const orangeDark = "#c2542a";
+  const filled = variant === "filled";
   return (
     <Link
       to={to}
       className="no-underline inline-block uppercase w-full sm:w-auto text-center sm:whitespace-nowrap"
       style={{
-        backgroundColor: "#faf2e8",
-        color: "#c2542a",
-        border: "1px solid #e8623c",
+        backgroundColor: filled ? orange : "transparent",
+        color: filled ? "#ffffff" : orangeDark,
+        border: `1px solid ${orange}`,
         padding: "16px 28px",
         fontFamily: "var(--font-meta)",
         fontSize: 12,
         letterSpacing: "0.22em",
         fontWeight: 600,
+        boxShadow: filled ? "0 6px 18px -8px rgba(232,98,60,0.55)" : "none",
         transition: "background-color 200ms ease, color 200ms ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = "#e8623c";
+        e.currentTarget.style.backgroundColor = filled ? orangeDark : orange;
         e.currentTarget.style.color = "#ffffff";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = "#faf2e8";
-        e.currentTarget.style.color = "#c2542a";
+        e.currentTarget.style.backgroundColor = filled ? orange : "transparent";
+        e.currentTarget.style.color = filled ? "#ffffff" : orangeDark;
       }}
     >
       {label}
     </Link>
   );
 }
+
 
 /* ===================== QUICK LINKS ===================== */
 import { MessageCircle, Users, Sparkles, HandHeart } from "lucide-react";
