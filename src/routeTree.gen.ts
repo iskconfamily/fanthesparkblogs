@@ -244,9 +244,9 @@ const WisdomBlog1SlugRoute = WisdomBlog1SlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const WisdomBlogSlugRoute = WisdomBlogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => WisdomBlogRoute,
+  id: '/wisdom/blog/$slug',
+  path: '/wisdom/blog/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminEditIdRoute = AdminEditIdRouteImport.update({
   id: '/edit/$id',
@@ -549,6 +549,7 @@ export interface RootRouteChildren {
   NextStepsIndexRoute: typeof NextStepsIndexRoute
   ServeIndexRoute: typeof ServeIndexRoute
   WisdomIndexRoute: typeof WisdomIndexRoute
+  WisdomBlogSlugRoute: typeof WisdomBlogSlugRoute
   WisdomBlog1SlugRoute: typeof WisdomBlog1SlugRoute
   WisdomBlog2SlugRoute: typeof WisdomBlog2SlugRoute
   WisdomBlogIndexRoute: typeof WisdomBlogIndexRoute
@@ -826,10 +827,10 @@ declare module '@tanstack/react-router' {
     }
     '/wisdom/blog/$slug': {
       id: '/wisdom/blog/$slug'
-      path: '/$slug'
+      path: '/wisdom/blog/$slug'
       fullPath: '/wisdom/blog/$slug'
       preLoaderRoute: typeof WisdomBlogSlugRouteImport
-      parentRoute: typeof WisdomBlogRoute
+      parentRoute: typeof rootRouteImport
     }
     '/admin/edit/$id': {
       id: '/admin/edit/$id'
@@ -898,6 +899,7 @@ const rootRouteChildren: RootRouteChildren = {
   NextStepsIndexRoute: NextStepsIndexRoute,
   ServeIndexRoute: ServeIndexRoute,
   WisdomIndexRoute: WisdomIndexRoute,
+  WisdomBlogSlugRoute: WisdomBlogSlugRoute,
   WisdomBlog1SlugRoute: WisdomBlog1SlugRoute,
   WisdomBlog2SlugRoute: WisdomBlog2SlugRoute,
   WisdomBlogIndexRoute: WisdomBlogIndexRoute,
