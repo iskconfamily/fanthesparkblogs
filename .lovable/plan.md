@@ -1,19 +1,19 @@
 ## Goal
-Restyle `/blog` index to match the old `/` homepage: full posts stacked one after the other using `PostPreview` inside `SiteLayout`.
+Give `/blog` the same elevated, sidebar-flanked feel as `/blog/$slug` — the post list sits inside the minimal reader shell with `PostTilesSidebar` on the left.
 
 ## Changes
 
 ### `src/routes/blog.index.tsx`
-Replace the current minimal divided-list with the old homepage layout:
-- Wrap in `<SiteLayout>` (not bare `<main>`).
-- For each post, render `<PostPreview post={post} />` — full article preview stacked vertically with border dividers.
-- Drop the eyebrow + "The Blog" header (matches the old `/` which had no page header). If you'd prefer to keep a small header, say so; otherwise it goes.
-- Keep `head()` meta and loader unchanged.
-- The `Permalink` link inside `PostPreview` currently points to `/post/$slug`. Leaving that as-is (consistent with the prior `/` behavior). Let me know if it should point to `/blog/$slug` instead.
+Drop `SiteLayout` and rebuild using the same shell as `blog.$slug.tsx`:
+- Outer `<div className="post-minimal-page py-10 md:py-16">`
+- Inner grid `mx-auto max-w-[1240px] px-5 md:px-8 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]`
+- Left column (`order-2 lg:order-1`): `<PostTilesSidebar />`
+- Right column (`order-1 lg:order-2`): the stacked `<PostPreview>` list (one post after another, dividers preserved by `PostPreview`'s own border).
+- Keep the loader, `head()`, and `mergePosts` logic unchanged.
 
 ### Not touched
-- `/blog/$slug` detail page (just redone in the last turn, stays as blog2 minimal style).
-- `/`, `/home`, `/blog2`, `/blog3` are unchanged.
+- `SiteHeader` still renders globally (it's mounted in `__root.tsx` or similar parent), so the page keeps the site chrome.
+- `/blog/$slug`, `/blog2`, `/blog3` unchanged.
 
 ## Files
 - `src/routes/blog.index.tsx` (rewrite component only)
