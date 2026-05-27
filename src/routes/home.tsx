@@ -160,6 +160,7 @@ function Hero() {
 
 function HeroCTA({ to, label }: { to: string; label: string }) {
   const orange = "#e8623c";
+  const darkOrange = "#c2542a";
   const cream = "#faf2e8";
   return (
     <Link
@@ -167,8 +168,8 @@ function HeroCTA({ to, label }: { to: string; label: string }) {
       className="no-underline inline-block uppercase w-full sm:w-auto text-center sm:whitespace-nowrap"
       style={{
         backgroundColor: cream,
-        color: orange,
-        border: `2px solid ${orange}`,
+        color: darkOrange,
+        border: `1px solid ${orange}`,
         padding: "16px 28px",
         fontFamily: "var(--font-meta)",
         fontSize: 12,
@@ -182,7 +183,7 @@ function HeroCTA({ to, label }: { to: string; label: string }) {
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = cream;
-        e.currentTarget.style.color = orange;
+        e.currentTarget.style.color = darkOrange;
       }}
     >
       {label}
