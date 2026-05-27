@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PlaceholderPage } from "@/components/placeholder-page";
 import { Para } from "@/components/editorial";
+import smallGroupsImg from "@/assets/transformational-stories.jpg?format=webp&w=900&quality=78";
 
 export const Route = createFileRoute("/next-steps/small-groups")({
   head: () => ({
