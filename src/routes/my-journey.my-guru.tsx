@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots, Para, Prose } from "@/components/editorial";
-import heroUrl from "@/assets/my-guru/prabhupada-hero.png";
-import speakingUrl from "@/assets/my-guru/prabhupada-speaking.jpg";
-import laughingUrl from "@/assets/my-guru/prabhupada-laughing.png";
-import darshanUrl from "@/assets/my-guru/prabhupada-darshan.jpg";
-import initiationUrl from "@/assets/my-guru/prabhupada-initiation.jpg";
+import heroUrl from "@/assets/my-guru/prabhupada-hero.png?format=webp&w=1800&quality=80";
+import speakingUrl from "@/assets/my-guru/prabhupada-speaking.jpg?format=webp&w=1600&quality=78";
+import laughingUrl from "@/assets/my-guru/prabhupada-laughing.png?format=webp&w=1200&quality=78";
+import darshanUrl from "@/assets/my-guru/prabhupada-darshan.jpg?format=webp&w=1200&quality=78";
+import initiationUrl from "@/assets/my-guru/prabhupada-initiation.jpg?format=webp&w=1800&quality=78";
 
 export const Route = createFileRoute("/my-journey/my-guru")({
   head: () => ({
@@ -62,6 +62,8 @@ function MyGuruPage() {
           src={heroUrl}
           alt="Srila Prabhupada seated in a forest, garlanded with marigolds"
           className="my-guru-hero-image"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-[1200px] px-6 pb-8 sm:pb-12">
@@ -190,6 +192,8 @@ function MyGuruPage() {
           src={speakingUrl}
           alt="Srila Prabhupada speaking, garlanded with marigolds"
           className="block w-full h-auto"
+          loading="lazy"
+          decoding="async"
           style={{ maxHeight: "82vh", objectFit: "cover", objectPosition: "center 30%" }}
         />
       </section>
@@ -220,12 +224,16 @@ function MyGuruPage() {
               src={laughingUrl}
               alt="Srila Prabhupada laughing among disciples"
               className="block w-full h-auto"
+              loading="lazy"
+              decoding="async"
               style={{ maxHeight: 560, objectFit: "cover", borderRadius: 2 }}
             />
             <img
               src={darshanUrl}
               alt="Srila Prabhupada giving darshan, seated amid rose petals"
               className="block w-full h-auto"
+              loading="lazy"
+              decoding="async"
               style={{ maxHeight: 560, objectFit: "cover", borderRadius: 2 }}
             />
           </div>
@@ -264,6 +272,8 @@ function MyGuruPage() {
           src={initiationUrl}
           alt="Srila Prabhupada offering initiation beads to a disciple, surrounded by devotees"
           className="block w-full h-auto"
+          loading="lazy"
+          decoding="async"
           style={{ maxHeight: "88vh", objectFit: "cover", objectPosition: "center 35%" }}
         />
       </section>

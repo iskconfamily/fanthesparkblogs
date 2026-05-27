@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots, Para, Prose } from "@/components/editorial";
-import heroForest from "@/assets/my-story/vaisesika-meditation.png";
-import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg";
+import heroForest from "@/assets/my-story/vaisesika-meditation.png?format=webp&w=1800&quality=80";
+import vaisesikaArchway from "@/assets/my-story/vaisesika-archway.jpg?format=webp&w=1600&quality=78";
 
 export const Route = createFileRoute("/my-journey/my-story")({
   head: () => ({
@@ -67,6 +67,8 @@ function MyStoryPage() {
           src={heroForest}
           alt="Vaisesika Dasa in meditation in a forest clearing"
           className="my-story-hero-image"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-x-0 bottom-0">
           <div className="mx-auto max-w-[1200px] px-6 pb-8 sm:pb-12">
@@ -232,6 +234,8 @@ function MyStoryPage() {
           src={vaisesikaArchway}
           alt="Vaisesika Dasa in pranam pose beneath an ornate temple archway"
           className="block w-full h-auto"
+          loading="lazy"
+          decoding="async"
           style={{
             maxHeight: "88vh",
             objectFit: "cover",
