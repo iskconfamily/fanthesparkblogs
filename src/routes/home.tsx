@@ -10,11 +10,11 @@ import { getAllPosts, getPostBySlug, formatDate } from "@/content/queries";
 import type { Post } from "@/content/posts";
 import { TestimonialsRow, TESTIMONIALS } from "@/components/testimonials-row";
 
-import storyImg from "@/assets/vaisesika-dasa-portrait.jpg";
-import guruImg from "@/assets/my-story/prabhupada-group.jpg";
-import heroCrowdBg from "@/assets/hero-crowd-bg.png";
-import heroStamp from "@/assets/hero-stamp.png";
-import transformationStoriesImg from "@/assets/transformational-stories-v3.jpg";
+import storyImg from "@/assets/vaisesika-dasa-portrait.jpg?format=webp&w=900&quality=78";
+import guruImg from "@/assets/my-story/prabhupada-group.jpg?format=webp&w=1200&quality=78";
+import heroCrowdBg from "@/assets/hero-crowd-bg.png?format=webp&w=1800&quality=78";
+import heroStamp from "@/assets/hero-stamp.png?format=webp&w=800&quality=82";
+import transformationStoriesImg from "@/assets/transformational-stories-v3.jpg?format=webp&w=1200&quality=78";
 
 
 const YOUTUBE_URL = "https://www.youtube.com/@FanTheSpark";

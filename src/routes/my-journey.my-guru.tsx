@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots, Para, Prose } from "@/components/editorial";
-import heroUrl from "@/assets/my-guru/prabhupada-hero.png";
-import speakingUrl from "@/assets/my-guru/prabhupada-speaking.jpg";
-import laughingUrl from "@/assets/my-guru/prabhupada-laughing.png";
-import darshanUrl from "@/assets/my-guru/prabhupada-darshan.jpg";
-import initiationUrl from "@/assets/my-guru/prabhupada-initiation.jpg";
+import heroUrl from "@/assets/my-guru/prabhupada-hero.png?format=webp&w=1800&quality=80";
+import speakingUrl from "@/assets/my-guru/prabhupada-speaking.jpg?format=webp&w=1600&quality=78";
+import laughingUrl from "@/assets/my-guru/prabhupada-laughing.png?format=webp&w=1200&quality=78";
+import darshanUrl from "@/assets/my-guru/prabhupada-darshan.jpg?format=webp&w=1200&quality=78";
+import initiationUrl from "@/assets/my-guru/prabhupada-initiation.jpg?format=webp&w=1800&quality=78";
 
 export const Route = createFileRoute("/my-journey/my-guru")({
   head: () => ({

@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayoutWeb } from "@/components/site-layout-web";
 import { ContactSection } from "@/components/contact-section";
 import { Dots } from "@/components/editorial";
-import storyImage from "@/assets/my-story/vaisesika-meditation.png";
-import guruImage from "@/assets/my-guru/prabhupada-hero.png";
+import storyImage from "@/assets/my-story/vaisesika-meditation.png?format=webp&w=1000&quality=78";
+import guruImage from "@/assets/my-guru/prabhupada-hero.png?format=webp&w=1000&quality=78";
 
 export const Route = createFileRoute("/my-journey/")({
   head: () => ({
