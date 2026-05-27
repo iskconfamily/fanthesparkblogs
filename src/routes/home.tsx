@@ -119,7 +119,7 @@ function Hero() {
           src={heroStamp}
           alt="Fan The Spark"
           style={{
-            width: "clamp(240px, 30vw, 360px)",
+            width: "clamp(255px, 32.3vw, 391px)",
             height: "auto",
             display: "block",
           }}
