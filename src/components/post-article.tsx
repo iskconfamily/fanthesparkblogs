@@ -98,7 +98,7 @@ export function PostArticle({
 
   const titleNode = titleLink ? (
     <Link
-      to="/post/$slug"
+      to="/wisdom/blog/$slug"
       params={{ slug: titleLink.slug }}
       className={`${titleClassName} italic hover:text-primary`}
       style={{ ...titleStyle, borderBottom: "none", display: "inline-block" }}
