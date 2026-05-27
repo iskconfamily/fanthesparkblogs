@@ -96,8 +96,8 @@ function Hero() {
         backgroundImage: `url(${heroCrowdBg})`,
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center 78%",
-        backgroundSize: "112% auto",
-        paddingBottom: 100,
+        backgroundSize: "115% auto",
+        paddingBottom: 90,
         overflow: "hidden",
       }}
     >
@@ -107,13 +107,13 @@ function Hero() {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(180deg, rgba(242,240,234,0.85) 0%, rgba(242,240,234,0.35) 55%, rgba(242,240,234,0.15) 100%)",
+            "linear-gradient(180deg, rgba(242,240,234,0.78) 0%, rgba(242,240,234,0.28) 55%, rgba(242,240,234,0.12) 100%)",
           pointerEvents: "none",
         }}
       />
       <div
         className="relative mx-auto flex justify-center"
-        style={{ paddingTop: 56 }}
+        style={{ paddingTop: 20 }}
       >
         <img
           src={heroStamp}
@@ -129,29 +129,28 @@ function Hero() {
         className="relative mx-auto flex flex-col items-center text-center"
         style={{
           maxWidth: 760,
-          padding: "24px 24px 0",
+          padding: "16px 24px 0",
         }}
       >
         <h1 className="sr-only">Fan The Spark</h1>
         <p
           style={{
             fontFamily: "var(--font-serif-body)",
-            fontSize: "clamp(15px, 1.25vw, 17px)",
-            lineHeight: 1.55,
-            color: "#6b6448",
-            maxWidth: 560,
-            margin: "0 auto 26px",
+            fontSize: "clamp(17px, 1.4vw, 19px)",
+            lineHeight: 1.65,
+            color: "#5f5940",
+            maxWidth: 600,
+            margin: "0 auto 30px",
           }}
         >
           Welcome to Fan The Spark — encouragement and support for expanding
           your book distribution, sadhana, and understanding of sastra.
         </p>
-        <div className="flex flex-col w-full max-w-[300px] mx-auto gap-3 sm:flex-row sm:max-w-none sm:w-auto sm:gap-4">
-          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" variant="filled" />
+        <div className="flex flex-col w-full max-w-[320px] mx-auto gap-3 sm:flex-row sm:max-w-none sm:w-auto sm:gap-4">
+          <HeroCTA to="/wisdom/lord" label="Lord Chaitanya" />
           <HeroCTA
             to="/my-journey/my-guru"
             label="Disciple of Srila Prabhupada"
-            variant="outline"
           />
         </div>
       </div>
@@ -159,47 +158,39 @@ function Hero() {
   );
 }
 
-function HeroCTA({
-  to,
-  label,
-  variant = "filled",
-}: {
-  to: string;
-  label: string;
-  variant?: "filled" | "outline";
-}) {
+function HeroCTA({ to, label }: { to: string; label: string }) {
   const orange = "#e8623c";
   const orangeDark = "#c2542a";
-  const filled = variant === "filled";
+  const cream = "#faf2e8";
   return (
     <Link
       to={to}
       className="no-underline inline-block uppercase w-full sm:w-auto text-center sm:whitespace-nowrap"
       style={{
-        backgroundColor: filled ? orange : "transparent",
-        color: filled ? "#ffffff" : orangeDark,
+        backgroundColor: cream,
+        color: orangeDark,
         border: `1px solid ${orange}`,
         padding: "16px 28px",
         fontFamily: "var(--font-meta)",
         fontSize: 12,
         letterSpacing: "0.22em",
         fontWeight: 600,
-        boxShadow: filled ? "0 6px 18px -8px rgba(232,98,60,0.55)" : "none",
         transition: "background-color 200ms ease, color 200ms ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = filled ? orangeDark : orange;
+        e.currentTarget.style.backgroundColor = orange;
         e.currentTarget.style.color = "#ffffff";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = filled ? orange : "transparent";
-        e.currentTarget.style.color = filled ? "#ffffff" : orangeDark;
+        e.currentTarget.style.backgroundColor = cream;
+        e.currentTarget.style.color = orangeDark;
       }}
     >
       {label}
     </Link>
   );
 }
+
 
 
 /* ===================== QUICK LINKS ===================== */
