@@ -13,7 +13,7 @@ export function PostSplit({ post }: { post: Post }) {
       <div className="grid gap-12 lg:grid-cols-[260px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-12 lg:self-start">
           <Link
-            to="/blog3"
+            to="/wisdom/blog2"
             className="text-xs uppercase tracking-[0.22em] text-muted-foreground hover:text-primary"
             style={{ fontFamily: "var(--font-meta)", borderBottom: "none" }}
           >

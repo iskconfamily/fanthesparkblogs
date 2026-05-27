@@ -1,69 +1,60 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { SiteLayout } from "@/components/site-layout";
-import { InlineNewsletter } from "@/components/inline-newsletter";
-import { RelatedArticles } from "@/components/related-articles";
-import { PostArticle } from "@/components/post-article";
-import { getPostBySlug, getRelated, getAllPosts } from "@/content/queries";
+import { PostMinimal } from "@/components/blog-layouts/PostMinimal";
+import { PostTilesSidebar } from "@/components/blog-layouts/PostTilesSidebar";
+import { getPostBySlug } from "@/content/queries";
 import { getPublishedDbPostBySlug } from "@/lib/blog.functions";
 import type { Post } from "@/content/posts";
 
 export const Route = createFileRoute("/wisdom/blog/$slug")({
   head: ({ params }) => {
     const post = getPostBySlug(params.slug);
-    if (!post) return { meta: [{ title: "Essay — Fan The Spark" }] };
     return {
       meta: [
-        { title: `${post.title} — Fan The Spark` },
-        { name: "description", content: post.excerpt },
-        { property: "og:title", content: post.title },
-        { property: "og:description", content: post.excerpt },
-        { property: "og:image", content: post.featuredImage.src },
-        { property: "og:type", content: "article" },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:image", content: post.featuredImage.src },
+        { title: post ? `${post.title} — Fan The Spark` : "Essay — Fan The Spark" },
+        ...(post ? [{ name: "description", content: post.excerpt }] : []),
       ],
-      links: [{ rel: "canonical", href: `https://fanthesparkblogs.lovable.app/post/${params.slug}` }],
+      links: [{ rel: "canonical", href: `https://fanthesparkblogs.lovable.app/wisdom/blog/${params.slug}` }],
     };
   },
   loader: async ({ params }) => {
     const dbPost = await getPublishedDbPostBySlug({ data: { slug: params.slug } });
     const post: Post | undefined = dbPost ?? getPostBySlug(params.slug);
     if (!post) throw notFound();
-    const related = getRelated(post).length
-      ? getRelated(post)
-      : getAllPosts().filter((p) => p.slug !== post.slug).slice(0, 3);
-    return { post, related };
+    return { post };
   },
   component: PostPage,
   notFoundComponent: () => (
-    <SiteLayout>
-      <h1 className="text-4xl italic mb-4" style={{ fontFamily: "var(--font-serif-display)" }}>
-        Essay not found
+    <main className="mx-auto max-w-[640px] px-6 py-20">
+      <h1 className="text-3xl italic mb-4" style={{ fontFamily: "var(--font-serif-display)" }}>
+        Not found
       </h1>
-      <p className="text-muted-foreground">
-        That essay doesn't seem to exist. <Link to="/wisdom/blog">Return to the blog</Link>.
-      </p>
-    </SiteLayout>
+      <Link to="/wisdom/blog" className="text-muted-foreground">
+        ← Back
+      </Link>
+    </main>
   ),
   errorComponent: ({ error }) => (
-    <SiteLayout>
+    <main className="mx-auto max-w-[640px] px-6 py-20">
       <h1 className="text-3xl italic" style={{ fontFamily: "var(--font-serif-display)" }}>
-        Something went quietly wrong
+        Something went wrong
       </h1>
       <p className="text-muted-foreground mt-3">{error.message}</p>
-    </SiteLayout>
+    </main>
   ),
 });
 
 function PostPage() {
-  const { post, related } = Route.useLoaderData();
+  const { post } = Route.useLoaderData();
   return (
-    <SiteLayout>
-      <article>
-        <PostArticle post={post} as="h1" titleClassName="text-4xl md:text-5xl" />
-        <InlineNewsletter />
-        <RelatedArticles posts={related} />
-      </article>
-    </SiteLayout>
+    <div className="post-minimal-page py-10 md:py-16">
+      <div className="mx-auto max-w-[1240px] px-5 md:px-8 grid gap-10 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="order-2 lg:order-1">
+          <PostTilesSidebar />
+        </div>
+        <div className="order-1 lg:order-2">
+          <PostMinimal post={post} bare />
+        </div>
+      </div>
+    </div>
   );
 }
