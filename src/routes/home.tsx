@@ -696,6 +696,9 @@ function BooksFeature() {
       slug: "our-family-business",
       title: family?.title ?? "Our Family Business",
       img: family?.featuredImage?.src ?? "",
+      amazonUrl:
+        "https://www.amazon.com/s?k=Our+Family+Business+Vaisesika+Dasa&i=stripbooks",
+
       paragraphs: [
         {
           kind: "p",
