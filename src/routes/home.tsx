@@ -688,8 +688,10 @@ function BooksFeature() {
     slug: string;
     title: string;
     img: string;
+    amazonUrl: string;
     paragraphs: BookParagraph[];
   }> = [
+
     {
       slug: "our-family-business",
       title: family?.title ?? "Our Family Business",
