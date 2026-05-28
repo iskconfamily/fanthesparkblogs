@@ -97,6 +97,10 @@ function Hero() {
         position: "relative",
         width: "100%",
         backgroundColor: "#f2f0ea",
+        backgroundImage: `url(${heroCrowdBg})`,
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center 78%",
+        backgroundSize: "115% auto",
         paddingBottom: 90,
         overflow: "hidden",
       }}
@@ -106,21 +110,8 @@ function Hero() {
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage: `url(${heroCrowdBg})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center 78%",
-          backgroundSize: "115% auto",
-          filter: "contrast(1.6) brightness(0.78) saturate(1.1)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
           background:
-            "linear-gradient(180deg, rgba(242,240,234,0.35) 0%, rgba(242,240,234,0.15) 55%, rgba(242,240,234,0.05) 100%)",
+            "linear-gradient(180deg, rgba(242,240,234,0.78) 0%, rgba(242,240,234,0.28) 55%, rgba(242,240,234,0.12) 100%)",
           pointerEvents: "none",
         }}
       />
