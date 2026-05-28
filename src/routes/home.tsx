@@ -845,17 +845,40 @@ function BooksFeature() {
                   >
                     {b.title}
                   </h3>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif-body)",
-                      fontSize: 16,
-                      lineHeight: 1.7,
-                      color: "color-mix(in oklab, var(--foreground) 78%, transparent)",
-                      marginBottom: 36,
-                    }}
-                  >
-                    {shortDesc}
-                  </p>
+                  <div style={{ marginBottom: 36 }}>
+                    {b.paragraphs.map((para, i) =>
+                      para.kind === "subhead" ? (
+                        <p
+                          key={i}
+                          style={{
+                            fontFamily: "var(--font-serif-display)",
+                            fontStyle: "italic",
+                            fontSize: 20,
+                            lineHeight: 1.3,
+                            color: "var(--foreground)",
+                            marginTop: 18,
+                            marginBottom: 14,
+                          }}
+                        >
+                          {para.text}
+                        </p>
+                      ) : (
+                        <p
+                          key={i}
+                          style={{
+                            fontFamily: "var(--font-serif-body)",
+                            fontSize: 16,
+                            lineHeight: 1.7,
+                            color: "color-mix(in oklab, var(--foreground) 78%, transparent)",
+                            marginBottom: 16,
+                          }}
+                        >
+                          {para.text}
+                        </p>
+                      )
+                    )}
+                  </div>
+
                   <span
                     className="uppercase inline-flex items-center"
                     style={{
