@@ -97,14 +97,23 @@ function Hero() {
         position: "relative",
         width: "100%",
         backgroundColor: "#f2f0ea",
-        backgroundImage: `url(${heroCrowdBg})`,
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center 78%",
-        backgroundSize: "115% auto",
         paddingBottom: 90,
         overflow: "hidden",
       }}
     >
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `url(${heroCrowdBg})`,
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center 78%",
+          backgroundSize: "115% auto",
+          filter: "contrast(1.6) brightness(0.78) saturate(1.1)",
+          pointerEvents: "none",
+        }}
+      />
       <div
         aria-hidden
         style={{
