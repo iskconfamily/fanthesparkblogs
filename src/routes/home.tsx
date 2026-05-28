@@ -688,12 +688,17 @@ function BooksFeature() {
     slug: string;
     title: string;
     img: string;
+    amazonUrl: string;
     paragraphs: BookParagraph[];
   }> = [
+
     {
       slug: "our-family-business",
       title: family?.title ?? "Our Family Business",
       img: family?.featuredImage?.src ?? "",
+      amazonUrl:
+        "https://www.amazon.com/s?k=Our+Family+Business+Vaisesika+Dasa&i=stripbooks",
+
       paragraphs: [
         {
           kind: "p",
@@ -722,6 +727,9 @@ function BooksFeature() {
       slug: "the-four-questions",
       title: four?.title ?? "The Four Questions",
       img: four?.featuredImage?.src ?? "",
+      amazonUrl:
+        "https://www.amazon.com/s?k=The+Four+Questions+Vaisesika&i=stripbooks",
+
       paragraphs: [
         {
           kind: "p",
@@ -913,24 +921,54 @@ function BooksFeature() {
                     )}
                   </div>
 
-                  <Link
-                    to="/wisdom/blog/$slug"
-                    params={{ slug: b.slug }}
-                    className="uppercase inline-flex items-center no-underline"
-                    style={{
-                      fontFamily: "var(--font-meta)",
-                      fontSize: 12,
-                      letterSpacing: "0.22em",
-                      fontWeight: 700,
-                      color: "var(--primary)",
-                      borderBottom:
-                        "1.5px solid color-mix(in oklab, var(--primary) 45%, transparent)",
-                      paddingBottom: 3,
-                    }}
-                  >
-                    Read More
-                    <span style={{ marginLeft: 10, display: "inline-block" }}>→</span>
-                  </Link>
+                  <div className="flex flex-wrap gap-5 items-center">
+                    <a
+                      href={b.amazonUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="uppercase inline-flex items-center no-underline"
+                      style={{
+                        backgroundColor: "#faf2e8",
+                        color: "#c2542a",
+                        border: "1px solid #e8623c",
+                        padding: "14px 26px",
+                        fontFamily: "var(--font-meta)",
+                        fontSize: 12,
+                        letterSpacing: "0.22em",
+                        fontWeight: 600,
+                        transition: "background-color 200ms ease, color 200ms ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#e8623c";
+                        e.currentTarget.style.color = "#ffffff";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#faf2e8";
+                        e.currentTarget.style.color = "#c2542a";
+                      }}
+                    >
+                      Buy on Amazon
+                      <span style={{ marginLeft: 10, display: "inline-block" }}>→</span>
+                    </a>
+                    <Link
+                      to="/wisdom/blog/$slug"
+                      params={{ slug: b.slug }}
+                      className="uppercase inline-flex items-center no-underline"
+                      style={{
+                        fontFamily: "var(--font-meta)",
+                        fontSize: 12,
+                        letterSpacing: "0.22em",
+                        fontWeight: 700,
+                        color: "var(--primary)",
+                        borderBottom:
+                          "1.5px solid color-mix(in oklab, var(--primary) 45%, transparent)",
+                        paddingBottom: 3,
+                      }}
+                    >
+                      Read More →
+                    </Link>
+                  </div>
+
                 </div>
               </div>
             );
