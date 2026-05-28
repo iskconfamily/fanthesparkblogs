@@ -433,7 +433,7 @@ function FeatureBlock({
 }: {
   eyebrow: string;
   title: string;
-  body: string;
+  body: React.ReactNode;
   img: string;
   imgAlt: string;
   ctaLabel: string;
@@ -442,6 +442,11 @@ function FeatureBlock({
   background?: string;
   objectPosition?: string;
 }) {
+  const paragraphs: React.ReactNode[] = Array.isArray(body)
+    ? body
+    : typeof body === "string"
+    ? [body]
+    : [body];
   return (
     <section
       style={{
@@ -492,18 +497,22 @@ function FeatureBlock({
           >
             {title}
           </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-serif-body)",
-              fontSize: 18,
-              lineHeight: 1.8,
-              color: "var(--muted-foreground)",
-              marginBottom: 36,
-              maxWidth: 520,
-            }}
-          >
-            {body}
-          </p>
+          <div style={{ marginBottom: 36, maxWidth: 520 }}>
+            {paragraphs.map((p, i) => (
+              <p
+                key={i}
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 18,
+                  lineHeight: 1.8,
+                  color: "var(--muted-foreground)",
+                  marginBottom: i === paragraphs.length - 1 ? 0 : 20,
+                }}
+              >
+                {p}
+              </p>
+            ))}
+          </div>
           <FeatureCTA to={ctaTo} label={ctaLabel} />
         </div>
       </div>
@@ -511,12 +520,13 @@ function FeatureBlock({
   );
 }
 
+
 function MyGuruFeature() {
   return (
     <FeatureBlock
       eyebrow="My Journey"
       title="My Guru"
-      body="His Divine Grace A.C. Bhaktivedanta Swami Prabhupada (1896–1977), guru of Vaisesika Dasa, is widely regarded as the world's pre-eminent exponent of the teachings and practices of Bhakti-yoga to the Western world. He is the Founder-Acarya of the International Society for Krishna Consciousness (ISKCON)."
+      body="Vaisesika Dasa is a disciple of His Divine Grace A.C. Bhaktivedanta Srila Prabhupada Swami. His Divine Grace A. C. Bhaktivedanta Swami Prabhupada was born in 1896 in Calcutta, India. He first met his spiritual master, Srila Bhaktisiddhanta Sarasvati Gosvami, in Calcutta in 1922. Bhaktisiddhanta Sarasvati, a prominent bhakti-yoga scholar and the founder of sixty-four branches of Gaudiya Mathas (Vedic institutes), requested His Divine Grace Srila Prabhupada to broadcast Vedic knowledge through the English language. In the years that followed, His Divine Grace Srila Prabhupada wrote a commentary on the Bhagavad-gita and in 1944, without assistance, started an English fortnightly magazine."
       img={guruImg}
       imgAlt="Srila Prabhupada surrounded by his disciples"
       ctaLabel="Read About Srila Prabhupada Swami"
@@ -532,7 +542,11 @@ function MyStoryFeature() {
     <FeatureBlock
       eyebrow="My Journey"
       title="My Story"
-      body="When I was a child, I was deeply curious about the mystery of life. Trying to wrap my mind around it, I would sometimes ask my parents about the reasons for death. They thought that because I was so young, I shouldn't worry about it. But, I did."
+      body={[
+        "Discover what inspired Vaisesika Dasa's spiritual journey as he recounts the pivotal moments that shaped his passion for sharing Bhakti Yoga with the world.",
+        "Vaisesika recalls being intrigued by the mysteries of life as a young boy, but feeling frustrated in his attempts to make sense out of it all. As he searched for answers, nothing satisfied his thirst for wisdom – until his life took an unexpected turn as a teenager.",
+        "Disillusioned with the depth of knowledge offered by popular culture, Vaisesika renounced worldly pursuits and became a monk at the age of fifteen.",
+      ]}
       img={storyImg}
       imgAlt="Vaisesika Dasa"
       ctaLabel="Read My Story"
@@ -543,6 +557,7 @@ function MyStoryFeature() {
     />
   );
 }
+
 
 /* ===================== LATEST VIDEOS ===================== */
 function LatestVideos({ videoIds }: { videoIds: string[] }) {
@@ -664,23 +679,55 @@ function LatestAudio() {
 }
 
 /* ===================== BOOKS FEATURE ===================== */
+type BookParagraph = { kind: "p"; text: string } | { kind: "subhead"; text: string };
+
 function BooksFeature() {
   const family = getPostBySlug("our-family-business");
   const four = getPostBySlug("the-four-questions");
-  const books = [
+  const books: Array<{
+    slug: string;
+    title: string;
+    img: string;
+    paragraphs: BookParagraph[];
+  }> = [
     {
       slug: "our-family-business",
       title: family?.title ?? "Our Family Business",
-      desc: family?.excerpt ?? "",
       img: family?.featuredImage?.src ?? "",
+      paragraphs: [
+        {
+          kind: "p",
+          text:
+            "In his book \u201COur Family Business: The Great Art of Distributing Srila Prabhupada\u2019s Books\u201D veteran distributor Vaisesika Das shares the history, key principles and techniques of book distribution, drawing from a lifetime of experience.",
+        },
+        { kind: "subhead", text: "Strategies For Success" },
+        {
+          kind: "p",
+          text:
+            "The ISKCON spiritual community of three hundred families he developed in Silicon Valley, California is based on the study and distribution of His Divine Grace Srila Prabhupada\u2019s books, and consistently ranks high amongst the list of small temples in these efforts.",
+        },
+        {
+          kind: "p",
+          text:
+            "\u201CIt was great to consolidate all the things that I had learned throughout the years from mentors, and to dig deep and think about my own realizations, and how this service had actually molded my life,\u201D he says.",
+        },
+        {
+          kind: "p",
+          text:
+            "Our Family Business is divided into four sections. The first, Chronicles, gives a basic history of book distribution in the Gaudiya Sampradaya, in His Divine Grace Srila Prabhupada\u2019s life, and in ISKCON up to his passing in 1977, describing how it got off the ground in the U.S. and spread all over the world.",
+        },
+      ],
     },
     {
       slug: "the-four-questions",
       title: four?.title ?? "The Four Questions",
-      desc: four?.excerpt ?? "",
       img: four?.featuredImage?.src ?? "",
+      paragraphs: four?.excerpt
+        ? [{ kind: "p", text: four.excerpt }]
+        : [],
     },
   ];
+
 
   return (
     <section style={{ padding: "120px 24px 130px", backgroundColor: "var(--background)" }}>
@@ -727,16 +774,15 @@ function BooksFeature() {
               display: "inline-block",
             }}
           >
-            Books &amp; Teachings
+            Books
           </h2>
         </div>
 
         {/* Featured showcase grid */}
         <div className="grid md:grid-cols-2 items-start w-full" style={{ gap: 64 }}>
           {books.map((b) => {
-            const shortDesc =
-              b.desc && b.desc.length > 220 ? b.desc.slice(0, 217).trimEnd() + "…" : b.desc;
             return (
+
               <Link
                 key={b.slug}
                 to="/wisdom/blog/$slug"
@@ -799,17 +845,40 @@ function BooksFeature() {
                   >
                     {b.title}
                   </h3>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-serif-body)",
-                      fontSize: 16,
-                      lineHeight: 1.7,
-                      color: "color-mix(in oklab, var(--foreground) 78%, transparent)",
-                      marginBottom: 36,
-                    }}
-                  >
-                    {shortDesc}
-                  </p>
+                  <div style={{ marginBottom: 36 }}>
+                    {b.paragraphs.map((para, i) =>
+                      para.kind === "subhead" ? (
+                        <p
+                          key={i}
+                          style={{
+                            fontFamily: "var(--font-serif-display)",
+                            fontStyle: "italic",
+                            fontSize: 20,
+                            lineHeight: 1.3,
+                            color: "var(--foreground)",
+                            marginTop: 18,
+                            marginBottom: 14,
+                          }}
+                        >
+                          {para.text}
+                        </p>
+                      ) : (
+                        <p
+                          key={i}
+                          style={{
+                            fontFamily: "var(--font-serif-body)",
+                            fontSize: 16,
+                            lineHeight: 1.7,
+                            color: "color-mix(in oklab, var(--foreground) 78%, transparent)",
+                            marginBottom: 16,
+                          }}
+                        >
+                          {para.text}
+                        </p>
+                      )
+                    )}
+                  </div>
+
                   <span
                     className="uppercase inline-flex items-center"
                     style={{
