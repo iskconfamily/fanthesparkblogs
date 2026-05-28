@@ -774,7 +774,7 @@ function BooksFeature() {
               display: "inline-block",
             }}
           >
-            Books &amp; Teachings
+            Books
           </h2>
         </div>
 
