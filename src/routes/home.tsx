@@ -697,7 +697,8 @@ function BooksFeature() {
       title: family?.title ?? "Our Family Business",
       img: family?.featuredImage?.src ?? "",
       amazonUrl:
-        "https://www.amazon.com/s?k=Our+Family+Business+Vaisesika+Dasa&i=stripbooks",
+        "https://www.amazon.com/dp/B01MUUUMEZ?ref_=cm_sw_r_ffobk_cp_ud_dp_RCGJJWJ4XFQ3Y91G11QJ&bestFormat=true",
+
 
       paragraphs: [
         {
@@ -728,7 +729,8 @@ function BooksFeature() {
       title: four?.title ?? "The Four Questions",
       img: four?.featuredImage?.src ?? "",
       amazonUrl:
-        "https://www.amazon.com/s?k=The+Four+Questions+Vaisesika&i=stripbooks",
+        "https://a.co/d/0brvgaLU",
+
 
       paragraphs: [
         {
