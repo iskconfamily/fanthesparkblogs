@@ -727,6 +727,9 @@ function BooksFeature() {
       slug: "the-four-questions",
       title: four?.title ?? "The Four Questions",
       img: four?.featuredImage?.src ?? "",
+      amazonUrl:
+        "https://www.amazon.com/s?k=The+Four+Questions+Vaisesika&i=stripbooks",
+
       paragraphs: [
         {
           kind: "p",
