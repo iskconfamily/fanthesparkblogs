@@ -526,7 +526,7 @@ function MyGuruFeature() {
     <FeatureBlock
       eyebrow="My Journey"
       title="My Guru"
-      body="His Divine Grace A.C. Bhaktivedanta Swami Prabhupada (1896–1977), guru of Vaisesika Dasa, is widely regarded as the world's pre-eminent exponent of the teachings and practices of Bhakti-yoga to the Western world. He is the Founder-Acarya of the International Society for Krishna Consciousness (ISKCON)."
+      body="Vaisesika Dasa is a disciple of His Divine Grace A.C. Bhaktivedanta Srila Prabhupada Swami. His Divine Grace A. C. Bhaktivedanta Swami Prabhupada was born in 1896 in Calcutta, India. He first met his spiritual master, Srila Bhaktisiddhanta Sarasvati Gosvami, in Calcutta in 1922. Bhaktisiddhanta Sarasvati, a prominent bhakti-yoga scholar and the founder of sixty-four branches of Gaudiya Mathas (Vedic institutes), requested His Divine Grace Srila Prabhupada to broadcast Vedic knowledge through the English language. In the years that followed, His Divine Grace Srila Prabhupada wrote a commentary on the Bhagavad-gita and in 1944, without assistance, started an English fortnightly magazine."
       img={guruImg}
       imgAlt="Srila Prabhupada surrounded by his disciples"
       ctaLabel="Read About Srila Prabhupada Swami"
@@ -542,7 +542,11 @@ function MyStoryFeature() {
     <FeatureBlock
       eyebrow="My Journey"
       title="My Story"
-      body="When I was a child, I was deeply curious about the mystery of life. Trying to wrap my mind around it, I would sometimes ask my parents about the reasons for death. They thought that because I was so young, I shouldn't worry about it. But, I did."
+      body={[
+        "Discover what inspired Vaisesika Dasa's spiritual journey as he recounts the pivotal moments that shaped his passion for sharing Bhakti Yoga with the world.",
+        "Vaisesika recalls being intrigued by the mysteries of life as a young boy, but feeling frustrated in his attempts to make sense out of it all. As he searched for answers, nothing satisfied his thirst for wisdom – until his life took an unexpected turn as a teenager.",
+        "Disillusioned with the depth of knowledge offered by popular culture, Vaisesika renounced worldly pursuits and became a monk at the age of fifteen.",
+      ]}
       img={storyImg}
       imgAlt="Vaisesika Dasa"
       ctaLabel="Read My Story"
@@ -553,6 +557,7 @@ function MyStoryFeature() {
     />
   );
 }
+
 
 /* ===================== LATEST VIDEOS ===================== */
 function LatestVideos({ videoIds }: { videoIds: string[] }) {
