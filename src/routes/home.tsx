@@ -781,9 +781,8 @@ function BooksFeature() {
         {/* Featured showcase grid */}
         <div className="grid md:grid-cols-2 items-start w-full" style={{ gap: 64 }}>
           {books.map((b) => {
-            const shortDesc =
-              b.desc && b.desc.length > 220 ? b.desc.slice(0, 217).trimEnd() + "…" : b.desc;
             return (
+
               <Link
                 key={b.slug}
                 to="/wisdom/blog/$slug"
