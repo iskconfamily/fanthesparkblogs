@@ -111,7 +111,7 @@ function Hero() {
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(180deg, rgba(242,240,234,0.78) 0%, rgba(242,240,234,0.28) 55%, rgba(242,240,234,0.12) 100%)",
+            "linear-gradient(180deg, rgba(242,240,234,0.35) 0%, rgba(242,240,234,0.15) 55%, rgba(242,240,234,0.05) 100%)",
           pointerEvents: "none",
         }}
       />
