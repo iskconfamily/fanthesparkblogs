@@ -722,11 +722,33 @@ function BooksFeature() {
       slug: "the-four-questions",
       title: four?.title ?? "The Four Questions",
       img: four?.featuredImage?.src ?? "",
-      paragraphs: four?.excerpt
-        ? [{ kind: "p", text: four.excerpt }]
-        : [],
+      paragraphs: [
+        {
+          kind: "p",
+          text:
+            "There are questions that are useful for an afternoon, and there are questions that are useful for a life. The Four Questions belongs to the second kind. It returns, patiently, to a small set of inquiries that the Vedic tradition has handed down for centuries — questions about who I am, where I came from, what I am supposed to be doing here, and where I am going next.",
+        },
+        {
+          kind: "p",
+          text:
+            "The book\u2019s wager is simple: most of our suffering is downstream of never having actually sat with these questions. We answer them implicitly, by the way we spend our days, but we rarely answer them on purpose. When we finally do, the answers begin to gently rearrange the furniture of the mind.",
+        },
+        { kind: "subhead", text: "Why four, and why these four" },
+        {
+          kind: "p",
+          text:
+            "These are not riddles. They are diagnostic. Each one shines a light on a layer of identity that is easy to forget — the body, the mind, the soul, and the relationship between the soul and its source. Together they form a small examination that any thoughtful person can carry around in a pocket, returning to whenever life feels noisier than it should.",
+        },
+        { kind: "subhead", text: "How to use this companion" },
+        {
+          kind: "p",
+          text:
+            "These notes are an invitation, not a summary. The book itself is unhurried and conversational; it deserves to be read slowly, perhaps a chapter at a time, with a notebook nearby. If anything here makes you curious, follow the link to the book and let it do the deeper work.",
+        },
+      ],
     },
   ];
+
 
 
   return (
@@ -778,74 +800,85 @@ function BooksFeature() {
           </h2>
         </div>
 
-        {/* Featured showcase grid */}
-        <div className="grid md:grid-cols-2 items-start w-full" style={{ gap: 64 }}>
-          {books.map((b) => {
+        {/* Stacked rows — one per book, alternating image side */}
+        <div className="flex flex-col" style={{ gap: 112 }}>
+          {books.map((b, idx) => {
+            const reverse = idx % 2 === 1;
             return (
-
-              <Link
+              <div
                 key={b.slug}
-                to="/wisdom/blog/$slug"
-                params={{ slug: b.slug }}
-                className="no-underline block group"
-                style={{ borderBottom: "none" }}
+                className="grid items-center gap-10 md:gap-16"
+                style={{
+                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                }}
               >
-                <div
-                  className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2"
-                  style={{ marginBottom: 44 }}
+                <Link
+                  to="/wisdom/blog/$slug"
+                  params={{ slug: b.slug }}
+                  className="no-underline block group"
+                  style={{
+                    borderBottom: "none",
+                    order: reverse ? 2 : 1,
+                  }}
                 >
                   <div
-                    aria-hidden
-                    style={{
-                      position: "absolute",
-                      inset: "-24px",
-                      backgroundColor: "color-mix(in oklab, var(--foreground) 6%, var(--background))",
-                      borderRadius: 2,
-                      zIndex: -1,
-                      opacity: 0.55,
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "relative",
-                      aspectRatio: "3 / 4.5",
-                      overflow: "hidden",
-                      backgroundColor: "var(--muted)",
-                      boxShadow:
-                        "25px 25px 60px -15px rgba(20,16,8,0.22), 5px 5px 15px rgba(20,16,8,0.08)",
-                      outline: "1px solid color-mix(in oklab, var(--foreground) 8%, transparent)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                    className="relative transition-transform duration-700 ease-out group-hover:-translate-y-2"
                   >
-                    <img
-                      src={b.img}
-                      alt={b.title}
-                      loading="lazy"
+                    <div
+                      aria-hidden
                       style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
+                        position: "absolute",
+                        inset: "-24px",
+                        backgroundColor:
+                          "color-mix(in oklab, var(--foreground) 6%, var(--background))",
+                        borderRadius: 2,
+                        zIndex: -1,
+                        opacity: 0.55,
                       }}
                     />
+                    <div
+                      style={{
+                        position: "relative",
+                        aspectRatio: "3 / 4.5",
+                        overflow: "hidden",
+                        backgroundColor: "var(--muted)",
+                        boxShadow:
+                          "25px 25px 60px -15px rgba(20,16,8,0.22), 5px 5px 15px rgba(20,16,8,0.08)",
+                        outline:
+                          "1px solid color-mix(in oklab, var(--foreground) 8%, transparent)",
+                        maxWidth: 420,
+                        margin: "0 auto",
+                      }}
+                    >
+                      <img
+                        src={b.img}
+                        alt={b.title}
+                        loading="lazy"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          display: "block",
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
+                </Link>
 
-                <div style={{ maxWidth: 460 }}>
+                <div style={{ order: reverse ? 1 : 2, maxWidth: 520 }}>
                   <h3
                     style={{
                       fontFamily: "var(--font-serif-display)",
-                      fontSize: "clamp(26px, 2.4vw, 32px)",
-                      lineHeight: 1.15,
+                      fontStyle: "italic",
+                      fontSize: "clamp(30px, 3.2vw, 42px)",
+                      lineHeight: 1.1,
                       color: "var(--foreground)",
-                      marginBottom: 18,
+                      marginBottom: 22,
                     }}
                   >
                     {b.title}
                   </h3>
-                  <div style={{ marginBottom: 36 }}>
+                  <div style={{ marginBottom: 32 }}>
                     {b.paragraphs.map((para, i) =>
                       para.kind === "subhead" ? (
                         <p
@@ -853,10 +886,10 @@ function BooksFeature() {
                           style={{
                             fontFamily: "var(--font-serif-display)",
                             fontStyle: "italic",
-                            fontSize: 20,
+                            fontSize: 22,
                             lineHeight: 1.3,
                             color: "var(--foreground)",
-                            marginTop: 18,
+                            marginTop: 22,
                             marginBottom: 14,
                           }}
                         >
@@ -867,9 +900,10 @@ function BooksFeature() {
                           key={i}
                           style={{
                             fontFamily: "var(--font-serif-body)",
-                            fontSize: 16,
-                            lineHeight: 1.7,
-                            color: "color-mix(in oklab, var(--foreground) 78%, transparent)",
+                            fontSize: 17,
+                            lineHeight: 1.75,
+                            color:
+                              "color-mix(in oklab, var(--foreground) 78%, transparent)",
                             marginBottom: 16,
                           }}
                         >
@@ -879,8 +913,10 @@ function BooksFeature() {
                     )}
                   </div>
 
-                  <span
-                    className="uppercase inline-flex items-center"
+                  <Link
+                    to="/wisdom/blog/$slug"
+                    params={{ slug: b.slug }}
+                    className="uppercase inline-flex items-center no-underline"
                     style={{
                       fontFamily: "var(--font-meta)",
                       fontSize: 12,
@@ -893,18 +929,14 @@ function BooksFeature() {
                     }}
                   >
                     Read More
-                    <span
-                      className="transition-transform duration-300 group-hover:translate-x-1.5"
-                      style={{ marginLeft: 10, display: "inline-block" }}
-                    >
-                      →
-                    </span>
-                  </span>
+                    <span style={{ marginLeft: 10, display: "inline-block" }}>→</span>
+                  </Link>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>
+
       </div>
     </section>
   );
