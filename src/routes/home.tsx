@@ -947,27 +947,11 @@ function BooksFeature() {
                         e.currentTarget.style.color = "#c2542a";
                       }}
                     >
-                      Buy on Amazon
+                      Order Now
                       <span style={{ marginLeft: 10, display: "inline-block" }}>→</span>
                     </a>
-                    <Link
-                      to="/wisdom/blog/$slug"
-                      params={{ slug: b.slug }}
-                      className="uppercase inline-flex items-center no-underline"
-                      style={{
-                        fontFamily: "var(--font-meta)",
-                        fontSize: 12,
-                        letterSpacing: "0.22em",
-                        fontWeight: 700,
-                        color: "var(--primary)",
-                        borderBottom:
-                          "1.5px solid color-mix(in oklab, var(--primary) 45%, transparent)",
-                        paddingBottom: 3,
-                      }}
-                    >
-                      Read More →
-                    </Link>
                   </div>
+
 
                 </div>
               </div>
