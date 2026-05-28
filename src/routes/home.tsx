@@ -722,11 +722,33 @@ function BooksFeature() {
       slug: "the-four-questions",
       title: four?.title ?? "The Four Questions",
       img: four?.featuredImage?.src ?? "",
-      paragraphs: four?.excerpt
-        ? [{ kind: "p", text: four.excerpt }]
-        : [],
+      paragraphs: [
+        {
+          kind: "p",
+          text:
+            "There are questions that are useful for an afternoon, and there are questions that are useful for a life. The Four Questions belongs to the second kind. It returns, patiently, to a small set of inquiries that the Vedic tradition has handed down for centuries — questions about who I am, where I came from, what I am supposed to be doing here, and where I am going next.",
+        },
+        {
+          kind: "p",
+          text:
+            "The book\u2019s wager is simple: most of our suffering is downstream of never having actually sat with these questions. We answer them implicitly, by the way we spend our days, but we rarely answer them on purpose. When we finally do, the answers begin to gently rearrange the furniture of the mind.",
+        },
+        { kind: "subhead", text: "Why four, and why these four" },
+        {
+          kind: "p",
+          text:
+            "These are not riddles. They are diagnostic. Each one shines a light on a layer of identity that is easy to forget — the body, the mind, the soul, and the relationship between the soul and its source. Together they form a small examination that any thoughtful person can carry around in a pocket, returning to whenever life feels noisier than it should.",
+        },
+        { kind: "subhead", text: "How to use this companion" },
+        {
+          kind: "p",
+          text:
+            "These notes are an invitation, not a summary. The book itself is unhurried and conversational; it deserves to be read slowly, perhaps a chapter at a time, with a notebook nearby. If anything here makes you curious, follow the link to the book and let it do the deeper work.",
+        },
+      ],
     },
   ];
+
 
 
   return (
