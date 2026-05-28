@@ -679,23 +679,55 @@ function LatestAudio() {
 }
 
 /* ===================== BOOKS FEATURE ===================== */
+type BookParagraph = { kind: "p"; text: string } | { kind: "subhead"; text: string };
+
 function BooksFeature() {
   const family = getPostBySlug("our-family-business");
   const four = getPostBySlug("the-four-questions");
-  const books = [
+  const books: Array<{
+    slug: string;
+    title: string;
+    img: string;
+    paragraphs: BookParagraph[];
+  }> = [
     {
       slug: "our-family-business",
       title: family?.title ?? "Our Family Business",
-      desc: family?.excerpt ?? "",
       img: family?.featuredImage?.src ?? "",
+      paragraphs: [
+        {
+          kind: "p",
+          text:
+            "In his book \u201COur Family Business: The Great Art of Distributing Srila Prabhupada\u2019s Books\u201D veteran distributor Vaisesika Das shares the history, key principles and techniques of book distribution, drawing from a lifetime of experience.",
+        },
+        { kind: "subhead", text: "Strategies For Success" },
+        {
+          kind: "p",
+          text:
+            "The ISKCON spiritual community of three hundred families he developed in Silicon Valley, California is based on the study and distribution of His Divine Grace Srila Prabhupada\u2019s books, and consistently ranks high amongst the list of small temples in these efforts.",
+        },
+        {
+          kind: "p",
+          text:
+            "\u201CIt was great to consolidate all the things that I had learned throughout the years from mentors, and to dig deep and think about my own realizations, and how this service had actually molded my life,\u201D he says.",
+        },
+        {
+          kind: "p",
+          text:
+            "Our Family Business is divided into four sections. The first, Chronicles, gives a basic history of book distribution in the Gaudiya Sampradaya, in His Divine Grace Srila Prabhupada\u2019s life, and in ISKCON up to his passing in 1977, describing how it got off the ground in the U.S. and spread all over the world.",
+        },
+      ],
     },
     {
       slug: "the-four-questions",
       title: four?.title ?? "The Four Questions",
-      desc: four?.excerpt ?? "",
       img: four?.featuredImage?.src ?? "",
+      paragraphs: four?.excerpt
+        ? [{ kind: "p", text: four.excerpt }]
+        : [],
     },
   ];
+
 
   return (
     <section style={{ padding: "120px 24px 130px", backgroundColor: "var(--background)" }}>
