@@ -433,7 +433,7 @@ function FeatureBlock({
 }: {
   eyebrow: string;
   title: string;
-  body: string;
+  body: React.ReactNode;
   img: string;
   imgAlt: string;
   ctaLabel: string;
@@ -442,6 +442,11 @@ function FeatureBlock({
   background?: string;
   objectPosition?: string;
 }) {
+  const paragraphs: React.ReactNode[] = Array.isArray(body)
+    ? body
+    : typeof body === "string"
+    ? [body]
+    : [body];
   return (
     <section
       style={{
@@ -492,24 +497,29 @@ function FeatureBlock({
           >
             {title}
           </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-serif-body)",
-              fontSize: 18,
-              lineHeight: 1.8,
-              color: "var(--muted-foreground)",
-              marginBottom: 36,
-              maxWidth: 520,
-            }}
-          >
-            {body}
-          </p>
+          <div style={{ marginBottom: 36, maxWidth: 520 }}>
+            {paragraphs.map((p, i) => (
+              <p
+                key={i}
+                style={{
+                  fontFamily: "var(--font-serif-body)",
+                  fontSize: 18,
+                  lineHeight: 1.8,
+                  color: "var(--muted-foreground)",
+                  marginBottom: i === paragraphs.length - 1 ? 0 : 20,
+                }}
+              >
+                {p}
+              </p>
+            ))}
+          </div>
           <FeatureCTA to={ctaTo} label={ctaLabel} />
         </div>
       </div>
     </section>
   );
 }
+
 
 function MyGuruFeature() {
   return (
